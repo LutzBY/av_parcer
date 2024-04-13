@@ -152,7 +152,7 @@ stop_flag = False
 while stop_flag == False:
     page_counter +=1
     url_cycle = url_page + "&page=" + str(page_counter)
-    print(f"Страница - {page_counter}----------------------------------------")
+    print(f"Страница - {page_counter} ---------------------------------------")
     #Функция
     response = requests.get(url_cycle, headers=headers)
 
@@ -236,8 +236,6 @@ while stop_flag == False:
         # Вызов функции дополнения vlk
         best_match = None
         best_match = add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_match) 
-        print(f"-----------------------------------------------------------------")
-        print(f"№ {processed_ads} Price - {price}, Name - {brand} {model} {modification} ({best_match}), (у - {year}), Capacity - {capacity} ccm, URL - {url}, id - {id}")
 
         # Скрипт для пгри
         parsequery = """
@@ -252,11 +250,12 @@ while stop_flag == False:
         # Работа курсора для пгри
         parsecursor.execute(parsequery)
         
-        processed_ads = processed_ads + 1
-
         if rdatetime_obj <= latest_ad_date: # Сверка даты
             stop_flag = True
             break
+        print(f"-----------------------------------------------------------------")
+        print(f"№ {processed_ads} Price - {price}, Name - {brand} {model} {modification} ({best_match}), (у - {year}), Capacity - {capacity} ccm, URL - {url}, id - {id}")
+        processed_ads = processed_ads + 1
     
     
 parsecursor.close()
