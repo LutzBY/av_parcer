@@ -257,7 +257,7 @@ while stop_flag == False:
             break
         processed_ads += 1
         print(f"-----------------------------------------------------------------")
-        print(f"№ {processed_ads}, Publ. - {publish_for_print}, Refr. - {refresh_for_print}, Price - {price}, Name - {brand} {model} {modification} ({best_match}), (у - {year}), Capacity - {capacity} ccm, URL - {url}, id - {id}")
+        print(f"№ {processed_ads}, Publ. at {publish_for_print}, Refr. at {refresh_for_print}, Price - {price}, Name - {brand} {model} {modification} ({best_match}), (у - {year}), Capacity - {capacity} ccm, URL - {url}, id - {id}")
         
     
     
