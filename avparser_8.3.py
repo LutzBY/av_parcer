@@ -232,8 +232,8 @@ while stop_flag == False:
 
         rdatetime_obj = datetime.strptime(refresh, '%Y-%m-%dT%H:%M:%S%z') # Преобразования текстового значения в дату
         rdatetime_obj = rdatetime_obj.replace(tzinfo=None) # убираем таймзон
-        publish_for_print = datetime_obj.strftime('%d.%m %H:%M')
-        refresh_for_print = rdatetime_obj.strftime('%d.%m %H:%M')
+        publish_for_print = datetime_obj.strftime('%d.%m.%y %H:%M')
+        refresh_for_print = rdatetime_obj.strftime('%d.%m.%y %H:%M')
                 
         # Вызов функции дополнения vlk
         best_match = None
