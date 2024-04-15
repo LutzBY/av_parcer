@@ -1,47 +1,11 @@
-Привет! Текущая дата - 2024-04-13-11-26-50
-Последняя дата объявления - 2024-04-13-05-54-17
-Страница - 1----------------------------------------
+Привет! Текущая дата - 2024-04-15-10-11-08
+Последняя дата объявления - 2024-04-15-05-51-37
+Страница - 1 ---------------------------------------
 -----------------------------------------------------------------
-№ 0 Price - 3000, Name - Suzuki GSX-R SRAD (gsx-r 600 srad), (у - 1997), Capacity - 600 ccm, URL - https://moto.av.by/bike/suzuki/gsx-r/108350241, id - 108350241
+№ 1, Date - 15.04 06:40, UPD - 15.04 06:40, Price - 1560, Name - ЗиД 250 Лис  (), (у - 2023), Capacity - 250 ccm, URL - https://moto.av.by/bike/zid/250-lis/108656219, id - 108656219
 -----------------------------------------------------------------
-№ 1 Price - 3500, Name - Honda VTR  (vtr 1000 f), (у - 1998), Capacity - 1000 ccm, URL - https://moto.av.by/bike/honda/vtr/108645453, id - 108645453
+№ 2, Date - 19.12 06:26, UPD - 15.04 06:35, Price - 18976, Name - BMW R nineT PURE OPTION 719 (r nine t pure), (у - 2023), Capacity - 1170 ccm, URL - https://moto.av.by/bike/bmw/r/106716944, id - 106716944
 -----------------------------------------------------------------
-№ 2 Price - 6600, Name - Honda CTX CTX700d (автомат) (ctx 700), (у - 2014), Capacity - 700 ccm, URL - https://moto.av.by/bike/honda/ctx/107401713, id - 107401713
------------------------------------------------------------------
-№ 3 Price - 550, Name - Днепр МТ-11  (), (у - 1991), Capacity - 650 ccm, URL - https://moto.av.by/bike/dnepr/mt-11/108643667, id - 108643667
------------------------------------------------------------------
-№ 4 Price - 8000, Name - Harley-Davidson Dyna fat bob (fxdf dyna fat bob), (у - 2009), Capacity - 1584 ccm, URL - https://moto.av.by/bike/harley-davidson/dyna/104370173, id - 104370173
------------------------------------------------------------------
-№ 5 Price - 2850, Name - Aprilia Pegaso 650 (pegaso 650), (у - 2002), Capacity - 650 ccm, URL - https://moto.av.by/bike/aprilia/pegaso/108366242, id - 108366242
------------------------------------------------------------------
-№ 6 Price - 2600, Name - Yamaha XJ  (xj 900 s diversion), (у - 1996), Capacity - 900 ccm, URL - https://moto.av.by/bike/yamaha/xj/105263535, id - 105263535
------------------------------------------------------------------
-№ 7 Price - 5300, Name - Honda NC 700х (nc 700 d integra), (у - 2013), Capacity - 700 ccm, URL - https://moto.av.by/bike/honda/nc/108643486, id - 108643486
------------------------------------------------------------------
-№ 8 Price - 7900, Name - Harley-Davidson Sportster 1200 (iron 1200), (у - 2020), Capacity - 1200 ccm, URL - https://moto.av.by/bike/harley-davidson/sportster/108643542, id - 108643542
------------------------------------------------------------------
-№ 9 Price - 24950, Name - Harley-Davidson Road King Special  (), (у - 2023), Capacity - 1868 ccm, URL - https://moto.av.by/bike/harley-davidson/road-king-classic/108389562, id - 108389562
------------------------------------------------------------------
-№ 10 Price - 3500, Name - Honda PC  (), (у - 1992), Capacity - 800 ccm, URL - https://moto.av.by/bike/honda/pc/108643474, id - 108643474
------------------------------------------------------------------
-№ 11 Price - 1300, Name - Motoland TCX SX 125 E 17/14 (), (у - 2024), Capacity - 125 ccm, URL - https://moto.av.by/bike/motoland/tcx/108643478, id - 108643478
------------------------------------------------------------------
-№ 12 Price - 1000, Name - Kawasaki GPX 600R (gpx 600 r), (у - 1990), Capacity - 600 ccm, URL - https://moto.av.by/bike/kawasaki/gpx/100625820, id - 100625820
------------------------------------------------------------------
-№ 13 Price - 2400, Name - Motoland CRF  ST ENDURO 172FMM (XV250-B) (), (у - 2024), Capacity - 250 ccm, URL - https://moto.av.by/bike/motoland/crf/108643470, id - 108643470
------------------------------------------------------------------
-№ 14 Price - 5300, Name - Honda CB 500X (cb 500 x), (у - 2014), Capacity - 500 ccm, URL - https://moto.av.by/bike/honda/cb/108643440, id - 108643440
------------------------------------------------------------------
-№ 15 Price - 799, Name - Znen ZN street (), (у - 2017), Capacity - 49 ccm, URL - https://moto.av.by/bike/znen/zn/107430378, id - 107430378
------------------------------------------------------------------
-№ 16 Price - 9100, Name - Victory Cross Roads  (cross roads 8-ball), (у - 2014), Capacity - 1731 ccm, URL - https://moto.av.by/bike/victory/cross-roads/107480733, id - 107480733
------------------------------------------------------------------
-№ 17 Price - 20999, Name - BMW S 1000 XR (s 1000 xr), (у - 2021), Capacity - 1000 ccm, URL - https://moto.av.by/bike/bmw/s/105787726, id - 105787726
------------------------------------------------------------------
-№ 18 Price - 18999, Name - Suzuki GSX1300R Hayabusa  (gsx 1300 r hayabusa (2 gen)), (у - 2021), Capacity - 1300 ccm, URL - https://moto.av.by/bike/suzuki/gsx1300r-hayabusa/105787706, id - 105787706
------------------------------------------------------------------
-№ 19 Price - 3600, Name - Kawasaki Ninja Zx (ninja zx-6 r), (у - 2005), Capacity - 600 ccm, URL - https://moto.av.by/bike/kawasaki/ninja/108643182, id - 108643182
------------------------------------------------------------------
-№ 20 Price - 3000, Name - Honda CBR Honda cbr 600f2 (cbr 600 f3), (у - 1993), Capacity - 600 ccm, URL - https://moto.av.by/bike/honda/cbr/108643113, id - 108643113
------ВЫВОД-------------------------------------------------------
-Все хорошо! Прошел 1 страниц, в старой базе было 16262 строк. Обработано 21 объявлений!
+№ 3, Date - 15.04 06:16, UPD - 15.04 06:16, Price - 1800, Name - Минск SCR 250  (), (у - 2021), Capacity - 250 ccm, URL - https://moto.av.by/bike/minsk/scr-250/108656260, id - 108656260
+---- ВЫВОД ------------------------------------------------------
+Все хорошо! Прошел 1 страниц, в старой базе было 16410 строк. Обработано 3 объявлений!

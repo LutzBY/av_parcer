@@ -136,7 +136,7 @@ def send_email(subject, body, recipient):
         server.login(sender, password)
         server.sendmail(sender, recipient, message.as_string())
         server.quit()
-        print('Email sent successfully')
+        print(f'Email to {recipient} sent successfully')
     except Exception as e:
         print('Error sending email:', str(e))    
 
@@ -232,6 +232,8 @@ while stop_flag == False:
 
         rdatetime_obj = datetime.strptime(refresh, '%Y-%m-%dT%H:%M:%S%z') # Преобразования текстового значения в дату
         rdatetime_obj = rdatetime_obj.replace(tzinfo=None) # убираем таймзон
+        publish_for_print = datetime_obj.strftime('%d.%m %H:%M')
+        refresh_for_print = rdatetime_obj.strftime('%d.%m %H:%M')
                 
         # Вызов функции дополнения vlk
         best_match = None
@@ -253,9 +255,10 @@ while stop_flag == False:
         if rdatetime_obj <= latest_ad_date: # Сверка даты
             stop_flag = True
             break
+        processed_ads += 1
         print(f"-----------------------------------------------------------------")
-        print(f"№ {processed_ads} Price - {price}, Name - {brand} {model} {modification} ({best_match}), (у - {year}), Capacity - {capacity} ccm, URL - {url}, id - {id}")
-        processed_ads = processed_ads + 1
+        print(f"№ {processed_ads}, Publ. - {publish_for_print}, Refr. - {refresh_for_print}, Price - {price}, Name - {brand} {model} {modification} ({best_match}), (у - {year}), Capacity - {capacity} ccm, URL - {url}, id - {id}")
+        
     
     
 parsecursor.close()
