@@ -91,3 +91,4 @@ for index, row in tqdm(df_actual.iterrows(), total=len(df_actual)):
     cursor.close()
 df_actual.to_excel(excel_file, index=False)
 conn.close()
+
