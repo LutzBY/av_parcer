@@ -31,7 +31,7 @@ query = """
     SELECT brand, model, model_misc, year, cylinders, capacity, type, id, model_vlk
     FROM av_full
     where model_vlk is null
-    and brand = 'Kawasaki';
+    and brand = 'Suzuki';
 """
 cursor.execute(query)
 row = cursor.fetchall()
@@ -91,15 +91,17 @@ for brand, model, modification, year, cylcount, capacity, mtype, id, mvlk in row
         best_match = best_model
 
 
-        
-        insertcursor = conn.cursor()
-        insertquery = """
-            UPDATE av_full
-            SET model_vlk = %s
-            WHERE id = %s
-        """
-        insertcursor.execute(insertquery, (best_match, id))
-        insertcursor.close()
+        if best_match !="":
+            insertcursor = conn.cursor()
+            insertquery = """
+                UPDATE av_full
+                SET model_vlk = %s
+                WHERE id = %s
+            """
+            insertcursor.execute(insertquery, (best_match, id))
+            insertcursor.close()
+        else:
+            continue
            
     print(F"MC - {model_concat}")
     print(F"BM - {best_match}")
