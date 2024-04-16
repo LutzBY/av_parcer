@@ -31,7 +31,7 @@ query = """
     SELECT brand, model, model_misc, year, cylinders, capacity, type, id, model_vlk
     FROM av_full
     where model_vlk is null
-    and brand = 'Suzuki';
+    and brand = 'Triumph';
 """
 cursor.execute(query)
 row = cursor.fetchall()

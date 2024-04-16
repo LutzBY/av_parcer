@@ -54,7 +54,7 @@ cursor = conn.cursor()
 query = """
     SELECT brand, model, model_misc, year, cylinders, capacity, type
     FROM av_full
-    WHERE id IN (107330990);
+    WHERE id IN (103620623);
 """
 cursor.execute(query)
 row = cursor.fetchall()
