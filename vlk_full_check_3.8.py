@@ -31,7 +31,7 @@ query = """
     SELECT brand, model, model_misc, year, cylinders, capacity, type, id, model_vlk
     FROM av_full
     where model_vlk is null
-    and brand = 'Honda';
+    and brand = 'Kawasaki';
 """
 cursor.execute(query)
 row = cursor.fetchall()
@@ -43,7 +43,9 @@ for brand, model, modification, year, cylcount, capacity, mtype, id, mvlk in row
         model_concat = model + " " + modification
     else:
         model_concat = model
-    
+
+    print(brand, model, modification, year, cylcount, capacity, mtype, id, mvlk) 
+
     displacement = float(capacity)
 
     vlkcursor = conn.cursor()
@@ -88,10 +90,7 @@ for brand, model, modification, year, cylcount, capacity, mtype, id, mvlk in row
         best_model, best_ratio = max(model_ratio_list, key=lambda x: x[1])
         best_match = best_model
 
-        print(F"MC - {model_concat}")
-        print (f"id - {id}, {brand} {model} {modification}, {year}, d - {capacity}, c - {cylcount}, t - {mtype},")
-        print(F"BM - {best_match}")
-        print(f"-----------")
+
         
         insertcursor = conn.cursor()
         insertquery = """
@@ -101,9 +100,11 @@ for brand, model, modification, year, cylcount, capacity, mtype, id, mvlk in row
         """
         insertcursor.execute(insertquery, (best_match, id))
         insertcursor.close()
-
-
+           
+    print(F"MC - {model_concat}")
+    print(F"BM - {best_match}")
+    print(f"-----------")
     vlkcursor.close()
 
-#conn.commit()
+conn.commit()
 conn.close()
