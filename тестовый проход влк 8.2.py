@@ -13,7 +13,9 @@ from email.utils import COMMASPACE
 import sys
 import io
 import decimal
-
+##########################
+id_to_check = 103257051
+#########################
 headers = {
     'authority': 'moto.av.by',
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -54,8 +56,8 @@ cursor = conn.cursor()
 query = """
     SELECT brand, model, model_misc, year, cylinders, capacity, type
     FROM av_full
-    WHERE id IN (104256867);
-"""
+    WHERE id IN (%s);
+""" % id_to_check
 cursor.execute(query)
 row = cursor.fetchall()
 
