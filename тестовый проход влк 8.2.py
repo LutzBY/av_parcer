@@ -54,7 +54,7 @@ cursor = conn.cursor()
 query = """
     SELECT brand, model, model_misc, year, cylinders, capacity, type
     FROM av_full
-    WHERE id IN (103620623);
+    WHERE id IN (104256867);
 """
 cursor.execute(query)
 row = cursor.fetchall()
@@ -72,7 +72,7 @@ cursor.close()
 
 vlkcursor = conn.cursor()
 query = """
-    SELECT model, mtype
+    SELECT model, mtype, id
     FROM vlookup
     WHERE brand = %(brand)s
         AND year = %(year)s
@@ -96,6 +96,7 @@ best_ratio = 0
 for row in rows:
     model_found = row[0]
     mtype_found = row[1]
+    vlk_id = row[2]
     
     if mtype_found == mtype:
         model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
