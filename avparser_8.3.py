@@ -287,11 +287,11 @@ with open('terminal_output.txt', 'w') as file:
 # Параметры отправки на email
 recipient = 'lutzby@gmail.com'
 subject = 'Результат работы скриптов. №1 Парсинг и апдейт modelvlk'
-#send_email(subject, terminal_output, recipient)
+send_email(subject, terminal_output, recipient)
 
 recipient = 'alxsaz@gmail.com'
-#send_email(subject, terminal_output, recipient)
+send_email(subject, terminal_output, recipient)
 
 # Записать-закрыть курсор
-#conn.commit()
+conn.commit()
 conn.close()
