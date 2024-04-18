@@ -78,7 +78,7 @@ def add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_m
     model_concat += " " + modification
     vlkcursor = conn.cursor()
     query = """
-        SELECT model, mtype
+        SELECT model, mtype, id
         FROM vlookup
         WHERE brand = %(brand)s
             AND year = %(year)s
@@ -102,17 +102,26 @@ def add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_m
     for row in rows:
         model_found = row[0]
         mtype_found = row[1]
-          
-        if mtype_found == mtype:
-            model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
-            match_ratio.append(model_comp + 30)
+        vlk_id = row[2]
+
+        if brand == 'BMW':
+            model_comp = fuzz.partial_ratio(model_concat.lower(), model_found.lower())
+            match_ratio.append(model_comp)
             best_match_list.append(model_found)
             
         else:
-            model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
-            match_ratio.append(model_comp)
-            best_match_list.append(model_found)
+            if mtype_found == mtype:
+                model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
+                match_ratio.append(model_comp * 1.2)
+                best_match_list.append(model_found)
+                
+            else:
+                model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
+                match_ratio.append(model_comp)
+                best_match_list.append(model_found)
+                
         model_ratio_list = list(zip(best_match_list, match_ratio))
+        
         best_model, best_ratio = max(model_ratio_list, key=lambda x: x[1])
         best_match = best_model
         
@@ -278,11 +287,11 @@ with open('terminal_output.txt', 'w') as file:
 # Параметры отправки на email
 recipient = 'lutzby@gmail.com'
 subject = 'Результат работы скриптов. №1 Парсинг и апдейт modelvlk'
-send_email(subject, terminal_output, recipient)
+#send_email(subject, terminal_output, recipient)
 
 recipient = 'alxsaz@gmail.com'
-send_email(subject, terminal_output, recipient)
+#send_email(subject, terminal_output, recipient)
 
 # Записать-закрыть курсор
-conn.commit()
+#conn.commit()
 conn.close()
