@@ -99,17 +99,24 @@ for row in rows:
     model_found = row[0]
     mtype_found = row[1]
     vlk_id = row[2]
-    
-    if mtype_found == mtype:
-        model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
-        match_ratio.append(model_comp + 30)
-        best_match_list.append(model_found)
-        print (f"row {row}, ratio - {model_comp + 30}")
-    else:
-        model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
+
+    if brand == 'BMW':
+        model_comp = fuzz.partial_ratio(model_concat.lower(), model_found.lower())
         match_ratio.append(model_comp)
         best_match_list.append(model_found)
         print (f"row {row}, ratio - {model_comp}")
+    else:
+        if mtype_found == mtype:
+            model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
+            match_ratio.append(model_comp * 1.2)
+            best_match_list.append(model_found)
+            print (f"row {row}, ratio - {model_comp *1.2}")
+            
+        else:
+            model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
+            match_ratio.append(model_comp)
+            best_match_list.append(model_found)
+            print (f"row {row}, ratio - {model_comp}")
     model_ratio_list = list(zip(best_match_list, match_ratio))
     
     best_model, best_ratio = max(model_ratio_list, key=lambda x: x[1])
