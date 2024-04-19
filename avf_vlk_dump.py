@@ -1,7 +1,5 @@
 import datetime
 from datetime import datetime
-import time
-import psycopg2
 import subprocess
 import gzip
 
