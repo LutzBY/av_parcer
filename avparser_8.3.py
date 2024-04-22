@@ -40,8 +40,7 @@ pgre_password = lines[7].strip()
 pgre_host = lines[9].strip()
 pgre_port = lines[11].strip()
 pgre_db = lines[13].strip()
-mail_rec_1 = lines[15].strip()
-mail_rec_2 = lines[17].strip()
+recipients = lines[15].split(", ")
     
 #Подключение к postgres
 conn = psycopg2.connect(
@@ -147,9 +146,9 @@ def send_email(subject, body, recipient):
         server.login(sender, password)
         server.sendmail(sender, recipient, message.as_string())
         server.quit()
-        print(f'Email to {recipient} sent successfully')
+        print(f'Email successfully sent to {recipient}')
     except Exception as e:
-        print('Error sending email:', str(e))    
+        print('Error sending email:', str(e))
 
 #цикл перебора страниц и парсинг
 page_counter = 0
@@ -287,12 +286,9 @@ with open('terminal_output.txt', 'w') as file:
     file.write(terminal_output)
 
 # Параметры отправки на email
-recipient = mail_rec_1
 subject = 'Результат работы скриптов. №1 Парсинг и апдейт modelvlk'
-send_email(subject, terminal_output, recipient)
-
-recipient = mail_rec_2
-send_email(subject, terminal_output, recipient)
+for recipient in recipients:
+    send_email(subject, terminal_output, recipient)
 
 # Записать-закрыть курсор
 conn.commit()

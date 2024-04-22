@@ -43,8 +43,7 @@ pgre_password = lines[7].strip()
 pgre_host = lines[9].strip()
 pgre_port = lines[11].strip()
 pgre_db = lines[13].strip()
-mail_rec_1 = lines[15].strip()
-mail_rec_2 = lines[17].strip()
+recipients = lines[15].split(", ")
     
 #Подключение к postgres
 conn = psycopg2.connect(
@@ -59,7 +58,7 @@ conn = psycopg2.connect(
 current_time_start = datetime.now()
 print(f"Привет! Текущая дата - {current_time_start}")
 
-# Забираем всю таблицу и делаем бекап
+# Забираем всю таблицу и НЕ делаем бекап
 cursor = conn.cursor()
 select_query = "SELECT * from av_full"
 cursor.execute(select_query)
@@ -98,7 +97,7 @@ def send_email(subject, body, recipient):
         server.login(sender, password)
         server.sendmail(sender, recipient, message.as_string())
         server.quit()
-        print('Email sent successfully')
+        print(f'Email successfully sent to {recipient}')
     except Exception as e:
         print('Error sending email:', str(e))    
 
@@ -196,8 +195,6 @@ print(f"Проверка актуальности завершена успеш�
 
 # Параметры отправки на email
 mail_contents = (f"Привет!\nДата начала - {current_time_start}\nДата завершения - {current_time_finish}, времени заняло - {elapsed_minutes_formatted} минут\nВ базе {rows_count} строк\nДля проверки отобрано {rows_count_na} строк\nПроверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук. Ссылка недоступна у {dead_link_count} штук.")
-recipient = mail_rec_1
 subject = 'Результат работы скриптов. №2 Проверка статуса и бекап'
-send_email(subject, mail_contents, recipient)
-recipient = mail_rec_2
-send_email(subject, mail_contents, recipient)
+for recipient in recipients:
+    send_email(subject, mail_contents, recipient)
