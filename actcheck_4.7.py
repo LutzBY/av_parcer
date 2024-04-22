@@ -43,6 +43,7 @@ pgre_password = lines[7].strip()
 pgre_host = lines[9].strip()
 pgre_port = lines[11].strip()
 pgre_db = lines[13].strip()
+recipients = lines[15].split(", ")
     
 #Подключение к postgres
 conn = psycopg2.connect(
@@ -57,7 +58,7 @@ conn = psycopg2.connect(
 current_time_start = datetime.now()
 print(f"Привет! Текущая дата - {current_time_start}")
 
-# Забираем всю таблицу и делаем бекап
+# Забираем всю таблицу и НЕ делаем бекап
 cursor = conn.cursor()
 select_query = "SELECT * from av_full"
 cursor.execute(select_query)
@@ -65,12 +66,6 @@ rows_full = cursor.fetchall()
 rows_count = cursor.rowcount
 print(f"Строк в базе: {rows_count}")
 
-# Создаем и сохраняем бекап в csv
-backup_file = f"av_full_backup_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-with open(backup_file, 'w', newline='', encoding='utf-8 sig') as csvfile:
-    csvwriter = csv.writer(csvfile)
-    csvwriter.writerows(rows_full)
-print(f"Бекап таблицы сохранен в файле: {backup_file}")
 
 # Готовим нужные столбцы и строки
 select_query = "SELECT id, status, status_date, url FROM av_full WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке')"
@@ -102,7 +97,7 @@ def send_email(subject, body, recipient):
         server.login(sender, password)
         server.sendmail(sender, recipient, message.as_string())
         server.quit()
-        print('Email sent successfully')
+        print(f'Email successfully sent to {recipient}')
     except Exception as e:
         print('Error sending email:', str(e))    
 
@@ -118,6 +113,8 @@ for row in rows:
     url = row[3] # стобец url с индексом 3
     # Диапазон рандомных значений для задержки
     wait_amount = random.randint(4, 9)
+    print(f"Ждем {wait_amount} секунд")
+    time.sleep(wait_amount)
 
     try:
         response = requests.get(url, headers=headers)
@@ -146,25 +143,31 @@ for row in rows:
         formatted_published_at = published_at.strftime("%Y-%m-%d %H:%M:%S")
         
         #Цикл условий
-        if status: #Если табличка закрыто есть
+        #Если табличка закрыто есть
+        if status: 
             reason = soup.find('div', class_='gallery__status')
             updated_status = reason.text
 
-            try:
-                removed_at_str = data['props']['initialState']['advert']['advert']['removedAt']
-            except KeyError:
-                removed_at_str = data['props']['initialState']['advert']['advert']['refreshedAt']
-            removed_at = datetime.strptime(removed_at_str, "%Y-%m-%dT%H:%M:%S%z")
-            updated_status_date = removed_at.strftime("'%Y-%m-%d %H:%M:%S'") 
-            
-            # Квери на запись и курсор execute
-            update_and_write(updated_status, updated_status_date, id_value)
+            #Если статус изменился:
+            if status_value != updated_status:
+                try:
+                    removed_at_str = data['props']['initialState']['advert']['advert']['removedAt']
+                except KeyError:
+                    removed_at_str = data['props']['initialState']['advert']['advert']['refreshedAt']
+                removed_at = datetime.strptime(removed_at_str, "%Y-%m-%dT%H:%M:%S%z")
+                updated_status_date = removed_at.strftime("'%Y-%m-%d %H:%M:%S'") 
+ 
+                # Квери на запись и курсор execute
+                update_and_write(updated_status, updated_status_date, id_value)
 
-            print(f"смена статуса для id - {id_value}, ST-{updated_status}, STD-{updated_status_date}")
-            changed_status_count += 1 # Крутим счетчик
+                print(f"смена статуса для id - {id_value}, ST-{updated_status}, STD-{updated_status_date}")
+                changed_status_count += 1 # Крутим счетчик
+            else:
+                print(f"статус {updated_status} не изменился для id - {id_value}")
+                continue
 
         else: #Если таблички нет, то объява еще актуальная
-            print(f"нет смены статуса для id - {id_value}")
+            print(f"статус {status_value} не изменился для id - {id_value}")
             stayed_active_count += 1 # Крутим счетчик
 
     else: # Если респонс не 200, т.е. страница не прочиталась
@@ -176,8 +179,7 @@ for row in rows:
 
         print(f"ссылка сдохла для id {id_value}, ST-{updated_status}, STD-{updated_status_date}")
         dead_link_count += 1
-    print(f"Ждем {wait_amount} секунд")
-    time.sleep(wait_amount)
+    
 
 # Закрытие курсора и подключения    
 cursor.close()
@@ -193,9 +195,7 @@ print(f"Дата завершения - {current_time_finish}, времени з
 print(f"Проверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук. Ссылка недоступна у {dead_link_count} штук.")
 
 # Параметры отправки на email
-mail_contents = (f"Привет!\nДата начала - {current_time_start}\nДата завершения - {current_time_finish}, времени заняло - {elapsed_minutes_formatted} минут\nВ базе {rows_count} строк\nБекап базы сохранен в файле csv на локальной машине: {backup_file}\nДля проверки отобрано {rows_count_na} строк\nПроверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук. Ссылка недоступна у {dead_link_count} штук.")
-recipient = 'lutzby@gmail.com'
+mail_contents = (f"Привет!\nДата начала - {current_time_start}\nДата завершения - {current_time_finish}, времени заняло - {elapsed_minutes_formatted} минут\nВ базе {rows_count} строк\nДля проверки отобрано {rows_count_na} строк\nПроверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук. Ссылка недоступна у {dead_link_count} штук.")
 subject = 'Результат работы скриптов. №2 Проверка статуса и бекап'
-send_email(subject, mail_contents, recipient)
-recipient = 'alxsaz@gmail.com'
-send_email(subject, mail_contents, recipient)
+for recipient in recipients:
+    send_email(subject, mail_contents, recipient)

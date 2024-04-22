@@ -40,6 +40,7 @@ pgre_password = lines[7].strip()
 pgre_host = lines[9].strip()
 pgre_port = lines[11].strip()
 pgre_db = lines[13].strip()
+recipients = lines[15].split(", ")
     
 #Подключение к postgres
 conn = psycopg2.connect(
@@ -103,7 +104,7 @@ def add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_m
         model_found = row[0]
         mtype_found = row[1]
         vlk_id = row[2]
-
+    
         if brand == 'BMW':
             model_comp = fuzz.partial_ratio(model_concat.lower(), model_found.lower())
             match_ratio.append(model_comp)
@@ -112,7 +113,7 @@ def add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_m
         else:
             if mtype_found == mtype:
                 model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
-                match_ratio.append(model_comp * 1.2)
+                match_ratio.append(model_comp * 1.25)
                 best_match_list.append(model_found)
                 
             else:
@@ -145,9 +146,9 @@ def send_email(subject, body, recipient):
         server.login(sender, password)
         server.sendmail(sender, recipient, message.as_string())
         server.quit()
-        print(f'Email to {recipient} sent successfully')
+        print(f'Email successfully sent to {recipient}')
     except Exception as e:
-        print('Error sending email:', str(e))    
+        print('Error sending email:', str(e))
 
 #цикл перебора страниц и парсинг
 page_counter = 0
@@ -285,12 +286,9 @@ with open('terminal_output.txt', 'w') as file:
     file.write(terminal_output)
 
 # Параметры отправки на email
-recipient = 'lutzby@gmail.com'
 subject = 'Результат работы скриптов. №1 Парсинг и апдейт modelvlk'
-send_email(subject, terminal_output, recipient)
-
-recipient = 'alxsaz@gmail.com'
-send_email(subject, terminal_output, recipient)
+for recipient in recipients:
+    send_email(subject, terminal_output, recipient)
 
 # Записать-закрыть курсор
 conn.commit()
