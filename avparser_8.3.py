@@ -29,19 +29,20 @@ headers = {
     'upgrade-insecure-requests': '1',
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
 }
-# Чтение конфига с пасвордами
-with open('config.txt', 'r') as file:
-    lines = file.readlines()
 
-mail_login = lines[1].strip()
-mail_password = lines[3].strip()
-pgre_login = lines[5].strip()
-pgre_password = lines[7].strip()
-pgre_host = lines[9].strip()
-pgre_port = lines[11].strip()
-pgre_db = lines[13].strip()
-recipients = lines[15].split(", ")
-    
+# Чтение json конфига
+with open('config.json') as file:
+    config = json.load(file)
+
+mail_login = config['sender login']
+mail_password = config['sender password']
+pgre_login = config['postgre login']
+pgre_password = config['postgre password']
+pgre_host = config['postgre host']
+pgre_port = config['postgre port']
+pgre_db = config['postgre database']
+recipients = config['mail recipients']
+
 #Подключение к postgres
 conn = psycopg2.connect(
     host = pgre_host,
@@ -51,8 +52,9 @@ conn = psycopg2.connect(
     password = pgre_password
 )
 
+# Страница для парсинга
 url_page = "https://moto.av.by/filter?category_type=1&price_usd[min]=1&condition[0]=1&condition[1]=2&sort=4"
-
+# Страница для парсинга
 
 # Блок сохранения терминала в буфер
 output_buffer = io.StringIO()
