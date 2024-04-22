@@ -113,6 +113,8 @@ for row in rows:
     url = row[3] # стобец url с индексом 3
     # Диапазон рандомных значений для задержки
     wait_amount = random.randint(4, 9)
+    print(f"Ждем {wait_amount} секунд")
+    time.sleep(wait_amount)
 
     try:
         response = requests.get(url, headers=headers)
@@ -177,8 +179,7 @@ for row in rows:
 
         print(f"ссылка сдохла для id {id_value}, ST-{updated_status}, STD-{updated_status_date}")
         dead_link_count += 1
-    print(f"Ждем {wait_amount} секунд")
-    time.sleep(wait_amount)
+    
 
 # Закрытие курсора и подключения    
 cursor.close()
