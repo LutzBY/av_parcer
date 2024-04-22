@@ -40,6 +40,8 @@ pgre_password = lines[7].strip()
 pgre_host = lines[9].strip()
 pgre_port = lines[11].strip()
 pgre_db = lines[13].strip()
+mail_rec_1 = lines[15].strip()
+mail_rec_2 = lines[17].strip()
     
 #Подключение к postgres
 conn = psycopg2.connect(
@@ -285,11 +287,11 @@ with open('terminal_output.txt', 'w') as file:
     file.write(terminal_output)
 
 # Параметры отправки на email
-recipient = 'lutzby@gmail.com'
+recipient = mail_rec_1
 subject = 'Результат работы скриптов. №1 Парсинг и апдейт modelvlk'
 send_email(subject, terminal_output, recipient)
 
-recipient = 'alxsaz@gmail.com'
+recipient = mail_rec_2
 send_email(subject, terminal_output, recipient)
 
 # Записать-закрыть курсор
