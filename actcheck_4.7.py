@@ -104,6 +104,7 @@ def send_email(subject, body, recipient):
 changed_status_count = 0
 stayed_active_count = 0
 dead_link_count = 0
+unchanged_status_count = 0
 
 # Сам цикл
 for row in rows:
@@ -163,6 +164,7 @@ for row in rows:
                 changed_status_count += 1 # Крутим счетчик
             else:
                 print(f"статус {updated_status} не изменился для id - {id_value}")
+                unchanged_status_count +=1 # Крутим счетчик
                 continue
 
         else: #Если таблички нет, то объява еще актуальная
@@ -194,7 +196,7 @@ print(f"Дата завершения - {current_time_finish}, времени з
 print(f"Проверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук. Ссылка недоступна у {dead_link_count} штук.")
 
 # Параметры отправки на email
-mail_contents = (f"Привет!\nДата начала - {current_time_start}\nДата завершения - {current_time_finish}, времени заняло - {elapsed_minutes_formatted} минут\nВ базе {rows_count} строк\nДля проверки отобрано {rows_count_na} строк\nПроверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук. Ссылка недоступна у {dead_link_count} штук.")
+mail_contents = (f"Привет!\nДата начала - {current_time_start}\nДата завершения - {current_time_finish}, времени заняло - {elapsed_minutes_formatted} минут\nВ базе {rows_count} строк\nДля проверки отобрано {rows_count_na} строк\nПроверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук, не изменили статус {unchanged_status_count} штук. Ссылка недоступна у {dead_link_count} штук.")
 subject = 'Результат работы скриптов. №2 Проверка статуса и бекап'
 for recipient in recipients:
     send_email(subject, mail_contents, recipient)
