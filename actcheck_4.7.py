@@ -54,7 +54,7 @@ conn = psycopg2.connect(
 )
 
 
-current_time_start = datetime.now()
+current_time_start = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 print(f"Привет! Текущая дата - {current_time_start}")
 
 # Забираем всю таблицу и НЕ делаем бекап
@@ -67,7 +67,7 @@ print(f"Строк в базе: {rows_count}")
 
 
 # Готовим нужные столбцы и строки
-select_query = "SELECT id, status, status_date, url FROM av_full WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке')"
+select_query = "SELECT id, status, status_date, url, price FROM av_full WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке')"
 cursor.execute(select_query)
 rows = cursor.fetchall()
 rows_count_na = cursor.rowcount
@@ -105,14 +105,17 @@ changed_status_count = 0
 stayed_active_count = 0
 dead_link_count = 0
 unchanged_status_count = 0
+price_changed_count = 0
 
 # Сам цикл
 for row in rows:
-    status_value = row[1] # стобец status с индексом 1
     id_value = row[0] # стобец id с индексом 0
+    status_value = row[1] # стобец status с индексом 1
     url = row[3] # стобец url с индексом 3
+    price_ex = row[4] # столбец price
+
     # Диапазон рандомных значений для задержки
-    wait_amount = random.randint(4, 9)
+    wait_amount = random.randint(4, 7)
     print(f"Ждем {wait_amount} секунд")
     time.sleep(wait_amount)
 
@@ -143,6 +146,18 @@ for row in rows:
         formatted_published_at = published_at.strftime("%Y-%m-%d %H:%M:%S")
         
         #Цикл условий
+        # Сверка цены
+        price_upd = data['props']['initialState']['advert']['advert']['price']['usd']['amount']
+        if price_ex != price_upd:
+            price_query = ("UPDATE av_full SET price = '%s' WHERE id = %s") % (price_upd, id_value) 
+            cursor.execute(price_query)
+            conn.commit()
+            price_diff = price_upd - price_ex
+            print(f"Изменилась цена для id {id_value} на {price_diff} USD")
+            price_changed_count += 1
+        else:
+            print(f"Цена для id {id_value} осталась прежней")
+
         #Если табличка закрыто есть
         if status: 
             reason = soup.find('div', class_='gallery__status')
@@ -187,7 +202,7 @@ cursor.close()
 conn.close()
 
 # Блок подсчета занятого времени
-current_time_finish = datetime.now()
+current_time_finish = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 elapsed_time = current_time_finish - current_time_start
 elapsed_minutes = elapsed_time.total_seconds() / 60
 elapsed_minutes_formatted = "{:.2f}".format(elapsed_minutes)
@@ -196,7 +211,7 @@ print(f"Дата завершения - {current_time_finish}, времени з
 print(f"Проверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук. Ссылка недоступна у {dead_link_count} штук.")
 
 # Параметры отправки на email
-mail_contents = (f"Привет!\nДата начала - {current_time_start}\nДата завершения - {current_time_finish}, времени заняло - {elapsed_minutes_formatted} минут\nВ базе {rows_count} строк\nДля проверки отобрано {rows_count_na} строк\nПроверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук, не изменили статус {unchanged_status_count} штук. Ссылка недоступна у {dead_link_count} штук.")
+mail_contents = (f"Привет!\nДата начала - {current_time_start}\nДата завершения - {current_time_finish}, времени заняло - {elapsed_minutes_formatted} минут\nВ базе {rows_count} строк\nДля проверки отобрано {rows_count_na} строк\nПроверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук, не изменили статус {unchanged_status_count} штук. Ссылка недоступна у {dead_link_count} штук.\nЦена изменилась у {price_changed_count} штук.")
 subject = 'Результат работы скриптов. №2 Проверка статуса и бекап'
 for recipient in recipients:
     send_email(subject, mail_contents, recipient)
