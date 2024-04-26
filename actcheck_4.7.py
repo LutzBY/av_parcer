@@ -54,8 +54,9 @@ conn = psycopg2.connect(
 )
 
 
-current_time_start = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-print(f"Привет! Текущая дата - {current_time_start}")
+current_time_start = datetime.now()
+ctsf = current_time_start.strftime("%Y-%m-%d %H:%M:%S")
+print(f"Привет! Текущая дата - {ctsf}")
 
 # Забираем всю таблицу и НЕ делаем бекап
 cursor = conn.cursor()
@@ -202,7 +203,8 @@ cursor.close()
 conn.close()
 
 # Блок подсчета занятого времени
-current_time_finish = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+current_time_finish = datetime.now()
+ctff = current_time_finish.strftime("%Y-%m-%d %H:%M:%S")
 elapsed_time = current_time_finish - current_time_start
 elapsed_minutes = elapsed_time.total_seconds() / 60
 elapsed_minutes_formatted = "{:.2f}".format(elapsed_minutes)
@@ -211,7 +213,7 @@ print(f"Дата завершения - {current_time_finish}, времени з
 print(f"Проверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук. Ссылка недоступна у {dead_link_count} штук.")
 
 # Параметры отправки на email
-mail_contents = (f"Привет!\nДата начала - {current_time_start}\nДата завершения - {current_time_finish}, времени заняло - {elapsed_minutes_formatted} минут\nВ базе {rows_count} строк\nДля проверки отобрано {rows_count_na} строк\nПроверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук, не изменили статус {unchanged_status_count} штук. Ссылка недоступна у {dead_link_count} штук.\nЦена изменилась у {price_changed_count} штук.")
+mail_contents = (f"Привет!\nДата начала - {ctsf}\nДата завершения - {ctff}, времени заняло - {elapsed_minutes_formatted} минут\nВ базе {rows_count} строк\nДля проверки отобрано {rows_count_na} строк\nПроверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук, не изменили статус {unchanged_status_count} штук. Ссылка недоступна у {dead_link_count} штук.\nЦена изменилась у {price_changed_count} штук.")
 subject = 'Результат работы скриптов. №2 Проверка статуса и бекап'
 for recipient in recipients:
     send_email(subject, mail_contents, recipient)
