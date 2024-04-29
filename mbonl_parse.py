@@ -95,6 +95,7 @@ def scrape_data_on_page(driver, page_datetime, page_ids, page_titles, page_years
         datecleaned = dateparser.parse(dateclean)
         #dateclean = dateclean.strftime('%Y-%m-%d %H:%M:%S')
         priceclean = price.text.split(' $')[0]
+        priceclean = priceclean.replace(" ", "")
         id = id.text
         title = title.text
         year = year.text
