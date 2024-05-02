@@ -14,7 +14,7 @@ import sys
 import io
 import decimal
 ##########################
-id_to_check = 108716047
+id_to_check = 108860356
 #########################
 headers = {
     'authority': 'moto.av.by',
@@ -101,19 +101,19 @@ for row in rows:
     vlk_id = row[2]
 
     if brand == 'BMW':
-        model_comp = fuzz.partial_ratio(model_concat.lower(), model_found.lower())
+        model_comp = fuzz.token_sort_ratio(model_concat.lower(), model_found.lower())
         match_ratio.append(model_comp)
         best_match_list.append(model_found)
         print (f"row {row}, ratio - {model_comp}")
     else:
         if mtype_found == mtype:
-            model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
+            model_comp = fuzz.token_sort_ratio(model_concat.lower(), model_found.lower())
             match_ratio.append(model_comp * 1.2)
             best_match_list.append(model_found)
             print (f"row {row}, ratio - {model_comp *1.2}")
             
         else:
-            model_comp = fuzz.WRatio(model_concat.lower(), model_found.lower())
+            model_comp = fuzz.token_sort_ratio(model_concat.lower(), model_found.lower())
             match_ratio.append(model_comp)
             best_match_list.append(model_found)
             print (f"row {row}, ratio - {model_comp}")
