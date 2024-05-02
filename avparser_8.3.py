@@ -108,18 +108,18 @@ def add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_m
         vlk_id = row[2]
     
         if brand == 'BMW':
-            model_comp = fuzz.token_sort_ratio(model_concat.lower(), model_found.lower())
+            model_comp = fuzz.token_set_ratio(model_concat.lower(), model_found.lower())
             match_ratio.append(model_comp)
             best_match_list.append(model_found)
             
         else:
             if mtype_found == mtype:
-                model_comp = fuzz.token_sort_ratio(model_concat.lower(), model_found.lower())
+                model_comp = fuzz.token_set_ratio(model_concat.lower(), model_found.lower())
                 match_ratio.append(model_comp * 1.25)
                 best_match_list.append(model_found)
                 
             else:
-                model_comp = fuzz.token_sort_ratio(model_concat.lower(), model_found.lower())
+                model_comp = fuzz.token_set_ratio(model_concat.lower(), model_found.lower())
                 match_ratio.append(model_comp)
                 best_match_list.append(model_found)
                 
