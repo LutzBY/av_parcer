@@ -1,13 +1,15 @@
 import requests
 import json
 from urllib.parse import urlencode
-import smtplib
 from bs4 import BeautifulSoup
 import re
 import datetime
 from datetime import datetime
 import dateparser
 import psycopg2
+import smtplib
+from email.mime.text import MIMEText
+from email.utils import COMMASPACE
 
 # Чтение json конфига
 with open('config.json') as file:
@@ -31,10 +33,11 @@ conn = psycopg2.connect(
     password = pgre_password
 )
 
+# Чтение текущей даты
 current_time_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 print(f"Привет! Текущая дата - {current_time_str}")
 
-# Забираем последнюю дату и количество стобцов
+# Забираем последнюю дату из базы и количество стобцов
 datecursor = conn.cursor()
 datequery = "SELECT count(id), max(date) from mbonl_test"
 datecursor.execute(datequery)
@@ -43,6 +46,27 @@ latest_ad_date = tmpfetch[1]
 old_rows_count = tmpfetch[0]
 print(f"Последняя дата объявления - {latest_ad_date.strftime('%Y-%m-%d %H:%M:%S')}")
 datecursor.close()
+
+# Функция отправки результата на email
+def send_email(subject, body, recipient):
+    sender = mail_login 
+    password = mail_password
+    smtp_server = 'smtp.yandex.ru'
+    smtp_port = 465
+
+    message = MIMEText(body)
+    message['Subject'] = subject
+    message['From'] = sender
+    message['To'] = recipient
+
+    try:
+        server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        server.login(sender, password)
+        server.sendmail(sender, recipient, message.as_string())
+        server.quit()
+        print(f'Email successfully sent to {recipient}')
+    except Exception as e:
+        print('Error sending email:', str(e))    
 
 # Хэдеры для странцы search и для каждой страницы объяв (page)
 headers = {
@@ -68,13 +92,14 @@ headers = {
     'sec-ch-ua-platform': '"Windows"'
 }
 
-
-def parse_page (url_page): # функция парсинга каждой страницы
-    
+# Функция парсинга каждой страницы
+def parse_page (url_page): 
     url_page = url_page
     response_page = requests.get(url_page, headers=headers_page)
     page = response_page.text
     soup = BeautifulSoup(page, 'lxml')
+    
+    # Извлечение нужных элементов
     # Марка и модель
     element = soup.find("span", class_="autoba-fastchars-ttl")
     brand = element.find("strong").string
@@ -146,7 +171,7 @@ def parse_page (url_page): # функция парсинга каждой стр
 
     print(f'ID - {id}, Дата - {date}, Модель - {brand} {model_misc}, Год - {year}, Пробег - {mileage}, Цена - {price}, Тип - {mtype}, Объем - {displacement}, Место - {location}, Тип двигла - {eng_type}, Цил - {eng_cyl}, Привод - {drive}, Продавец - {seller}, Телефон - {phone}, Ссылка - {url_page}')
     
-    # Скрипт для пгри
+    # Скрипт для записи в постгрес
     parsecursor = conn.cursor()
     parsequery = """
         INSERT INTO mbonl_test(id, date, brand, model_misc, year, mileage, price, mtype, displacement, location, eng_type, eng_cyl, drive, seller, phone, url)
@@ -157,12 +182,11 @@ def parse_page (url_page): # функция парсинга каждой стр
         WHERE mbonl_test.id = excluded.id;
     """ % (id, date, brand, model_misc, year, mileage, price, mtype, displacement, location, eng_type, eng_cyl, drive, seller, phone, url_page)
     parsecursor.execute(parsequery)
-    return date
+    return date # Вернуть дату объвяления для сверки
 
 # Глобальные переменные и счетчики
 page_counter = 1
-
-
+ads_parced = 0
 
 while True:
     # Получение ссылок на странице из джсона который в XHR search
@@ -199,15 +223,24 @@ while True:
     pattern = r'<a href="/moto/(\d+)#'
     links = re.findall(pattern, content)
 
-    # Цикл перехода по каждой объяве на странице
+    # Цикл перехода по каждой объяве на странице с использованием функции parse_page
     print(f'Страница - {page_counter}')
     for link in links:
         url_page = 'https://mb.onliner.by/moto/' + link
         date = parse_page (url_page)
-        
+        ads_parced +=1
+    conn.commit() # Записать страницу в пгре
+
+    # Сверка дат
     if latest_ad_date > date:
-        break    
+        print ("Более старая дата найдена")
+        break
     page_counter += 1
-    conn.commit()
 
 conn.close()
+
+# Параметры отправки на email
+mail_contents = (f"Привет!\nДата начала - {current_time_str}\nВ базе {old_rows_count} строк\nСамая старая дата - {latest_ad_date}\nПарсинг прошел успешно, обработано {ads_parced} штук.")
+subject = 'Результат работы скриптов. №3 Парсинг онлайнера'
+for recipient in recipients:
+    send_email(subject, mail_contents, recipient)
