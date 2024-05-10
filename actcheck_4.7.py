@@ -195,7 +195,7 @@ for row in rows:
 
     else: # Если респонс не 200, т.е. страница не прочиталась
         updated_status = "Недоступная ссылка"
-        updated_status_date = "null"
+        updated_status_date = None
 
         # Обн. базу, уст. статус и стат. дату для соотв id
         update_and_write(updated_status, updated_status_date, id_value)
