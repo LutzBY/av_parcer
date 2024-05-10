@@ -160,7 +160,7 @@ for row in rows:
             print(f"Цена для id {id_value} осталась прежней")
         
         # Добавление организации
-        organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', None)
+        organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', 'null')
         organization_query = ("UPDATE av_full SET seller = '%s' WHERE id = %s") % (organization, id_value) 
         cursor.execute(organization_query)
         conn.commit()
@@ -195,7 +195,7 @@ for row in rows:
 
     else: # Если респонс не 200, т.е. страница не прочиталась
         updated_status = "Недоступная ссылка"
-        updated_status_date = None
+        updated_status_date = 'null'
 
         # Обн. базу, уст. статус и стат. дату для соотв id
         update_and_write(updated_status, updated_status_date, id_value)
