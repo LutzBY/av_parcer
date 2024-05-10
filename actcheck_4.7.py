@@ -225,8 +225,11 @@ mail_contents = (f"""
                  Дата завершения - {ctff}, времени заняло - {elapsed_minutes_formatted} минут
                  В базе {rows_count} строк
                  Для проверки отобрано {rows_count_na} строк
-                 Проверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук, cтатус сохранился у {unchanged_status_count} штук
-                 Ссылка недоступна у {dead_link_count} штук
+                 Проверка актуальности завершена успешно:
+                    смена статуса у {changed_status_count} штук, 
+                    осталось активными {stayed_active_count} штук,
+                    закрытый статус сохранился у {unchanged_status_count} штук,
+                    ссылка недоступна у {dead_link_count} штук
                  Цена изменилась у {price_changed_count} штук
                  Спасибо за внимание <3
                  """
