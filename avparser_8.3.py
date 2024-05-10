@@ -213,7 +213,7 @@ while stop_flag == False:
         # Искать нужные свойства по имени тега внутри пропертис
         brand = next((prop['value'] for prop in properties if prop['name'] == 'brand'), None)
         model = next((prop['value'] for prop in properties if prop['name'] == 'model'), None)
-        modification = next((prop['value'] for prop in properties if prop['name'] == 'modification'), 'null')
+        modification = next((prop['value'] for prop in properties if prop['name'] == 'modification'), "")
         year = next((prop['value'] for prop in properties if prop['name'] == 'year'), "0")
         mtype = next((prop['value'] for prop in properties if prop['name'] == 'purpose_type'), None)
         cylcount = next((prop['value'] for prop in properties if prop['name'] == 'cylinder_number'), "0")
