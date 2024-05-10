@@ -158,6 +158,12 @@ for row in rows:
             price_changed_count += 1
         else:
             print(f"Цена для id {id_value} осталась прежней")
+        
+        # Добавление организации
+        organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', None)
+        organization_query = ("UPDATE av_full SET seller = '%s' WHERE id = %s") % (organization, id_value) 
+        cursor.execute(organization_query)
+        conn.commit()
 
         #Если табличка закрыто есть
         if status: 
@@ -213,7 +219,17 @@ print(f"Дата завершения - {current_time_finish}, времени з
 print(f"Проверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук. Ссылка недоступна у {dead_link_count} штук.")
 
 # Параметры отправки на email
-mail_contents = (f"Привет!\nДата начала - {ctsf}\nДата завершения - {ctff}, времени заняло - {elapsed_minutes_formatted} минут\nВ базе {rows_count} строк\nДля проверки отобрано {rows_count_na} строк\nПроверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук, не изменили статус {unchanged_status_count} штук. Ссылка недоступна у {dead_link_count} штук.\nЦена изменилась у {price_changed_count} штук.")
+mail_contents = (f"""
+                 Привет!
+                 Дата завершения - {ctff}, времени заняло - {elapsed_minutes_formatted} минут
+                 В базе {rows_count} строк
+                 Для проверки отобрано {rows_count_na} строк
+                 Проверка актуальности завершена успешно, сменило статус {changed_status_count} штук, осталось активными {stayed_active_count} штук, cтатус сохранился у {unchanged_status_count} штук. 
+                 Ссылка недоступна у {dead_link_count} штук.
+                 Цена изменилась у {price_changed_count} штук.
+                 """
+)
+
 subject = 'Результат работы скриптов. №2 Проверка статуса и бекап'
 for recipient in recipients:
     send_email(subject, mail_contents, recipient)
