@@ -200,6 +200,7 @@ while stop_flag == False:
     mileages = []
     urlss = []
     locations = []
+    sellers = []
 
     for item in data['props']['initialState']['filter']['main']['adverts']: # Цикл поиска в этом словаре этих ключей
         advert_id = item['id']
@@ -209,7 +210,8 @@ while stop_flag == False:
         properties = item['properties']
         public_url = item['publicUrl']
         location = item['locationName']
-
+        seller = item['sellerName']
+        
         # Искать нужные свойства по имени тега внутри пропертис
         brand = next((prop['value'] for prop in properties if prop['name'] == 'brand'), None)
         model = next((prop['value'] for prop in properties if prop['name'] == 'model'), None)
@@ -237,8 +239,9 @@ while stop_flag == False:
         mileages.append(mileage)
         urlss.append(public_url)
         locations.append(location)
+        sellers.append(seller)
     
-    for id, price, publish, refresh, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location in zip(ids, prices, published, refreshed, brands, models, modifications, years, mtypes, cylcounts, drivetypes, capacitys, mileages, urlss, locations):
+    for id, price, publish, refresh, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, seller in zip(ids, prices, published, refreshed, brands, models, modifications, years, mtypes, cylcounts, drivetypes, capacitys, mileages, urlss, locations, sellers):
         datetime_obj = datetime.strptime(publish, '%Y-%m-%dT%H:%M:%S%z') # Преобразования текстового значения в дату
         datetime_obj = datetime_obj.replace(tzinfo=None) # убираем таймзон
 
@@ -253,13 +256,13 @@ while stop_flag == False:
 
         # Скрипт для пгри
         parsequery = """
-            INSERT INTO av_full(id, price, date, brand, model, model_misc, year, type, cylinders, drive, capacity, mileage, url, locations, status, status_date, model_vlk)
-            VALUES ( %s, %s, '%s', '%s', '%s', '%s', %s, '%s', %s, '%s', %s, %s, '%s', '%s', 'Актуально', null, '%s' )
+            INSERT INTO av_full(id, price, date, brand, model, model_misc, year, type, cylinders, drive, capacity, mileage, url, locations, status, status_date, model_vlk, seller)
+            VALUES ( %s, %s, '%s', '%s', '%s', '%s', %s, '%s', %s, '%s', %s, %s, '%s', '%s', 'Актуально', null, '%s', '%s')
             ON CONFLICT (id) DO UPDATE 
             SET 
             price = excluded.price
             WHERE av_full.id = excluded.id;
-        """ % (id, price, datetime_obj, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, best_match)
+        """ % (id, price, datetime_obj, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, best_match, seller)
         
         # Работа курсора для пгри
         parsecursor.execute(parsequery)
@@ -269,10 +272,14 @@ while stop_flag == False:
             break
         processed_ads += 1
         print(f"-----------------------------------------------------------------")
-        print(f"№ {processed_ads}, Publ. at {publish_for_print}, Refr. at {refresh_for_print}, Price - {price}, Name - {brand} {model} {modification} ({best_match}), (у - {year}), Capacity - {capacity} ccm, URL - {url}, id - {id}")
-        
-    
-    
+        print (f"""
+№ {processed_ads}, Price - {price}, ID - {id}
+Publ. at {publish_for_print}, Refr. at {refresh_for_print}
+Name - {brand} {model} {modification} ({best_match}), (у - {year}), Capacity - {capacity} ccm
+seller - {seller}
+URL - {url}
+       """)
+
 parsecursor.close()
 print(f"---- ВЫВОД ------------------------------------------------------")
 print(f"Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений!")
