@@ -162,11 +162,10 @@ for row in rows:
         # Добавление организации
         organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', 'null')
         if organization != 'null':
-            organization = "'" + organization + "'"
-        organization_query = ("UPDATE av_full SET seller = %s WHERE id = %s") % (organization, id_value) 
-        cursor.execute(organization_query)
-        conn.commit()
-        print(f"Organization = {organization}")
+            organization_query = ("UPDATE av_full SET seller = '%s' WHERE id = %s") % (organization, id_value) 
+            cursor.execute(organization_query)
+            conn.commit()
+            print(f"Organization = {organization}")
 
         #Если табличка закрыто есть
         if status: 
