@@ -267,7 +267,14 @@ while stop_flag == False:
         # Работа курсора для пгри
         parsecursor.execute(parsequery)
         
-        if rdatetime_obj <= latest_ad_date: # Сверка даты
+        # Вынять влк из базы
+        vlkquery = " SELECT model_vlk FROM av_full WHERE id = %s " % (id)
+        parsecursor.execute(vlkquery)
+        vlkfetch = parsecursor.fetchone()
+        mvlk_actual = vlkfetch[0]
+        
+        # Сверка даты
+        if rdatetime_obj <= latest_ad_date: 
             stop_flag = True
             break
         processed_ads += 1
@@ -275,8 +282,9 @@ while stop_flag == False:
         print (f"""
 № {processed_ads}, Price - {price}, ID - {id}
 Publ. at {publish_for_print}, Refr. at {refresh_for_print}
-Name - {brand} {model} {modification} ({best_match}), (у - {year}), Capacity - {capacity} ccm
-seller - {seller}
+Name - {brand} {model} {modification} ({year}, {capacity} ccm)
+Actual mvlk - {mvlk_actual} (Best mvlk - {best_match})
+Seller - {seller}
 URL - {url}
        """)
 

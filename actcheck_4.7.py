@@ -107,6 +107,7 @@ stayed_active_count = 0
 dead_link_count = 0
 unchanged_status_count = 0
 price_changed_count = 0
+price_difference_sum = 0
 
 # Сам цикл
 for row in rows:
@@ -156,6 +157,7 @@ for row in rows:
             price_diff = price_upd - price_ex
             print(f"Изменилась цена для id {id_value} на {price_diff} USD")
             price_changed_count += 1
+            price_difference_sum += price_diff
         else:
             print(f"Цена для id {id_value} осталась прежней")
         
@@ -233,6 +235,7 @@ mail_contents = (f"""
     закрытый статус сохранился у {unchanged_status_count} штук,
     ссылка недоступна у {dead_link_count} штук
 Цена изменилась у {price_changed_count} штук
+Общее именение цен составило {price_difference_sum} USD
 Спасибо за внимание <3
 """
 )
