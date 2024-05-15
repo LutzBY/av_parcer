@@ -155,9 +155,9 @@ for row in rows:
             cursor.execute(price_query)
             conn.commit()
             price_diff = price_upd - price_ex
-            print(f"Изменилась цена для id {id_value} на {price_diff} USD")
             price_changed_count += 1
             price_difference_sum += price_diff
+            print(f"Изменилась цена для id {id_value} на {price_diff} USD, price_diff_sum составляет {price_difference_sum} USD")
         else:
             print(f"Цена для id {id_value} осталась прежней")
         
