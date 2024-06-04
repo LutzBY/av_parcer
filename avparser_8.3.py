@@ -249,6 +249,8 @@ while stop_flag == False:
         rdatetime_obj = rdatetime_obj.replace(tzinfo=None) # убираем таймзон
         publish_for_print = datetime_obj.strftime('%d.%m.%y %H:%M')
         refresh_for_print = rdatetime_obj.strftime('%d.%m.%y %H:%M')
+        seller = seller.replace("'", ".")
+        modification = modification.replace("'", ".")
                 
         # Вызов функции дополнения vlk
         best_match = None
