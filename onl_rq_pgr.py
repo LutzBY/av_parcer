@@ -237,10 +237,24 @@ while True:
         break
     page_counter += 1
 
+# Вынять количество объяв из базы
+rowscurcor = conn.cursor()
+vlkquery = " SELECT COUNT(*) FROM mbonl "
+rowscurcor.execute(vlkquery)
+rowfetch = rowscurcor.fetchone()
+rows_actual = rowfetch[0]
+
 conn.close()
 
+rows_written = rows_actual - old_rows_count
+
 # Параметры отправки на email
-mail_contents = (f"Привет!\nДата начала - {current_time_str}\nВ базе {old_rows_count} строк\nСамая старая дата - {latest_ad_date}\nПарсинг прошел успешно, обработано {ads_parced} штук.")
+mail_contents = (f"""
+ Привет! Сраный онлайнер тоже спарсили!
+ Дата начала - {current_time_str}
+ В базе было {old_rows_count} строк, самая старая дата - {latest_ad_date}
+ Парсинг прошел успешно, обработано {ads_parced} штук, записано {rows_written} штук
+ """)
 subject = 'Результат работы скриптов. №3 Парсинг онлайнера'
 for recipient in recipients:
     send_email(subject, mail_contents, recipient)
