@@ -39,7 +39,7 @@ print(f"Привет! Текущая дата - {current_time_str}")
 
 # Забираем последнюю дату из базы и количество стобцов
 datecursor = conn.cursor()
-datequery = "SELECT count(id), max(date) from mbonl_test"
+datequery = "SELECT count(id), max(date) from mbonl_actual"
 datecursor.execute(datequery)
 tmpfetch = datecursor.fetchone()
 latest_ad_date = tmpfetch[1]
@@ -174,12 +174,12 @@ def parse_page (url_page):
     # Скрипт для записи в постгрес
     parsecursor = conn.cursor()
     parsequery = """
-        INSERT INTO mbonl_test(id, date, brand, model_misc, year, mileage, price, mtype, displacement, location, eng_type, eng_cyl, drive, seller, phone, url)
+        INSERT INTO mbonl_actual(id, date, brand, model_misc, year, mileage, price, mtype, displacement, location, eng_type, eng_cyl, drive, seller, phone, url)
         VALUES ( %s, '%s', '%s', '%s', %s, %s, %s, '%s', %s, '%s', '%s', %s, '%s', '%s', '%s', '%s')
         ON CONFLICT (id) DO UPDATE 
         SET 
         price = excluded.price
-        WHERE mbonl_test.id = excluded.id;
+        WHERE mbonl_actual.id = excluded.id;
     """ % (id, date, brand, model_misc, year, mileage, price, mtype, displacement, location, eng_type, eng_cyl, drive, seller, phone, url_page)
     parsecursor.execute(parsequery)
     return date # Вернуть дату объвяления для сверки
@@ -239,7 +239,7 @@ while True:
 
 # Вынять количество объяв из базы
 rowscurcor = conn.cursor()
-vlkquery = " SELECT COUNT(*) FROM mbonl "
+vlkquery = " SELECT count(id) FROM mbonl_actual "
 rowscurcor.execute(vlkquery)
 rowfetch = rowscurcor.fetchone()
 rows_actual = rowfetch[0]
