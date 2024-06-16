@@ -14,7 +14,7 @@ import sys
 import io
 import decimal
 ##########################
-id_to_check = 108860356
+id_to_check = 109534875
 #########################
 headers = {
     'authority': 'moto.av.by',
@@ -95,6 +95,7 @@ match_ratio = []
 best_match_list = []
 best_match = ""
 best_ratio = 0
+enumerate = 0
 for row in rows:
     model_found = row[0]
     mtype_found = row[1]
@@ -104,26 +105,32 @@ for row in rows:
         model_comp = fuzz.token_set_ratio(model_concat.lower(), model_found.lower())
         match_ratio.append(model_comp)
         best_match_list.append(model_found)
-        print (f"row {row}, ratio - {model_comp}")
+        print (f"{enumerate}----------------")
+        print (f"{row}, - model, ratio - {model_comp}")
+        enumerate +=1
     else:
         if mtype_found == mtype:
             model_comp = fuzz.token_set_ratio(model_concat.lower(), model_found.lower())
             match_ratio.append(model_comp * 1.2)
             best_match_list.append(model_found)
-            print (f"row {row}, ratio - {model_comp *1.2}")
+            print (f"{enumerate}----------------")
+            print (f"{row}, - model, ratio - {model_comp *1.2}")
+            enumerate +=1
             
         else:
             model_comp = fuzz.token_set_ratio(model_concat.lower(), model_found.lower())
             match_ratio.append(model_comp)
             best_match_list.append(model_found)
-            print (f"row {row}, ratio - {model_comp}")
+            print (f"{enumerate}----------------")
+            print (f"{row}, - model, ratio - {model_comp}")
+            enumerate +=1
     model_ratio_list = list(zip(best_match_list, match_ratio))
     
     best_model, best_ratio = max(model_ratio_list, key=lambda x: x[1])
     best_match = best_model
 
 
-    
+print (f"----------------")    
 print (f"{brand} {model} {modification}, {year}, d - {capacity}, c - {cylcount}, t - {mtype}, BM - {best_match}")
 vlkcursor.close()
 
