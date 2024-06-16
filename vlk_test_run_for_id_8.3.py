@@ -14,7 +14,7 @@ import sys
 import io
 import decimal
 ##########################
-id_to_check = 109534875
+id_to_check = 109577737
 #########################
 headers = {
     'authority': 'moto.av.by',
@@ -105,26 +105,26 @@ for row in rows:
         model_comp = fuzz.token_set_ratio(model_concat.lower(), model_found.lower())
         match_ratio.append(model_comp)
         best_match_list.append(model_found)
-        print (f"{enumerate}----------------")
-        print (f"{row}, - model, ratio - {model_comp}")
         enumerate +=1
     else:
         if mtype_found == mtype:
             model_comp = fuzz.token_set_ratio(model_concat.lower(), model_found.lower())
             match_ratio.append(model_comp * 1.2)
             best_match_list.append(model_found)
-            print (f"{enumerate}----------------")
-            print (f"{row}, - model, ratio - {model_comp *1.2}")
             enumerate +=1
             
         else:
             model_comp = fuzz.token_set_ratio(model_concat.lower(), model_found.lower())
             match_ratio.append(model_comp)
             best_match_list.append(model_found)
-            print (f"{enumerate}----------------")
-            print (f"{row}, - model, ratio - {model_comp}")
             enumerate +=1
     model_ratio_list = list(zip(best_match_list, match_ratio))
+    
+    print(f"""
+{enumerate} --------
+{model_found}
+{mtype_found}
+ratio = {model_comp}, vlk_id = {vlk_id}""")
     
     best_model, best_ratio = max(model_ratio_list, key=lambda x: x[1])
     best_match = best_model
