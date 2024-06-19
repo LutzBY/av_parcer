@@ -280,15 +280,24 @@ while stop_flag == False:
             stop_flag = True
             break
         processed_ads += 1
+        
+# Основной принт (для маленьких сокращенный)
         print(f"-----------------------------------------------------------------")
-        print (f"""
+        if int(capacity) > 298:
+            print (f"""
 № {processed_ads}, Price - {price}, ID - {id}
 Publ. at {publish_for_print}, Refr. at {refresh_for_print}
 Name - {brand} {model} {modification} ({year}, {capacity} ccm)
 Actual mvlk - {mvlk_actual} (Best mvlk - {best_match})
 Seller - {seller}
-URL - {url}
-       """)
+URL - {url}""")
+        
+        else:
+            print (f"""
+№ {processed_ads}, Price - {price}, ID - {id}
+Name - {brand} {model} {modification} ({year}, {capacity} ccm)
+URL - {url}""")
+
 
 parsecursor.close()
 print(f"---- ВЫВОД ------------------------------------------------------")
