@@ -283,7 +283,7 @@ while stop_flag == False:
         
 # Основной принт (для маленьких сокращенный)
         print(f"-----------------------------------------------------------------")
-        if int(capacity) > 298:
+        if int(capacity) >= 299 and cylcount > 1:
             print (f"""
 № {processed_ads}, Price - {price}, ID - {id}
 Publ. at {publish_for_print}, Refr. at {refresh_for_print}
