@@ -112,6 +112,7 @@ price_difference_sum = 0
 # Сам цикл
 for row in rows:
     id_value = row[0] # стобец id с индексом 0
+    print(f"Обрабатываю ID {id_value}")
     status_value = row[1] # стобец status с индексом 1
     url = row[3] # стобец url с индексом 3
     price_ex = row[4] # столбец price
