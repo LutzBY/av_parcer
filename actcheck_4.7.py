@@ -135,7 +135,10 @@ for row in rows:
     src = response.text
     soup = BeautifulSoup(src, 'lxml')
 
-    if response.status_code == 200:
+    # Проверка на корректно закрытую страничку (присутствие картинки-домика)
+    page_closed = soup.find('div', class_='board board--error-404')
+
+    if response.status_code == 200 and page_closed is None:
         src = response.text 
         soup = BeautifulSoup(src, 'lxml')
         status = soup.find('div', class_='card__warning') #Проверяем наличие таблички закрыто
