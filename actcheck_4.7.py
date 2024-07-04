@@ -136,7 +136,7 @@ for row in rows:
     soup = BeautifulSoup(src, 'lxml')
 
     # Проверка на корректно закрытую страничку (присутствие картинки-домика)
-    page_closed = soup.find('div', class_='board board--error-404')
+    page_closed = soup.find_all('div', class_='board board--error-404')
 
     if response.status_code == 200 and page_closed is None:
         src = response.text 
