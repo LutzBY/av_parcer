@@ -249,5 +249,5 @@ mail_contents = (f"""
 )
 
 subject = 'Результат работы скриптов. №2 Проверка статуса и бекап'
-#for recipient in recipients:
-    #send_email(subject, mail_contents, recipient)
+for recipient in recipients:
+    send_email(subject, mail_contents, recipient)
