@@ -135,71 +135,78 @@ for row in rows:
     src = response.text
     soup = BeautifulSoup(src, 'lxml')
 
-    # Проверка на корректно закрытую страничку (присутствие картинки-домика)
-    page_closed = soup.find_all('div', class_='board board--error-404')
-
-    if response.status_code == 200 and page_closed is None:
+    if response.status_code == 200:
         src = response.text 
         soup = BeautifulSoup(src, 'lxml')
         status = soup.find('div', class_='card__warning') #Проверяем наличие таблички закрыто
         script_element = soup.find("script", id="__NEXT_DATA__") #Достаем жсон
         json_string = script_element.string #Конвертируем жсон в стринг
         data = json.loads(json_string) #Пакуем в data
+
+        # Проверка на корректно закрытую страничку
+        script_status = data['props']['initialState']['advert']['advert']
+
         #Извлекаем даты из data
-        published_at_str = data['props']['initialState']['advert']['advert']['publishedAt']
-        #Конвертируем в нормальный формат и обрезаем лишнее
-        published_at = datetime.strptime(published_at_str, "%Y-%m-%dT%H:%M:%S%z")
-        formatted_published_at = published_at.strftime("%Y-%m-%d %H:%M:%S")
-        
-        #Цикл условий
-        # Сверка цены
-        price_upd = data['props']['initialState']['advert']['advert']['price']['usd']['amount']
-        if price_ex != price_upd:
-            price_query = ("UPDATE av_full SET price = '%s' WHERE id = %s") % (price_upd, id_value) 
-            cursor.execute(price_query)
-            conn.commit()
-            price_diff = price_upd - price_ex
-            price_changed_count += 1
-            price_difference_sum += price_diff
-            print(f"Изменилась цена для id {id_value} на {price_diff} USD, price_diff_sum составляет {price_difference_sum} USD")
-        else:
-            print(f"Цена для id {id_value} осталась прежней")
-        
-        # Добавление организации
-        organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', 'null')
-        if organization != 'null':
-            organization_query = ("UPDATE av_full SET seller = '%s' WHERE id = %s") % (organization, id_value) 
-            cursor.execute(organization_query)
-            conn.commit()
-            print(f"Organization = {organization}")
-
-        #Если табличка закрыто есть
-        if status: 
-            reason = soup.find('div', class_='gallery__status')
-            updated_status = reason.text
-
-            #Если статус изменился:
-            if status_value != updated_status:
-                try:
-                    removed_at_str = data['props']['initialState']['advert']['advert']['removedAt']
-                except KeyError:
-                    removed_at_str = data['props']['initialState']['advert']['advert']['refreshedAt']
-                removed_at = datetime.strptime(removed_at_str, "%Y-%m-%dT%H:%M:%S%z")
-                updated_status_date = removed_at.strftime("'%Y-%m-%d %H:%M:%S'") 
- 
-                # Квери на запись и курсор execute
-                update_and_write(updated_status, updated_status_date, id_value)
-
-                print(f"смена статуса для id - {id_value}, ST-{updated_status}, STD-{updated_status_date}")
-                changed_status_count += 1 # Крутим счетчик
+        try:
+            published_at_str = data['props']['initialState']['advert']['advert']['publishedAt']
+            #Конвертируем в нормальный формат и обрезаем лишнее
+            published_at = datetime.strptime(published_at_str, "%Y-%m-%dT%H:%M:%S%z")
+            formatted_published_at = published_at.strftime("%Y-%m-%d %H:%M:%S")
+            
+            #Цикл условий
+            # Сверка цены
+            price_upd = data['props']['initialState']['advert']['advert']['price']['usd']['amount']
+            if price_ex != price_upd:
+                price_query = ("UPDATE av_full SET price = '%s' WHERE id = %s") % (price_upd, id_value) 
+                cursor.execute(price_query)
+                conn.commit()
+                price_diff = price_upd - price_ex
+                price_changed_count += 1
+                price_difference_sum += price_diff
+                print(f"Изменилась цена для id {id_value} на {price_diff} USD, price_diff_sum составляет {price_difference_sum} USD")
             else:
-                print(f"статус {updated_status} не изменился для id - {id_value}")
-                unchanged_status_count +=1 # Крутим счетчик
-                continue
+                print(f"Цена для id {id_value} осталась прежней")
+            
+            # Добавление организации
+            organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', 'null')
+            if organization != 'null':
+                organization_query = ("UPDATE av_full SET seller = '%s' WHERE id = %s") % (organization, id_value) 
+                cursor.execute(organization_query)
+                conn.commit()
+                print(f"Organization = {organization}")
 
-        else: #Если таблички нет, то объява еще актуальная
-            print(f"статус {status_value} не изменился для id - {id_value}")
-            stayed_active_count += 1 # Крутим счетчик
+            #Если табличка закрыто есть
+            if status: 
+                reason = soup.find('div', class_='gallery__status')
+                updated_status = reason.text
+
+                #Если статус изменился:
+                if status_value != updated_status:
+                    try:
+                        removed_at_str = data['props']['initialState']['advert']['advert']['removedAt']
+                    except KeyError:
+                        removed_at_str = data['props']['initialState']['advert']['advert']['refreshedAt']
+                    removed_at = datetime.strptime(removed_at_str, "%Y-%m-%dT%H:%M:%S%z")
+                    updated_status_date = removed_at.strftime("'%Y-%m-%d %H:%M:%S'") 
+    
+                    # Квери на запись и курсор execute
+                    update_and_write(updated_status, updated_status_date, id_value)
+
+                    print(f"смена статуса для id - {id_value}, ST-{updated_status}, STD-{updated_status_date}")
+                    changed_status_count += 1 # Крутим счетчик
+                else:
+                    print(f"статус {updated_status} не изменился для id - {id_value}")
+                    unchanged_status_count +=1 # Крутим счетчик
+                    continue
+
+            else: #Если таблички нет, то объява еще актуальная
+                print(f"статус {status_value} не изменился для id - {id_value}")
+                stayed_active_count += 1 # Крутим счетчик
+        except:
+            script_status = '404'
+            updated_status = "Недоступная ссылка"
+            updated_status_date = 'null'
+            print(f"ссылка сдохла для id {id_value}, ST-{updated_status}, STD-{updated_status_date}")
 
     else: # Если респонс не 200, т.е. страница не прочиталась
         updated_status = "Недоступная ссылка"
