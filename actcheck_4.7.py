@@ -68,7 +68,7 @@ print(f"Строк в базе: {rows_count}")
 
 
 # Готовим нужные столбцы и строки
-select_query = "SELECT id, status, status_date, url, price FROM av_full WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке')"
+select_query = "SELECT id, status, status_date, url, price FROM av_full WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке', 'Недоступная ссылка')"
 cursor.execute(select_query)
 rows = cursor.fetchall()
 rows_count_na = cursor.rowcount
@@ -112,6 +112,7 @@ price_difference_sum = 0
 # Сам цикл
 for row in rows:
     id_value = row[0] # стобец id с индексом 0
+    print(f'--------------------------')
     print(f"Обрабатываю ID {id_value}")
     status_value = row[1] # стобец status с индексом 1
     url = row[3] # стобец url с индексом 3
@@ -120,6 +121,7 @@ for row in rows:
     # Диапазон рандомных значений для задержки
     wait_amount = random.randint(4, 7)
     print(f"Ждем {wait_amount} секунд")
+    
     time.sleep(wait_amount)
 
     try:
@@ -138,16 +140,14 @@ for row in rows:
     if response.status_code == 200:
         src = response.text 
         soup = BeautifulSoup(src, 'lxml')
-        status = soup.find('div', class_='card__warning') #Проверяем наличие таблички закрыто
         script_element = soup.find("script", id="__NEXT_DATA__") #Достаем жсон
         json_string = script_element.string #Конвертируем жсон в стринг
         data = json.loads(json_string) #Пакуем в data
 
-        # Проверка на корректно закрытую страничку
-        script_status = data['props']['initialState']['advert']['advert']
-
         #Извлекаем даты из data
         try:
+            #Проверяем статус
+            ad_status_script = data['props']['initialState']['advert']['advert']['status'] 
             published_at_str = data['props']['initialState']['advert']['advert']['publishedAt']
             #Конвертируем в нормальный формат и обрезаем лишнее
             published_at = datetime.strptime(published_at_str, "%Y-%m-%dT%H:%M:%S%z")
@@ -176,9 +176,8 @@ for row in rows:
                 print(f"Organization = {organization}")
 
             #Если табличка закрыто есть
-            if status: 
-                reason = soup.find('div', class_='gallery__status')
-                updated_status = reason.text
+            if ad_status_script != 'active': 
+                updated_status = data['props']['initialState']['advert']['advert']['publicStatus']['label']
 
                 #Если статус изменился:
                 if status_value != updated_status:
@@ -192,30 +191,28 @@ for row in rows:
                     # Квери на запись и курсор execute
                     update_and_write(updated_status, updated_status_date, id_value)
 
-                    print(f"смена статуса для id - {id_value}, ST-{updated_status}, STD-{updated_status_date}")
+                    print(f"смена статуса для id - {id_value}, на {updated_status}, Дата-{updated_status_date}")
                     changed_status_count += 1 # Крутим счетчик
                 else:
-                    print(f"статус {updated_status} не изменился для id - {id_value}")
+                    print(f"статус {status_value} не изменился для id - {id_value}")
                     unchanged_status_count +=1 # Крутим счетчик
                     continue
 
-            else: #Если таблички нет, то объява еще актуальная
-                print(f"статус {status_value} не изменился для id - {id_value}")
+            else: #Если статус "active" то объява еще актуальная или стала актуальной
+                print(f"id - {id_value} актуален")
+                update_and_write('Актуально', 'null', id_value)
                 stayed_active_count += 1 # Крутим счетчик
-        except:
-            script_status = '404'
-            updated_status = "Недоступная ссылка"
-            updated_status_date = 'null'
-            print(f"ссылка сдохла для id {id_value}, ST-{updated_status}, STD-{updated_status_date}")
+                
+        # Если страница открылась но она с домиком 404
+        except (KeyError, json.JSONDecodeError, TypeError):
+            # Обн. базу, уст. статус и стат. дату для соотв id
+            print(f"ссылка сдохла для id {id_value}")
+            update_and_write('Недоступная ссылка', 'null', id_value)
 
     else: # Если респонс не 200, т.е. страница не прочиталась
-        updated_status = "Недоступная ссылка"
-        updated_status_date = 'null'
-
         # Обн. базу, уст. статус и стат. дату для соотв id
-        update_and_write(updated_status, updated_status_date, id_value)
-
-        print(f"ссылка сдохла для id {id_value}, ST-{updated_status}, STD-{updated_status_date}")
+        update_and_write('Недоступная ссылка', 'null', id_value)
+        print(f"ссылка сдохла для id {id_value}")
         dead_link_count += 1
     
 
@@ -252,5 +249,5 @@ mail_contents = (f"""
 )
 
 subject = 'Результат работы скриптов. №2 Проверка статуса и бекап'
-for recipient in recipients:
-    send_email(subject, mail_contents, recipient)
+#for recipient in recipients:
+    #send_email(subject, mail_contents, recipient)
