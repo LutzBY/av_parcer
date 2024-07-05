@@ -68,7 +68,7 @@ print(f"Строк в базе: {rows_count}")
 
 
 # Готовим нужные столбцы и строки
-select_query = "SELECT id, status, status_date, url, price FROM av_full WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке', 'Недоступная ссылка')"
+select_query = "SELECT id, status, status_date, url, price FROM av_full WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке')"
 cursor.execute(select_query)
 rows = cursor.fetchall()
 rows_count_na = cursor.rowcount
@@ -208,6 +208,7 @@ for row in rows:
             # Обн. базу, уст. статус и стат. дату для соотв id
             print(f"ссылка сдохла для id {id_value}")
             update_and_write('Недоступная ссылка', 'null', id_value)
+            dead_link_count += 1
 
     else: # Если респонс не 200, т.е. страница не прочиталась
         # Обн. базу, уст. статус и стат. дату для соотв id
