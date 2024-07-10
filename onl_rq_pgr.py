@@ -71,25 +71,22 @@ def send_email(subject, body, recipient):
 # Хэдеры для странцы search и для каждой страницы объяв (page)
 headers = {
     'Accept': 'application/json, text/javascript, */*; q=0.01',
-    'Accept-Encoding': 'gzip, deflate, br, zstd',
     'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,be-BY;q=0.6,be;q=0.5',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
-    'Content-Length': '75',
     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    'Cookie': '_ym_uid=1544705841212306891; ab_tracking_id=sNzsrfFtRjVY6dML; a1_disabled=1; onl_session=dFFvWExHa3ZObHlxRHVEVlRaTnFBYmVuWElZSGF6YjlRYzJDOEt5eEFEMlV1QytER3R6YzRjeWNYNnUraTU0aCtpaHlzUnY5cGNIdXhRRFNpSWF6eis3R3VXZFc5UklWTjhyNWxLQzk0NUtSVHRwNEZhYXFabjY1cytXaEhNaGs1MlQ0TzBhWjQvS21MM29WZSs4bG5RPT0%3D; refresh_token=OEJVdHIydXlBMm9SNCt3dys0algzS29sUG9JT05Tb1lyN3EvcTdFVEVUN01NTmw3Qm1mbWIrSjl5aFVrMTZwNw==; fingerprint=c0da18b61a61b55ce01c0e7c69999bd5; PHPSESSID=1517652828dc319babbb96eed2b8c4d1; ouid=snyBDGCSizszUg9eEAJEAg==; __gads=ID=580015c7bd23aff0:T=1594702918:R:S=ALNI_MbWBy7hmSKj56imPd3Tw-dNZoSeYA; _ga_BT7DBB79XJ=GS1.1.1653043527.18.1.1653043568.0; tmr_lvid=5369ded0d05e6471d91a3adb69d8874d; tmr_lvidTS=1544705840436; delivery_boarding_showed=true; _ga_5ET8V1N9SR=GS1.1.1681904355.20.1.1681904409.0.0.0; _ga_32KPWHT0K8=GS1.1.1686039029.36.0.1686039029.0.0.0; _ga_64XDN24MMX=GS1.1.1687152413.1.1.1687152704.57.0.0; stid=a8984d1ed27e24e288a03cdaa11dedf2edc630d14657d29ca8d8f28c6ea22302; _ga=GA1.1.221970240.1544705841; fpestid=IISubuA1GTwjbnW-yhBXWXPqlTI3IurpAhDt1pMM68OcE0JOzuAdm1FnO2WIQYQADJYotw; _ym_d=1704690978; mindboxDeviceUUID=f5a70dd0-d0d6-4aa9-981f-090ee261b7c3; directCrm-session=%7B%22deviceGuid%22%3A%22f5a70dd0-d0d6-4aa9-981f-090ee261b7c3%22%7D; compare=%5B%22mpgb550gamingplu%22%2C%22b550apro%22%5D; _ga_KRWRWJPXZ2=GS1.1.1706768515.34.1.1706768627.0.0.0; _ga_9DJMZ0LZRD=GS1.1.1709182449.399.0.1709182459.50.0.0; _ga_9FSEQ8JYKN=GS1.1.1709183789.27.1.1709183998.0.0.0; _ga_KPSB9MHYED=GS1.1.1709183789.52.1.1709183998.60.0.0; _ga_5HNFCB8DR9=GS1.1.1713514070.587.1.1713514153.60.0.0; _gcl_au=1.1.1234277736.1713787471; _ga_4Y6NQKE48G=GS1.1.1713787471.592.1.1713787526.5.0.0; oss=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozMDY4NjEsInVzZXJfdHlwZSI6InVzZXIiLCJmaW5nZXJwcmludCI6ImQ1YzYyMzkyNWQ2YjNhOTcxYjE3MTJlMzExNzNmMDA1IiwiZXhwIjoyMDI5MzE0MTYyLCJpYXQiOjE3MTM5NTQxNjJ9.dZvtaBJ8hrQWKjk3c7ntGD38CiOdSBkKmccqPoEaVH5xSIevyqQq57uagy9tWK0woQyFUegiMFKHxRnr1uXPJQ; logged_in=1; _ga_SMLMFQCWFM=GS1.1.1713954154.80.0.1713954162.52.0.0; _ym_isad=1; _ym_visorc=b; _ga_NG54S9EFTD=GS1.1.1714638904.1212.1.1714639389.60.0.0; _ga_FT8E0R2RSY=GS1.1.1714638904.303.1.1714639389.60.0.0; ADC_REQ_2E94AF76E7=51E27AF2DA1B2526AC7475983E27021287D995908BE9E4E887781083080D0FD4007EDC0FF808E0B7',
-    'Host': 'mb.onliner.by',
+    'Cookie': '_ym_uid=1544705841212306891; ab_tracking_id=sNzsrfFtRjVY6dML; a1_disabled=1; onl_session=dFFvWExHa3ZObHlxRHVEVlRaTnFBYmVuWElZSGF6YjlRYzJDOEt5eEFEMlV1QytER3R6YzRjeWNYNnUraTU0aCtpaHlzUnY5cGNIdXhRRFNpSWF6eis3R3VXZFc5UklWTjhyNWxLQzk0NUtSVHRwNEZhYXFabjY1cytXaEhNaGs1MlQ0TzBhWjQvS21MM29WZSs4bG5RPT0%3D; refresh_token=OEJVdHIydXlBMm9SNCt3dys0algzS29sUG9JT05Tb1lyN3EvcTdFVEVUN01NTmw3Qm1mbWIrSjl5aFVrMTZwNw==; fingerprint=c0da18b61a61b55ce01c0e7c69999bd5; PHPSESSID=1517652828dc319babbb96eed2b8c4d1; ouid=snyBDGCSizszUg9eEAJEAg==; __gads=ID=580015c7bd23aff0:T=1594702918:R:S=ALNI_MbWBy7hmSKj56imPd3Tw-dNZoSeYA; tmr_lvid=5369ded0d05e6471d91a3adb69d8874d; tmr_lvidTS=1544705840436; delivery_boarding_showed=true; _ga_32KPWHT0K8=GS1.1.1686039029.36.0.1686039029.0.0.0; _ga_64XDN24MMX=GS1.1.1687152413.1.1.1687152704.57.0.0; stid=a8984d1ed27e24e288a03cdaa11dedf2edc630d14657d29ca8d8f28c6ea22302; _ga=GA1.1.221970240.1544705841; fpestid=IISubuA1GTwjbnW-yhBXWXPqlTI3IurpAhDt1pMM68OcE0JOzuAdm1FnO2WIQYQADJYotw; mindboxDeviceUUID=f5a70dd0-d0d6-4aa9-981f-090ee261b7c3; directCrm-session=%7B%22deviceGuid%22%3A%22f5a70dd0-d0d6-4aa9-981f-090ee261b7c3%22%7D; _ga_KRWRWJPXZ2=GS1.1.1706768515.34.1.1706768627.0.0.0; _ga_9FSEQ8JYKN=GS1.1.1709183789.27.1.1709183998.0.0.0; _gcl_au=1.1.1234277736.1713787471; oss=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozMDY4NjEsInVzZXJfdHlwZSI6InVzZXIiLCJmaW5nZXJwcmludCI6ImQ1YzYyMzkyNWQ2YjNhOTcxYjE3MTJlMzExNzNmMDA1IiwiZXhwIjoyMDI5MzE0MTYyLCJpYXQiOjE3MTM5NTQxNjJ9.dZvtaBJ8hrQWKjk3c7ntGD38CiOdSBkKmccqPoEaVH5xSIevyqQq57uagy9tWK0woQyFUegiMFKHxRnr1uXPJQ; logged_in=1; _ga_SMLMFQCWFM=GS1.1.1713954154.80.0.1713954162.52.0.0; _ga_9DJMZ0LZRD=GS1.1.1715158673.400.0.1715158683.50.0.0; ouid=snyBEGZFtUdUD0pOXoLwAg==; _ga_KPSB9MHYED=GS1.1.1719319694.54.0.1719319786.60.0.0; compare=[%22smr390nzsacis%22%2C%22smr860nzkacis%22]; _ga_4Y6NQKE48G=GS1.1.1719319705.597.1.1719320732.60.0.0; _ga_5HNFCB8DR9=GS1.1.1719817443.588.1.1719817980.60.0.0; _ym_d=1720592775; _ym_isad=1; _ym_visorc=b; _ga_FT8E0R2RSY=GS1.1.1720592774.328.1.1720594015.60.0.0; _ga_NG54S9EFTD=GS1.1.1720592774.1243.1.1720594015.60.0.0',
     'Origin': 'https://mb.onliner.by',
     'Pragma': 'no-cache',
     'Referer': 'https://mb.onliner.by/',
     'Sec-Fetch-Dest': 'empty',
     'Sec-Fetch-Mode': 'cors',
     'Sec-Fetch-Site': 'same-origin',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
     'X-Requested-With': 'XMLHttpRequest',
-    'sec-ch-ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+    'sec-ch-ua': '"Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"',
     'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"'
+    'sec-ch-ua-platform': '"Windows"',
 }
 
 # Функция парсинга каждой страницы
