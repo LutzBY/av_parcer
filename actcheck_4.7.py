@@ -108,6 +108,7 @@ dead_link_count = 0
 unchanged_status_count = 0
 price_changed_count = 0
 price_difference_sum = 0
+broken_link_count = 0
 
 # Сам цикл
 for row in rows:
@@ -132,6 +133,10 @@ for row in rows:
         print(f"Произошла ошибка SSL при обращении к URL: {url}. Пропускаем выполнение для данного URL.")
     except requests.exceptions.ConnectionError as e:
         print("Ошибка подключения:", e)
+        continue
+    except Exception as e:
+        print(f"Произошла ошибка при обработке id {id_value}: {e}")
+        broken_link_count += 1
         continue
     
     src = response.text
@@ -243,12 +248,13 @@ mail_contents = (f"""
     осталось активными {stayed_active_count} штук,
     закрытый статус сохранился у {unchanged_status_count} штук,
     ссылка недоступна у {dead_link_count} штук
+    не открылась страница у {broken_link_count} штук
 Цена изменилась у {price_changed_count} штук
 Общее именение цен составило {price_difference_sum} USD
 Спасибо за внимание <3
 """
 )
 
-subject = 'Результат работы скриптов. №2 Проверка статуса и бекап'
+subject = 'Результат работы скриптов. №2 Проверка статусов'
 for recipient in recipients:
     send_email(subject, mail_contents, recipient)
