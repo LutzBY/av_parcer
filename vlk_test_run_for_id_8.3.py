@@ -1,22 +1,10 @@
 ##########################
-id_to_check = 109608562
+id_to_check = 110353406
 #########################
 
-import requests
-from urllib.parse import urlencode
-from bs4 import BeautifulSoup
-import datetime
-from datetime import datetime
 import json
 from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
 import psycopg2
-import smtplib
-from email.mime.text import MIMEText
-from email.utils import COMMASPACE
-import sys
-import io
-import decimal
 
 headers = {
     'authority': 'moto.av.by',
