@@ -56,10 +56,6 @@ conn = psycopg2.connect(
 url_page = "https://moto.av.by/filter?category_type=1&price_usd[min]=1&condition[0]=1&condition[1]=2&sort=4"
 # Страница для парсинга
 
-# Блок сохранения терминала в буфер
-output_buffer = io.StringIO()
-sys.stdout = output_buffer
-
 current_time_str = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 print(f"Привет! Текущая дата - {current_time_str}")
 
@@ -138,7 +134,7 @@ def send_email(subject, body, recipient):
     smtp_server = 'smtp.yandex.ru'
     smtp_port = 465
 
-    message = MIMEText(body)
+    message = MIMEText(body, 'html')
     message['Subject'] = subject
     message['From'] = sender
     message['To'] = recipient
@@ -151,6 +147,20 @@ def send_email(subject, body, recipient):
         print(f'Email successfully sent to {recipient}')
     except Exception as e:
         print('Error sending email:', str(e))
+
+# Создание HTML отчета
+html_mail_contents = f"""
+    <html>
+    <body>
+    <h2 style="text-align: center;">Привет! Отчет скрипта парсинга на дату:</h2>
+    <h4 style="text-align: center;">{current_time_str}</h4>
+    <h2 style="text-align: center;">Последняя дата объявления из базы:</h2>
+    <h4 style="text-align: center;">{latest_ad_date.strftime('%Y-%m-%d-%H-%M-%S')}</h4>
+    <hr />
+    <p>&nbsp;</p>
+    </body>
+    </html>
+    """
 
 #цикл перебора страниц и парсинг
 page_counter = 0
@@ -165,6 +175,10 @@ while stop_flag == False:
     page_counter +=1
     url_cycle = url_page + "&page=" + str(page_counter)
     print(f"Страница - {page_counter} ---------------------------------------")
+    html_mail_contents += f"""
+<p><strong>Страница {page_counter}</strong></p>
+<p>&nbsp;</p>
+"""
     #Функция
     response = requests.get(url_cycle, headers=headers)
 
@@ -201,6 +215,7 @@ while stop_flag == False:
     urlss = []
     locations = []
     sellers = []
+    img_srcs = []
 
     for item in data['props']['initialState']['filter']['main']['adverts']: # Цикл поиска в этом словаре этих ключей
         advert_id = item['id']
@@ -211,7 +226,11 @@ while stop_flag == False:
         public_url = item['publicUrl']
         location = item['locationName']
         seller = item['sellerName']
-        
+        if len(item['photos']) > 0:
+            pic = item['photos'][0]['small']['url']
+        else:
+            pic = 'https://upload.wikimedia.org/wikipedia/commons/5/59/Empty.png' 
+
         # Искать нужные свойства по имени тега внутри пропертис
         brand = next((prop['value'] for prop in properties if prop['name'] == 'brand'), None)
         model = next((prop['value'] for prop in properties if prop['name'] == 'model'), None)
@@ -240,8 +259,9 @@ while stop_flag == False:
         urlss.append(public_url)
         locations.append(location)
         sellers.append(seller)
+        img_srcs.append(pic)
     
-    for id, price, publish, refresh, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, seller in zip(ids, prices, published, refreshed, brands, models, modifications, years, mtypes, cylcounts, drivetypes, capacitys, mileages, urlss, locations, sellers):
+    for id, price, publish, refresh, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, seller, img_src in zip(ids, prices, published, refreshed, brands, models, modifications, years, mtypes, cylcounts, drivetypes, capacitys, mileages, urlss, locations, sellers, img_srcs):
         datetime_obj = datetime.strptime(publish, '%Y-%m-%dT%H:%M:%S%z') # Преобразования текстового значения в дату
         datetime_obj = datetime_obj.replace(tzinfo=None) # убираем таймзон
 
@@ -280,8 +300,8 @@ while stop_flag == False:
             stop_flag = True
             break
         processed_ads += 1
-        
-# Основной принт (для маленьких сокращенный)
+
+# Принт объявы и дополнение HTML contents (для маленьких сокращенный)
         print(f"-----------------------------------------------------------------")
         if int(capacity) >= 299 and cylcount > 1:
             print (f"""
@@ -292,31 +312,96 @@ Actual mvlk - {mvlk_actual} (Best mvlk - {best_match})
 Seller - {seller}
 URL - {url}""")
         
+            # Дополнение HTML каждым объявлением
+            html_mail_contents += f"""
+<html>
+        <body>
+<table style="width: 732px; height: 88px;" border="1">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 239px; height: 10px;">
+<p style="text-align: left;"><strong>№ {processed_ads}</strong></p>
+<p style="text-align: left;">{id}</p>
+</td>
+<td style="width: 477px; height: 10px;" colspan="4">
+<p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification}</strong></a></p>
+<p style="text-align: center;">{year} г.в. {price} USD</p>
+</td>
+</tr>
+<tr style="height: 35px;">
+<td style="width: 239px; height: 78px;" rowspan="3"><img src="{img_src}" alt="" /></td>
+<td style="width: 146px; height: 35px;">
+<p style="text-align: left;"><strong>Актуальное влк</strong></p>
+<p style="text-align: left;">{mvlk_actual}</p>
+</td>
+<td style="width: 325px; height: 35px;" colspan="3">
+<p>{mtype}</p>
+<p>{cylcount} цилиндров</p>
+<p>{capacity} см3</p>
+<p>{mileage} км.</p>
+</td>
+</tr>
+<tr style="height: 33px;">
+<td style="width: 146px; height: 33px;">
+<p style="text-align: left;"><strong>Лучшее влк</strong></p>
+<p style="text-align: left;">{best_match}</p>
+</td>
+<td style="width: 103px; height: 33px;">
+<p style="text-align: center;"><strong>Продавец</strong></p>
+<p style="text-align: center;">{seller}</p>
+</td>
+<td style="width: 216px; height: 33px;" colspan="2">
+<p style="text-align: center;"><strong>Локация</strong></p>
+<p style="text-align: center;">{location}</p>
+</td>
+</tr>
+<tr style="height: 5px;">
+<td style="width: 477px; height: 10px; text-align: center;" colspan="4">
+<blockquote><strong>Дата апдейта&nbsp;</strong>{refresh_for_print}</blockquote>
+<strong>Дата подачи </strong>{refresh_for_print}</td>
+</tr>
+</tbody>
+</table>
+<div class="jfk-bubble gtx-bubble" style="visibility: visible; left: -88px; top: 158px; opacity: 1;">&nbsp;</div>
+        </body>
+        </html>
+        """
         else:
             print (f"""
 № {processed_ads}, Price - {price}, ID - {id}
 Name - {brand} {model} {modification} ({year}, {capacity} ccm)
 URL - {url}""")
-
-
+            # Дополнение HTML каждым объявлением
+            html_mail_contents += f"""<table style="width: 732px; height: 88px;" border="1">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 239px; height: 10px;">
+<p style="text-align: left;"><strong>№ {processed_ads}</strong></p>
+<p style="text-align: left;">{id}</p>
+</td>
+<td style="width: 477px; height: 10px;" colspan="4">
+<p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification}</strong></a></p>
+<p style="text-align: center;">{year} г.в. {price} USD</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="jfk-bubble gtx-bubble" style="visibility: visible; left: -88px; top: 158px; opacity: 1;">&nbsp;</div>"""
+        
+## Завершающий блок
 parsecursor.close()
 print(f"---- ВЫВОД ------------------------------------------------------")
 print(f"Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений!")
 
-# Восстанавливаем исходный вывод терминала
-terminal_output = output_buffer.getvalue()
-sys.stdout = sys.__stdout__
-print (terminal_output)
-
-# Делаем дамп терминала
-with open('terminal_output.txt', 'w') as file:
-    # Запись содержимого переменной в файл
-    file.write(terminal_output)
+# Дополнение HTML хвостом
+html_mail_contents += f"""<hr />
+<h2 style="text-align: center;">КОНЕЦ ОТЧЕТА</h2>
+<h4 style="text-align: center;">Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений!</h4>"""
 
 # Параметры отправки на email
 subject = 'Результат работы скриптов. №1 Парсинг и апдейт modelvlk'
 for recipient in recipients:
-    send_email(subject, terminal_output, recipient)
+    send_email(subject, html_mail_contents, recipient)
 
 # Записать-закрыть курсор
 conn.commit()
