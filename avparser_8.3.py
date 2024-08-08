@@ -229,7 +229,7 @@ while stop_flag == False:
         if len(item['photos']) > 0:
             pic = item['photos'][0]['small']['url']
         else:
-            pic = 'https://upload.wikimedia.org/wikipedia/commons/5/59/Empty.png' 
+            pic = 'https://commons.wikimedia.org/wiki/File:No_Image_Available.jpg' 
 
         # Искать нужные свойства по имени тега внутри пропертис
         brand = next((prop['value'] for prop in properties if prop['name'] == 'brand'), None)
