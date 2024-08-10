@@ -358,7 +358,7 @@ URL - {url}""")
 <tr style="height: 5px;">
 <td style="width: 477px; height: 10px; text-align: center;" colspan="4">
 <blockquote><strong>Дата апдейта&nbsp;</strong>{refresh_for_print}</blockquote>
-<strong>Дата подачи </strong>{refresh_for_print}</td>
+<strong>Дата подачи </strong>{publish_for_print}</td>
 </tr>
 </tbody>
 </table>
