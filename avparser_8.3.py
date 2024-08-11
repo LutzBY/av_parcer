@@ -176,7 +176,9 @@ while stop_flag == False:
     url_cycle = url_page + "&page=" + str(page_counter)
     print(f"Страница - {page_counter} ---------------------------------------")
     html_mail_contents += f"""
-<p><strong>Страница {page_counter}</strong></p>
+<h2><strong>Страница {page_counter}</strong></h2>
+<hr />
+<p>&nbsp;</p>
 <p>&nbsp;</p>
 """
     #Функция
@@ -316,25 +318,30 @@ URL - {url}""")
             html_mail_contents += f"""
 <html>
         <body>
-<table style="width: 732px; height: 88px;" border="1">
+<table style="width: 786px; height: 88px;" border="1">
 <tbody>
 <tr style="height: 18px;">
-<td style="width: 239px; height: 10px;">
+<td style="width: 415px; height: 10px;" colspan="5">
+<p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification}</strong></a></p>
+</td>
+</tr>
+<tr style="height: 10px;">
+<td style="width: 276px; height: 10px;">
 <p style="text-align: left;"><strong>№ {processed_ads}</strong></p>
 <p style="text-align: left;">{id}</p>
 </td>
-<td style="width: 477px; height: 10px;" colspan="4">
-<p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification}</strong></a></p>
-<p style="text-align: center;">{year} г.в. {price} USD</p>
+<td style="width: 109px; height: 10px;">
+<p style="text-align: center;">{year} г.в.&nbsp;</p>
 </td>
+<td style="width: 30px; height: 10px; text-align: center;" colspan="3"><strong>{price} USD</strong></td>
 </tr>
 <tr style="height: 35px;">
-<td style="width: 239px; height: 78px;" rowspan="3"><img src="{img_src}" alt="" /></td>
-<td style="width: 146px; height: 35px;">
+<td style="width: 276px; height: 78px;" rowspan="3"><img src="{img_src}" alt="" /></td>
+<td style="width: 109px; height: 35px;">
 <p style="text-align: left;"><strong>Актуальное влк</strong></p>
 <p style="text-align: left;">{mvlk_actual}</p>
 </td>
-<td style="width: 325px; height: 35px;" colspan="3">
+<td style="width: 30px; height: 35px;" colspan="3">
 <p>{mtype}</p>
 <p>{cylcount} цилиндров</p>
 <p>{capacity} см3</p>
@@ -342,21 +349,19 @@ URL - {url}""")
 </td>
 </tr>
 <tr style="height: 33px;">
-<td style="width: 146px; height: 33px;">
+<td style="width: 109px; height: 33px;">
 <p style="text-align: left;"><strong>Лучшее влк</strong></p>
 <p style="text-align: left;">{best_match}</p>
 </td>
-<td style="width: 103px; height: 33px;">
+<td style="width: 30px; height: 33px;" colspan="3">
 <p style="text-align: center;"><strong>Продавец</strong></p>
 <p style="text-align: center;">{seller}</p>
-</td>
-<td style="width: 216px; height: 33px;" colspan="2">
 <p style="text-align: center;"><strong>Локация</strong></p>
 <p style="text-align: center;">{location}</p>
 </td>
 </tr>
-<tr style="height: 5px;">
-<td style="width: 477px; height: 10px; text-align: center;" colspan="4">
+<tr style="height: 10px;">
+<td style="width: 139px; height: 10px; text-align: center;" colspan="4">
 <blockquote><strong>Дата апдейта&nbsp;</strong>{refresh_for_print}</blockquote>
 <strong>Дата подачи </strong>{publish_for_print}</td>
 </tr>
@@ -372,20 +377,26 @@ URL - {url}""")
 Name - {brand} {model} {modification} ({year}, {capacity} ccm)
 URL - {url}""")
             # Дополнение HTML каждым объявлением
-            html_mail_contents += f"""<table style="width: 732px; height: 88px;" border="1">
+            html_mail_contents += f"""<table style="width: 786px; height: 88px;" border="1">
 <tbody>
-<tr style="height: 18px;">
-<td style="width: 239px; height: 10px;">
+<tr style="height: 10px;">
+<td style="width: 415px; height: 10px;" colspan="5">
+<p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification}</strong></a></p>
+</td>
+</tr>
+<tr style="height: 10px;">
+<td style="width: 276px; height: 10px;">
 <p style="text-align: left;"><strong>№ {processed_ads}</strong></p>
 <p style="text-align: left;">{id}</p>
 </td>
-<td style="width: 477px; height: 10px;" colspan="4">
-<p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification}</strong></a></p>
-<p style="text-align: center;">{year} г.в. {price} USD</p>
+<td style="width: 109px; height: 10px;">
+<p style="text-align: center;">{year} г.в.&nbsp;</p>
 </td>
+<td style="width: 30px; height: 10px; text-align: center;" colspan="3"><strong>{price} USD</strong></td>
 </tr>
 </tbody>
 </table>
+<p>&nbsp;</p>
 <div class="jfk-bubble gtx-bubble" style="visibility: visible; left: -88px; top: 158px; opacity: 1;">&nbsp;</div>"""
         
 ## Завершающий блок
