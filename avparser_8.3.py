@@ -229,7 +229,7 @@ while stop_flag == False:
         location = item['locationName']
         seller = item['sellerName']
         if len(item['photos']) > 0:
-            pic = item['photos'][0]['small']['url']
+            pic = item['photos'][0]['medium']['url'] #small?
         else:
             pic = 'https://commons.wikimedia.org/wiki/File:No_Image_Available.jpg' 
 
@@ -341,28 +341,25 @@ URL - {url}""")
         <body>
 <table style="width: 786px; height: 160px;" border="1">
 <tbody>
-<tr style="height: 18px;">
-<td style="width: 776px; height: 10px;" colspan="5">
-<p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification}</strong></a></p>
-</td>
-</tr>
 <tr style="height: 10px;">
-<td style="width: 276px; height: 10px;">
+<td style="width: 484.953px; height: 10px;">
 <p style="text-align: left;"><strong>№ {processed_ads}</strong></p>
 <p style="text-align: left;">{id}</p>
 </td>
-<td style="width: 109px; height: 10px;">
+<td style="width: 108.281px; height: 10px;">
 <p style="text-align: center;">{year} г.в.&nbsp;</p>
 </td>
-<td style="width: 379px; height: 10px; text-align: center;" colspan="3"><strong>{price} USD</strong></td>
+<td style="width: 173.438px; height: 10px; text-align: center;" colspan="3">
+<p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification}</strong></a></p>
+</td>
 </tr>
 <tr style="height: 35px;">
-<td style="width: 276px; height: 78px;" rowspan="3"><img src="{img_src}" alt="" /></td>
-<td style="width: 109px; height: 35px;">
+<td style="width: 484.953px; height: 78px;" rowspan="3"><img src="{img_src}" alt="" /></td>
+<td style="width: 108.281px; height: 35px;">
 <p style="text-align: left;"><strong>Актуальное влк</strong></p>
 <p style="text-align: left;">{mvlk_actual}</p>
 </td>
-<td style="width: 379px; height: 35px;" colspan="3">
+<td style="width: 173.438px; height: 35px;" colspan="3">
 <p>{mtype}</p>
 <p>{cylcount} цилиндров</p>
 <p>{capacity} см3</p>
@@ -370,11 +367,11 @@ URL - {url}""")
 </td>
 </tr>
 <tr style="height: 33px;">
-<td style="width: 109px; height: 33px;">
+<td style="width: 108.281px; height: 33px;">
 <p style="text-align: left;"><strong>Лучшее влк</strong></p>
 <p style="text-align: left;">{best_match}</p>
 </td>
-<td style="width: 379px; height: 33px;" colspan="3">
+<td style="width: 173.438px; height: 33px;" colspan="3">
 <p style="text-align: center;"><strong>Продавец</strong></p>
 <p style="text-align: center;">{seller}</p>
 <p style="text-align: center;"><strong>Локация</strong></p>
@@ -382,14 +379,15 @@ URL - {url}""")
 </td>
 </tr>
 <tr style="height: 10px;">
-<td style="height: 10px; text-align: center; width: 494px;" colspan="4">
+<td style="height: 10px; text-align: center; width: 287.719px;" colspan="4">
 <blockquote><strong>Дата апдейта&nbsp;</strong>{refresh_for_print}</blockquote>
 <strong>Дата подачи </strong>{publish_for_print}</td>
 </tr>
 <tr style="height: 62px;">
-<td style="width: 776px; text-align: center; height: 62px;" colspan="5">
-<pre><strong>Ценовая статистика согласно актуальному vlk:</strong><br />Средняя по актуальным = {price_a}, разница = <span style="color: {price_color};">{price_dif_fr_act}</span><br />Средняя за все время = {price_f}, разница = <span style="color: {price_color};">{price_dif_fr_full}</span></pre>
+<td style="text-align: center; height: 62px; width: 484.953px;">
+<h4><strong>{price} USD</strong></h4>
 </td>
+<td style="text-align: center; width: 108.281px;" colspan="4"><strong>Ценовая статистика согласно актуальному vlk:</strong><br />Средняя по актуальным = {price_a}, разница = <span style="color: {price_color};">{price_dif_fr_act}</span><br />Средняя за все время = {price_f}, разница = <span style="color: {price_color};">{price_dif_fr_full}</span><strong><br /></strong></td>
 </tr>
 </tbody>
 </table>
