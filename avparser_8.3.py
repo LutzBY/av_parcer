@@ -297,13 +297,34 @@ while stop_flag == False:
         vlkfetch = parsecursor.fetchone()
         mvlk_actual = vlkfetch[0]
         
+        # Вынять средние цены по влк из базы
+        prices_a_query = " select price from av_full where model_vlk = '%s' and status = 'Актуально' " % (mvlk_actual)
+        prices_f_query = " select price from av_full where model_vlk = '%s' " % (mvlk_actual)
+        parsecursor.execute(prices_a_query)
+        prices_a = parsecursor.fetchall()
+        parsecursor.execute(prices_f_query)
+        prices_f = parsecursor.fetchall()
+        if len(prices_a) > 1 and mvlk_actual not in (None, '', ' '):
+            price_a = sum(prices_a[1])/len(prices_a[1])
+            price_f = sum(prices_f[1])/len(prices_f[1])
+            price_dif_fr_act = price - price_a
+            price_dif_fr_full = price - price_f
+            price_color = "#ff9900" if price_dif_fr_act > 0 else "#99cc00"
+        else:
+            price_a = '-'
+            price_f = '-'
+            price_dif_fr_act = '-'
+            price_dif_fr_full = '-'
+            price_color = "#8e8d8f"
+        
+
         # Сверка даты
         if rdatetime_obj <= latest_ad_date: 
             stop_flag = True
             break
         processed_ads += 1
 
-# Принт объявы и дополнение HTML contents (для маленьких сокращенный)
+        # Принт объявы и дополнение HTML contents (для маленьких сокращенный)
         print(f"-----------------------------------------------------------------")
         if int(capacity) >= 299 and cylcount > 1:
             print (f"""
@@ -318,10 +339,10 @@ URL - {url}""")
             html_mail_contents += f"""
 <html>
         <body>
-<table style="width: 786px; height: 88px;" border="1">
+<table style="width: 786px; height: 160px;" border="1">
 <tbody>
 <tr style="height: 18px;">
-<td style="width: 415px; height: 10px;" colspan="5">
+<td style="width: 776px; height: 10px;" colspan="5">
 <p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification}</strong></a></p>
 </td>
 </tr>
@@ -333,7 +354,7 @@ URL - {url}""")
 <td style="width: 109px; height: 10px;">
 <p style="text-align: center;">{year} г.в.&nbsp;</p>
 </td>
-<td style="width: 30px; height: 10px; text-align: center;" colspan="3"><strong>{price} USD</strong></td>
+<td style="width: 379px; height: 10px; text-align: center;" colspan="3"><strong>{price} USD</strong></td>
 </tr>
 <tr style="height: 35px;">
 <td style="width: 276px; height: 78px;" rowspan="3"><img src="{img_src}" alt="" /></td>
@@ -341,7 +362,7 @@ URL - {url}""")
 <p style="text-align: left;"><strong>Актуальное влк</strong></p>
 <p style="text-align: left;">{mvlk_actual}</p>
 </td>
-<td style="width: 30px; height: 35px;" colspan="3">
+<td style="width: 379px; height: 35px;" colspan="3">
 <p>{mtype}</p>
 <p>{cylcount} цилиндров</p>
 <p>{capacity} см3</p>
@@ -353,7 +374,7 @@ URL - {url}""")
 <p style="text-align: left;"><strong>Лучшее влк</strong></p>
 <p style="text-align: left;">{best_match}</p>
 </td>
-<td style="width: 30px; height: 33px;" colspan="3">
+<td style="width: 379px; height: 33px;" colspan="3">
 <p style="text-align: center;"><strong>Продавец</strong></p>
 <p style="text-align: center;">{seller}</p>
 <p style="text-align: center;"><strong>Локация</strong></p>
@@ -361,13 +382,18 @@ URL - {url}""")
 </td>
 </tr>
 <tr style="height: 10px;">
-<td style="width: 139px; height: 10px; text-align: center;" colspan="4">
+<td style="height: 10px; text-align: center; width: 494px;" colspan="4">
 <blockquote><strong>Дата апдейта&nbsp;</strong>{refresh_for_print}</blockquote>
 <strong>Дата подачи </strong>{publish_for_print}</td>
 </tr>
+<tr style="height: 62px;">
+<td style="width: 776px; text-align: center; height: 62px;" colspan="5">
+<pre><strong>Ценовая статистика согласно актуальному vlk:</strong><br />Средняя по актуальным = {price_a}, разница = <span style="color: {price_color};">{price_dif_fr_act}</span><br />Средняя за все время = {price_f}, разница = <span style="color: {price_color};">{price_dif_fr_full}</span></pre>
+</td>
+</tr>
 </tbody>
 </table>
-<div class="jfk-bubble gtx-bubble" style="visibility: visible; left: -88px; top: 158px; opacity: 1;">&nbsp;</div>
+<p>&nbsp;</p>
         </body>
         </html>
         """
@@ -377,26 +403,25 @@ URL - {url}""")
 Name - {brand} {model} {modification} ({year}, {capacity} ccm)
 URL - {url}""")
             # Дополнение HTML каждым объявлением
-            html_mail_contents += f"""<table style="width: 786px; height: 88px;" border="1">
+            html_mail_contents += f"""<table style="width: 786px; height: 80px;" border="1">
 <tbody>
 <tr style="height: 10px;">
-<td style="width: 415px; height: 10px;" colspan="5">
-<p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification}</strong></a></p>
-</td>
-</tr>
-<tr style="height: 10px;">
-<td style="width: 276px; height: 10px;">
+<td style="height: 10px; width: 262px;">
 <p style="text-align: left;"><strong>№ {processed_ads}</strong></p>
 <p style="text-align: left;">{id}</p>
 </td>
-<td style="width: 109px; height: 10px;">
-<p style="text-align: center;">{year} г.в.&nbsp;</p>
+<td style="width: 137px;" colspan="2">
+<p style="text-align: center;"><a href="{url}"><strong>{brand} {model} {modification}</strong></a></p>
 </td>
-<td style="width: 30px; height: 10px; text-align: center;" colspan="3"><strong>{price} USD</strong></td>
+<td style="width: 128px;">
+<p style="text-align: center;"><strong>{year} г.в.&nbsp;</strong></p>
+</td>
+<td style="width: 96px;">
+<p style="text-align: center;"><strong>{price} USD</strong></p>
+</td>
 </tr>
 </tbody>
 </table>
-<p>&nbsp;</p>
 <div class="jfk-bubble gtx-bubble" style="visibility: visible; left: -88px; top: 158px; opacity: 1;">&nbsp;</div>"""
         
 ## Завершающий блок
