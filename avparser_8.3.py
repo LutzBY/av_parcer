@@ -309,15 +309,23 @@ while stop_flag == False:
             price_f = sum(prices_f[1])/len(prices_f[1])
             price_dif_fr_act = price - price_a
             price_dif_fr_full = price - price_f
-            price_color = "#ff9900" if price_dif_fr_act > 0 else "#99cc00"
+            price_color_a = "#ff9900" if price_dif_fr_act > 0 else "#99cc00"
+            price_color_f = "#ff9900" if price_dif_fr_full > 0 else "#99cc00"
+        elif len(prices_a) <= 1 and len(prices_f) > 1 and mvlk_actual not in (None, '', ' '):
+            price_a = '-'
+            price_f = sum(prices_f[1])/len(prices_f[1])
+            price_dif_fr_act = '-'
+            price_dif_fr_full = price - price_f
+            price_color_a = "#9e9e9e"
+            price_color_f = "#ff9900" if price_dif_fr_full > 0 else "#99cc00"
         else:
             price_a = '-'
             price_f = '-'
             price_dif_fr_act = '-'
             price_dif_fr_full = '-'
-            price_color = "#8e8d8f"
+            price_color_a = "#9e9e9e"
+            price_color_f = "#9e9e9e"
         
-
         # Сверка даты
         if rdatetime_obj <= latest_ad_date: 
             stop_flag = True
@@ -326,7 +334,7 @@ while stop_flag == False:
 
         # Принт объявы и дополнение HTML contents (для маленьких сокращенный)
         print(f"-----------------------------------------------------------------")
-        if int(capacity) >= 299 and cylcount > 1:
+        if int(capacity) >= 299 and cylcount > 1 and brand not in ('Днепр', 'Jawa', 'ИЖ', 'Эксклюзив'):
             print (f"""
 № {processed_ads}, Price - {price}, ID - {id}
 Publ. at {publish_for_print}, Refr. at {refresh_for_print}
@@ -335,11 +343,11 @@ Actual mvlk - {mvlk_actual} (Best mvlk - {best_match})
 Seller - {seller}
 URL - {url}""")
         
-            # Дополнение HTML каждым объявлением
+            # Дополнение большим HTML каждого объявления
             html_mail_contents += f"""
 <html>
         <body>
-<table style="width: 786px; height: 160px;" border="1">
+<table style="width: 950px; height: 160px;" border="1">
 <tbody>
 <tr style="height: 10px;">
 <td style="width: 484.953px; height: 10px;">
@@ -387,7 +395,7 @@ URL - {url}""")
 <td style="text-align: center; height: 62px; width: 484.953px;">
 <h4><strong>{price} USD</strong></h4>
 </td>
-<td style="text-align: center; width: 108.281px;" colspan="4"><strong>Ценовая статистика согласно актуальному vlk:</strong><br />Средняя по актуальным = {price_a}, разница = <span style="color: {price_color};">{price_dif_fr_act}</span><br />Средняя за все время = {price_f}, разница = <span style="color: {price_color};">{price_dif_fr_full}</span><strong><br /></strong></td>
+<td style="text-align: center; width: 108.281px;" colspan="4"><strong>Ценовая статистика согласно актуальному vlk:</strong><br />Средняя по актуальным = {price_a}, разница = <span style="color: {price_color_a};">{price_dif_fr_act}</span><br />Средняя за все время = {price_f}, разница = <span style="color: {price_color_f};">{price_dif_fr_full}</span><strong><br /></strong></td>
 </tr>
 </tbody>
 </table>
@@ -395,13 +403,13 @@ URL - {url}""")
         </body>
         </html>
         """
-        else:
+        else: # сокращенный для мопедов и совкоциклов
             print (f"""
 № {processed_ads}, Price - {price}, ID - {id}
 Name - {brand} {model} {modification} ({year}, {capacity} ccm)
 URL - {url}""")
-            # Дополнение HTML каждым объявлением
-            html_mail_contents += f"""<table style="width: 786px; height: 80px;" border="1">
+            # Дополнение сокращенным HTML каждого объявления
+            html_mail_contents += f"""<table style="width: 950px; height: 80px;" border="1">
 <tbody>
 <tr style="height: 10px;">
 <td style="height: 10px; width: 262px;">
