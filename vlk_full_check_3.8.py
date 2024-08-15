@@ -4,18 +4,19 @@ from fuzzywuzzy import process
 import psycopg2
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE
+import json
 
-# Чтение конфига с пасвордами
-with open('config.txt', 'r') as file:
-    lines = file.readlines()
+# Чтение json конфига
+with open('config.json') as file:
+    config = json.load(file)
 
-mail_login = lines[1].strip()
-mail_password = lines[3].strip()
-pgre_login = lines[5].strip()
-pgre_password = lines[7].strip()
-pgre_host = lines[9].strip()
-pgre_port = lines[11].strip()
-pgre_db = lines[13].strip()
+mail_login = config['sender login']
+mail_password = config['sender password']
+pgre_login = config['postgre login']
+pgre_password = config['postgre password']
+pgre_host = config['postgre host']
+pgre_port = config['postgre port']
+pgre_db = config['postgre database']
     
 #Подключение к postgres
 conn = psycopg2.connect(
@@ -30,8 +31,8 @@ cursor = conn.cursor()
 query = """
     SELECT brand, model, model_misc, year, cylinders, capacity, type, id, model_vlk
     FROM av_full
-    where model_vlk is null
-    and brand = 'Triumph';
+    where model_vlk = 'z 1000'
+    and brand = 'Kawasaki';
 """
 cursor.execute(query)
 row = cursor.fetchall()
