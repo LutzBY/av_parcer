@@ -298,23 +298,29 @@ while stop_flag == False:
         mvlk_actual = vlkfetch[0]
         
         # Вынять средние цены по влк из базы
-        prices_a_query = " select price from av_full where model_vlk = '%s' and status = 'Актуально' " % (mvlk_actual)
-        prices_f_query = " select price from av_full where model_vlk = '%s' " % (mvlk_actual)
+        prices_a_query = "SELECT AVG(price) as price_a FROM av_full WHERE model_vlk = '%s' AND status = 'Актуально'" % (mvlk_actual)
+        prices_f_query = "SELECT AVG(price) as price_f FROM av_full WHERE model_vlk = '%s'" % (mvlk_actual)
+
         parsecursor.execute(prices_a_query)
-        prices_a = parsecursor.fetchall()
+        price_a_result = parsecursor.fetchone()
+
         parsecursor.execute(prices_f_query)
-        prices_f = parsecursor.fetchall()
-        if len(prices_a) > 1 and mvlk_actual not in (None, '', ' '):
-            price_a = sum(prices_a[1])/len(prices_a[1])
-            price_f = sum(prices_f[1])/len(prices_f[1])
+        price_f_result = parsecursor.fetchone()
+
+        price_a = price_a_result[0] if price_a_result[0] is not None else None
+        price_f = price_f_result[0] if price_f_result[0] is not None else None
+
+        if price_a is not None and mvlk_actual not in (None, '', ' '):
+            price_a = int(price_a)
+            price_f = int(price_f)
             price_dif_fr_act = price - price_a
             price_dif_fr_full = price - price_f
             price_color_a = "#ff9900" if price_dif_fr_act > 0 else "#99cc00"
             price_color_f = "#ff9900" if price_dif_fr_full > 0 else "#99cc00"
-        elif len(prices_a) <= 1 and len(prices_f) > 1 and mvlk_actual not in (None, '', ' '):
+        elif price_f is not None and mvlk_actual not in (None, '', ' '):
             price_a = '-'
-            price_f = sum(prices_f[1])/len(prices_f[1])
             price_dif_fr_act = '-'
+            price_f = int(price_f)
             price_dif_fr_full = price - price_f
             price_color_a = "#9e9e9e"
             price_color_f = "#ff9900" if price_dif_fr_full > 0 else "#99cc00"
@@ -334,7 +340,7 @@ while stop_flag == False:
 
         # Принт объявы и дополнение HTML contents (для маленьких сокращенный)
         print(f"-----------------------------------------------------------------")
-        if int(capacity) >= 299 and cylcount > 1 and brand not in ('Днепр', 'Jawa', 'ИЖ', 'Эксклюзив'):
+        if int(capacity) >= 299 and cylcount > 1 and brand not in ('Днепр', 'Jawa', 'ИЖ', 'Эксклюзив', 'Racer', 'Урал'):
             print (f"""
 № {processed_ads}, Price - {price}, ID - {id}
 Publ. at {publish_for_print}, Refr. at {refresh_for_print}
