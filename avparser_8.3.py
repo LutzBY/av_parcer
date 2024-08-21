@@ -10,8 +10,8 @@ import psycopg2
 import smtplib
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE
-import sys
-import io
+from requests.exceptions import ChunkedEncodingError, RequestException
+import time
 
 headers = {
     'authority': 'moto.av.by',
@@ -181,21 +181,24 @@ while stop_flag == False:
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 """
-    #Функция
-    response = requests.get(url_cycle, headers=headers)
-
-    src = response.text
-    soup = BeautifulSoup(src, 'lxml')
-    #Проверка на доступность страницы
-    if response.status_code != 200:
-        print(f"Случилась ошибка загрузки этой {url_cycle} страницы :(  Код такой:", response.status_code)
-        break
-
-    script_element = soup.find("script", id="__NEXT_DATA__") #Достаем жсон
-    #Проверка имеется ли жсон на странице
-    if script_element is None:
-        print("Элемент script не найден :(")
-        break
+    #Функция парсинга страницы page
+    response_attempt = 0
+    max_response_retries = 10
+    error_counter = 0
+    for response_attempt in range(max_response_retries):
+        try:
+            response = requests.get(url_cycle, headers=headers)
+            src = response.text
+            soup = BeautifulSoup(src, 'lxml')
+            script_element = soup.find("script", id="__NEXT_DATA__") #Достаем жсон
+            break
+        except ChunkedEncodingError or RequestException or json.JSONDecodeError or script_element is None or response.status_code != 200:
+            print(f"Ошибка при чтении страницы. Попытка {response_attempt + 1} из {max_response_retries} не удалась. Повтор через 10 секунд.")
+            time.sleep(10)
+            error_counter += 1
+        except:
+            print(f'Непредвиденная ошибка при чтении страницы {url_cycle}')
+            break
 
     json_string = script_element.string #Конвертируем жсон в стринг
     data = json.loads(json_string) #Пакуем в data
@@ -439,12 +442,12 @@ URL - {url}""")
 ## Завершающий блок
 parsecursor.close()
 print(f"---- ВЫВОД ------------------------------------------------------")
-print(f"Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений!")
+print(f"Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений! Ошибок - {error_counter}")
 
 # Дополнение HTML хвостом
 html_mail_contents += f"""<hr />
 <h2 style="text-align: center;">КОНЕЦ ОТЧЕТА</h2>
-<h4 style="text-align: center;">Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений!</h4>"""
+<h4 style="text-align: center;">Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений! Ошибок при открытии страницы - {error_counter}</h4>"""
 
 # Параметры отправки на email
 subject = 'Результат работы скриптов. №1 Парсинг и апдейт modelvlk'
