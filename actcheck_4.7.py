@@ -168,7 +168,11 @@ for row in rows:
                 price_diff = price_upd - price_ex
                 price_changed_count += 1
                 price_difference_sum += price_diff
-                print(f"Изменилась цена для id {id_value} на {price_diff} USD, price_diff_sum составляет {price_difference_sum} USD")
+                if price_diff >0:
+                    pd = '+'
+                else:
+                    pd = ''
+                print(f"Изменилась цена для id {id_value} на {pd}{price_diff} USD, price_diff_sum составляет {price_difference_sum} USD")
             else:
                 print(f"Цена для id {id_value} осталась прежней")
             
