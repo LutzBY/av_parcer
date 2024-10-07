@@ -343,7 +343,7 @@ while stop_flag == False:
 
         # Принт объявы и дополнение HTML contents (для маленьких сокращенный)
         print(f"-----------------------------------------------------------------")
-        if int(capacity) >= 299 and cylcount > 1 and brand not in ('Днепр', 'Jawa', 'ИЖ', 'Эксклюзив', 'Racer', 'Урал'):
+        if int(capacity) >= 299 and cylcount > 1 and brand not in ('Днепр', 'Jawa', 'ИЖ', 'Эксклюзив', 'Racer', 'Урал', 'Cezet'):
             print (f"""
 № {processed_ads}, Price - {price}, ID - {id}
 Publ. at {publish_for_print}, Refr. at {refresh_for_print}
