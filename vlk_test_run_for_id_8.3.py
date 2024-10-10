@@ -1,11 +1,14 @@
 ##########################
-id_to_check = 110319280
+#id_to_check = 111355795
+
 #########################
 
 import json
 from fuzzywuzzy import fuzz
 import psycopg2
+import pyperclip
 
+id_to_check = pyperclip.paste()
 headers = {
     'authority': 'moto.av.by',
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
