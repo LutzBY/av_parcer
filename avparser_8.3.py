@@ -221,6 +221,7 @@ while stop_flag == False:
     locations = []
     sellers = []
     img_srcs = []
+    conditions = []
 
     for item in data['props']['initialState']['filter']['main']['adverts']: # Цикл поиска в этом словаре этих ключей
         advert_id = item['id']
@@ -235,6 +236,7 @@ while stop_flag == False:
             pic = item['photos'][0]['medium']['url'] #small?
         else:
             pic = 'https://commons.wikimedia.org/wiki/File:No_Image_Available.jpg' 
+        condition = item['metadata']['condition']['label']
 
         # Искать нужные свойства по имени тега внутри пропертис
         brand = next((prop['value'] for prop in properties if prop['name'] == 'brand'), None)
@@ -265,8 +267,9 @@ while stop_flag == False:
         locations.append(location)
         sellers.append(seller)
         img_srcs.append(pic)
+        conditions.append(condition)
     
-    for id, price, publish, refresh, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, seller, img_src in zip(ids, prices, published, refreshed, brands, models, modifications, years, mtypes, cylcounts, drivetypes, capacitys, mileages, urlss, locations, sellers, img_srcs):
+    for id, price, publish, refresh, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, seller, img_src, condition in zip(ids, prices, published, refreshed, brands, models, modifications, years, mtypes, cylcounts, drivetypes, capacitys, mileages, urlss, locations, sellers, img_srcs, conditions):
         datetime_obj = datetime.strptime(publish, '%Y-%m-%dT%H:%M:%S%z') # Преобразования текстового значения в дату
         datetime_obj = datetime_obj.replace(tzinfo=None) # убираем таймзон
 
@@ -283,13 +286,13 @@ while stop_flag == False:
 
         # Скрипт для пгри
         parsequery = """
-            INSERT INTO av_full(id, price, date, brand, model, model_misc, year, type, cylinders, drive, capacity, mileage, url, locations, status, status_date, model_vlk, seller)
-            VALUES ( %s, %s, '%s', '%s', '%s', '%s', %s, '%s', %s, '%s', %s, %s, '%s', '%s', 'Актуально', null, '%s', '%s')
+            INSERT INTO av_full(id, price, date, brand, model, model_misc, year, type, cylinders, drive, capacity, mileage, url, locations, status, status_date, model_vlk, seller, condition)
+            VALUES ( %s, %s, '%s', '%s', '%s', '%s', %s, '%s', %s, '%s', %s, %s, '%s', '%s', 'Актуально', null, '%s', '%s', '%s')
             ON CONFLICT (id) DO UPDATE 
             SET 
             price = excluded.price
             WHERE av_full.id = excluded.id;
-        """ % (id, price, datetime_obj, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, best_match, seller)
+        """ % (id, price, datetime_obj, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, best_match, seller, condition)
         
         # Работа курсора для пгри
         parsecursor.execute(parsequery)
@@ -377,6 +380,7 @@ URL - {url}""")
 <p style="text-align: left;">{mvlk_actual}</p>
 </td>
 <td style="width: 173.438px; height: 35px;" colspan="3">
+<p>{condition}</p>
 <p>{mtype}</p>
 <p>{cylcount} цилиндров</p>
 <p>{capacity} см3</p>
