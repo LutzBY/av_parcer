@@ -380,11 +380,11 @@ URL - {url}""")
 <p style="text-align: left;">{mvlk_actual}</p>
 </td>
 <td style="width: 173.438px; height: 35px;" colspan="3">
-<p>{condition}</p>
 <p>{mtype}</p>
 <p>{cylcount} цилиндров</p>
 <p>{capacity} см3</p>
 <p>{mileage} км.</p>
+<p>{condition}</p>
 </td>
 </tr>
 <tr style="height: 33px;">
