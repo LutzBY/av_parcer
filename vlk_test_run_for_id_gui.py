@@ -148,14 +148,14 @@ vlkcursor.close()
 conn.close
 
 # Создаем текстовые метки и кнопки для каждого результата
-for idx, results in enumerate(results, 1):
+for idx, result in enumerate(results, 1):
     # Отображаем текстовую информацию о каждом элементе
-    text = f"{idx} --------\n{results['name']}\n{results['type']}\nratio = {results['ratio']}, vlk_id = {results['vlk_id']}\n"
+    text = f"{idx} --------\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}\n"
     label = tk.Label(root, text=text, justify="left")
     label.pack(anchor="w")
 
     # Создаем кнопку для копирования названия в буфер обмена
-    copy_button = tk.Button(root, text="Скопировать", command=lambda text=results['name']: copy_to_clipboard(text))
+    copy_button = tk.Button(root, text="Скопировать", command=lambda text=result['name']: copy_to_clipboard(text))
     copy_button.pack(anchor="w")
 
 # Запуск основного цикла приложения
