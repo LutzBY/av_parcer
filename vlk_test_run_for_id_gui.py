@@ -18,9 +18,7 @@ def copy_to_clipboard(text):
     root.update()  # Необходимо для обновления буфера обмена
     # messagebox.showinfo("Информация", f"'{text}' скопировано в буфер обмена.")
     root.destroy()
-# Создаем основное окно
-root = tk.Tk()
-root.title("Результаты поиска")
+
 
 id_to_check = pyperclip.paste()
 
@@ -153,6 +151,10 @@ print (f"{brand} {model} {modification}, {year}, d - {capacity}, c - {cylcount},
 vlkcursor.close()
 
 conn.close
+
+# Создаем основное окно
+root = tk.Tk()
+root.title(f"{brand} {model} {modification}, {year}, d - {capacity}, c - {cylcount}, t - {mtype}")
 
 # Создаем текстовые метки и кнопки для каждого результата
 for idx, result in enumerate(results, 1):
