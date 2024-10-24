@@ -16,7 +16,7 @@ def copy_to_clipboard(text):
     root.clipboard_clear()  # Очистка буфера обмена
     root.clipboard_append(text)  # Добавление текста в буфер обмена
     root.update()  # Необходимо для обновления буфера обмена
-    #messagebox.showinfo("Информация", f"'{text}' скопировано в буфер обмена.")
+    # messagebox.showinfo("Информация", f"'{text}' скопировано в буфер обмена.")
     root.destroy()
 # Создаем основное окно
 root = tk.Tk()
