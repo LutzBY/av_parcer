@@ -9,6 +9,7 @@ import psycopg2
 import pyperclip
 import tkinter as tk
 from tkinter import messagebox
+import sys
 
 # Функция для копирования текста в буфер обмена
 def copy_to_clipboard(text):
@@ -22,6 +23,12 @@ root = tk.Tk()
 root.title("Результаты поиска")
 
 id_to_check = pyperclip.paste()
+
+#Проверка на айди
+if not id_to_check.isdigit():
+    print('В буфере не ID')
+    sys.exit()
+
 headers = {
     'authority': 'moto.av.by',
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
