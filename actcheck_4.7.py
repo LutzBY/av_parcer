@@ -66,9 +66,13 @@ rows_full = cursor.fetchall()
 rows_count = cursor.rowcount
 print(f"Строк в базе: {rows_count}")
 
-
 # Готовим нужные столбцы и строки
-select_query = "SELECT id, status, status_date, url, price FROM av_full WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке')"
+select_query = """
+SELECT id, status, status_date, url, price, seller, capacity, cylinders, brand, duplicate_flag
+FROM av_full 
+WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке')
+ORDER by date desc
+"""
 cursor.execute(select_query)
 rows = cursor.fetchall()
 rows_count_na = cursor.rowcount
@@ -99,7 +103,72 @@ def send_email(subject, body, recipient):
         server.quit()
         print(f'Email successfully sent to {recipient}')
     except Exception as e:
-        print('Error sending email:', str(e))    
+        print('Error sending email:', str(e))
+
+# легаси функция добавления организации
+def set_orgainsation (id_value):
+    # Добавление организации
+    organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', 'null')
+    if organization != 'null':
+        organization_query = ("UPDATE av_full SET seller = '%s' WHERE id = %s") % (organization, id_value) 
+        cursor.execute(organization_query)
+        conn.commit()
+        print(f"Organization = {organization}")
+
+# Функция проверки на дубликаты
+def check_for_duplicates (id_value):
+    # Ищем дубликат по id_value, список не будет содержать строку искомого айди
+    select_query = """SELECT id, date, price, model_vlk, brand, model, model_misc, year, type, cylinders, capacity, mileage, exclude_flag, url
+    FROM public.av_full
+    WHERE (brand, model, model_misc, year, type, cylinders, capacity, mileage, seller, locations) = 
+    (
+        SELECT brand, model, model_misc, year, type, cylinders, capacity, mileage, seller, locations
+        FROM public.av_full
+        WHERE id = %d
+    )
+    AND id != %d
+    ORDER BY date ASC;""" % (id_value, id_value)
+    cursor.execute(select_query)
+    rows = cursor.fetchall()
+    dupl_count = 0 # счетчик количества объяв-дубликатов
+
+    if rows:
+        dupl_id_list = []
+        dupl_date_list = []
+    
+        for n in rows:    
+            dupl_dates = n[1]
+            dupl_date_list.append(dupl_dates)
+            dupl_id = n[0]
+            dupl_id_list.append(dupl_id)
+            #print(f"id - {dupl_id}, дата - {dupl_dates}")
+            dupl_count += 1
+
+        dupl_date = min(dupl_date_list)
+        
+        print(f"Найдено {dupl_count} дубликатов для id:{id_value} с самой ранней датой - {dupl_date}")
+
+        # отформатировать список для вставки в квери
+        dupl_id_list = ', '.join(str(int(d)) for d in dupl_id_list)
+
+        # квери выставить флажок дубликата
+        query1 = """UPDATE public.av_full
+        SET duplicate_flag = True, duplicate_id = %d
+        WHERE id in (%s);""" % (id_value, dupl_id_list)
+        cursor.execute(query1)
+
+        # квери выставить новую дату
+        query2 = """UPDATE public.av_full
+        SET date = '%s'
+        WHERE id = %d;""" % (dupl_date, id_value)
+        cursor.execute(query2)
+        
+        # записать изменения
+        conn.commit()
+        return 1
+    else:
+        print(f'Дубликатов для id:{id_value} не обнаружено')
+        return 0
 
 # Подсчет итераций
 changed_status_count = 0
@@ -109,6 +178,7 @@ unchanged_status_count = 0
 price_changed_count = 0
 price_difference_sum = 0
 broken_link_count = 0
+duplicates_global_count = 0
 
 # Сам цикл
 for row in rows:
@@ -118,6 +188,11 @@ for row in rows:
     status_value = row[1] # стобец status с индексом 1
     url = row[3] # стобец url с индексом 3
     price_ex = row[4] # столбец price
+    seller = row[5]
+    capacity = row[6]
+    cylcount = row[7]
+    brand = row[8]
+    duplicate_flag = row[9]
 
     # Диапазон рандомных значений для задержки
     wait_amount = random.randint(4, 7)
@@ -176,13 +251,13 @@ for row in rows:
             else:
                 print(f"Цена для id {id_value} осталась прежней")
             
-            # Добавление организации
-            organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', 'null')
-            if organization != 'null':
-                organization_query = ("UPDATE av_full SET seller = '%s' WHERE id = %s") % (organization, id_value) 
-                cursor.execute(organization_query)
-                conn.commit()
-                print(f"Organization = {organization}")
+            # ЗДЕСЬ БЫЛО Добавление организации
+            
+            # Вызов функции проверки на дубликаты 
+            if seller != 'Продажа мотоциклов и прицеп дач Вязынка' and int(capacity) >= 299 and cylcount > 1 and brand not in ('Днепр', 'Jawa', 'ИЖ', 'Эксклюзив', 'Racer', 'Урал', 'Cezet') and duplicate_flag is False:
+                duplicates_global_count += check_for_duplicates (id_value)    
+            else:
+                print(f'Проверка дубликатов для id:{id_value} не проводится')
 
             #Если табличка закрыто есть
             if ad_status_script != 'active': 
@@ -255,6 +330,7 @@ mail_contents = (f"""
     не открылась страница у {broken_link_count} штук
 Цена изменилась у {price_changed_count} штук
 Общее именение цен составило {price_difference_sum} USD
+Найдено объявлений с дубликатами - {duplicates_global_count} шт.
 Спасибо за внимание <3
 """
 )
