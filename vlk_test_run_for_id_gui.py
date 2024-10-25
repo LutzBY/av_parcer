@@ -10,15 +10,14 @@ import pyperclip
 import tkinter as tk
 from tkinter import messagebox
 import sys
+import time
 
 # Функция для копирования текста в буфер обмена
 def copy_to_clipboard(text):
-    root.clipboard_clear()  # Очистка буфера обмена
-    root.clipboard_append(text)  # Добавление текста в буфер обмена
-    root.update()  # Необходимо для обновления буфера обмена
-    # messagebox.showinfo("Информация", f"'{text}' скопировано в буфер обмена.")
-    root.destroy()
-
+    pyperclip.copy(text)  # Используем pyperclip для копирования
+    #messagebox.showinfo("Информация", f"'{text}' скопировано в буфер обмена.")  # Показываем уведомление
+    root.destroy()  # Закрываем главное окно
+    sys.exit()  # Завершаем выполнение программы
 
 id_to_check = pyperclip.paste()
 
@@ -150,7 +149,7 @@ print (f"----------------")
 print (f"{brand} {model} {modification}, {year}, d - {capacity}, c - {cylcount}, t - {mtype}, BM - {best_match}")
 vlkcursor.close()
 
-conn.close
+conn.close()
 
 # Создаем основное окно
 root = tk.Tk()
@@ -166,6 +165,7 @@ for idx, result in enumerate(results, 1):
     # Создаем кнопку для копирования названия в буфер обмена
     copy_button = tk.Button(root, text="Скопировать", command=lambda text=result['name']: copy_to_clipboard(text))
     copy_button.pack(anchor="w")
+
 
 # Запуск основного цикла приложения
 root.mainloop()
