@@ -195,12 +195,6 @@ for row in rows:
     duplicate_flag = row[9]
     print(f'{brand}, объем: {capacity}, {cylcount} цил, статус: {status_value}, цена: {price_ex}, {seller}, дубль: {duplicate_flag}, {url} ')
 
-    # Диапазон рандомных значений для задержки
-    wait_amount = random.randint(4, 7)
-    print(f"Ждем {wait_amount} секунд")
-    
-    time.sleep(wait_amount)
-
     try:
         response = requests.get(url, headers=headers)
         # Дальнейшая обработка успешного запроса
@@ -301,6 +295,12 @@ for row in rows:
         print(f"ссылка сдохла для id {id_value}")
         dead_link_count += 1
     
+    # Диапазон рандомных значений для задержки
+    wait_amount = random.randint(4, 7)
+    print(f"Ждем {wait_amount} секунд")
+    
+    time.sleep(wait_amount)
+    print(f'--------------------------')
 
 # Закрытие курсора и подключения    
 cursor.close()
