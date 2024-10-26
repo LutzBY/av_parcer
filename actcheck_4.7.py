@@ -129,17 +129,17 @@ def check_for_duplicates (id_value):
     AND id != %d
     ORDER BY date ASC;""" % (id_value, id_value)
     cursor.execute(select_query)
-    rows = cursor.fetchall()
+    dupl_rows = cursor.fetchall()
     dupl_count = 0 # счетчик количества объяв-дубликатов
 
-    if rows:
+    if dupl_rows:
         dupl_id_list = []
         dupl_date_list = []
     
-        for n in rows:    
-            dupl_dates = n[1]
+        for dupl_n in dupl_rows:    
+            dupl_dates = dupl_n[1]
             dupl_date_list.append(dupl_dates)
-            dupl_id = n[0]
+            dupl_id = dupl_n[0]
             dupl_id_list.append(dupl_id)
             #print(f"id - {dupl_id}, дата - {dupl_dates}")
             dupl_count += 1
@@ -189,10 +189,11 @@ for row in rows:
     url = row[3] # стобец url с индексом 3
     price_ex = row[4] # столбец price
     seller = row[5]
-    capacity = row[6]
-    cylcount = row[7]
+    capacity = int(row[6])
+    cylcount = int(row[7])
     brand = row[8]
     duplicate_flag = row[9]
+    print(f'{brand}, объем:{cylcount}, {cylcount} цил, статус:{status_value}, цена:{price_ex}, {seller}, дубль:{duplicate_flag}, {url} ')
 
     # Диапазон рандомных значений для задержки
     wait_amount = random.randint(4, 7)
