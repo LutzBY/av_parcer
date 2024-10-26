@@ -193,7 +193,7 @@ for row in rows:
     cylcount = int(row[7])
     brand = row[8]
     duplicate_flag = row[9]
-    print(f'{brand}, объем:{cylcount}, {cylcount} цил, статус:{status_value}, цена:{price_ex}, {seller}, дубль:{duplicate_flag}, {url} ')
+    print(f'{brand}, объем: {cylcount}, {cylcount} цил, статус: {status_value}, цена: {price_ex}, {seller}, дубль: {duplicate_flag}, {url} ')
 
     # Диапазон рандомных значений для задержки
     wait_amount = random.randint(4, 7)
