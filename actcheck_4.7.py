@@ -68,7 +68,7 @@ print(f"Строк в базе: {rows_count}")
 
 # Готовим нужные столбцы и строки
 select_query = """
-SELECT id, status, status_date, url, price, seller, capacity, cylinders, brand, duplicate_flag
+SELECT id, status, status_date, url, price, seller, capacity, cylinders, brand, condition
 FROM av_full 
 WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке')
 ORDER by date desc
@@ -192,8 +192,19 @@ for row in rows:
     capacity = int(row[6])
     cylcount = int(row[7])
     brand = row[8]
-    duplicate_flag = row[9]
-    print(f'{brand}, объем: {capacity}, {cylcount} цил, статус: {status_value}, цена: {price_ex}, {seller}, дубль: {duplicate_flag}, {url} ')
+    condition = row[9]
+    
+    # вынимаем свежий флаг
+    flag_query = """
+    SELECT duplicate_flag
+    FROM av_full 
+    WHERE id = %s
+    """
+    cursor.execute(flag_query, (id_value,))
+    duplicate_flag = cursor.fetchone()
+    duplicate_flag = duplicate_flag[0]
+    
+    print(f'{brand}, объем: {capacity}, {cylcount} цил, статус: {status_value}, цена: {price_ex}, {seller}, {condition}, дубль: {duplicate_flag}, {url} ')
 
     try:
         response = requests.get(url, headers=headers)
@@ -249,7 +260,7 @@ for row in rows:
             # ЗДЕСЬ БЫЛО Добавление организации
             
             # Вызов функции проверки на дубликаты 
-            if seller != 'Продажа мотоциклов и прицеп дач Вязынка' and int(capacity) >= 299 and cylcount > 1 and brand not in ('Днепр', 'Jawa', 'ИЖ', 'Эксклюзив', 'Racer', 'Урал', 'Cezet') and duplicate_flag is False:
+            if seller != 'Продажа мотоциклов и прицеп дач Вязынка' and int(capacity) >= 299 and cylcount > 1 and brand not in ('Днепр', 'Jawa', 'ИЖ', 'Эксклюзив', 'Racer', 'Урал', 'Cezet') and duplicate_flag is False and condition != 'новый':
                 duplicates_global_count += check_for_duplicates (id_value)    
             else:
                 print(f'Проверка дубликатов для id:{id_value} не проводится')
