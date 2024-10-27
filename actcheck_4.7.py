@@ -312,6 +312,12 @@ for row in rows:
     
     time.sleep(wait_amount)
     print(f'--------------------------')
+    # Диапазон рандомных значений для задержки
+    wait_amount = random.randint(4, 7)
+    print(f"Ждем {wait_amount} секунд")
+    
+    time.sleep(wait_amount)
+    print(f'--------------------------')
 
 # Закрытие курсора и подключения    
 cursor.close()
