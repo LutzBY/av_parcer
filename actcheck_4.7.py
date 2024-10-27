@@ -260,7 +260,14 @@ for row in rows:
             # ЗДЕСЬ БЫЛО Добавление организации
             
             # Вызов функции проверки на дубликаты 
-            if seller != 'Продажа мотоциклов и прицеп дач Вязынка' and int(capacity) >= 299 and cylcount > 1 and brand not in ('Днепр', 'Jawa', 'ИЖ', 'Эксклюзив', 'Racer', 'Урал', 'Cezet') and duplicate_flag is False and condition != 'новый':
+            if (
+                seller != 'Продажа мотоциклов и прицеп дач Вязынка' 
+                and int(capacity) >= 299 
+                and cylcount > 1 
+                and brand not in ('Днепр', 'Jawa', 'ИЖ', 'Эксклюзив', 'Racer', 'Урал', 'Cezet') 
+                and duplicate_flag is False 
+                and condition != 'новый'
+            ):
                 duplicates_global_count += check_for_duplicates (id_value)    
             else:
                 print(f'Проверка дубликатов для id:{id_value} не проводится')
