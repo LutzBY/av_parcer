@@ -19,6 +19,16 @@ def copy_to_clipboard(text):
     root.destroy()  # Закрываем главное окно
     sys.exit()  # Завершаем выполнение программы
 
+# Функция для копирования текста и записи в базу
+def copy_to_clipboard_and_write(text):
+    vlk_to_write = text
+    vlk_cursor = conn.cursor()
+    organization_query = ("UPDATE av_full SET model_vlk = '%s' WHERE id = %s") % (vlk_to_write, id_to_check) 
+    vlk_cursor.execute(organization_query)
+    conn.commit()
+    root.destroy()  # Закрываем главное окно
+    sys.exit()  # Завершаем выполнение программы
+
 id_to_check = pyperclip.paste()
 
 #Проверка на айди
@@ -149,8 +159,6 @@ print (f"----------------")
 print (f"{brand} {model} {modification}, {year}, d - {capacity}, c - {cylcount}, t - {mtype}, BM - {best_match}")
 vlkcursor.close()
 
-conn.close()
-
 # Создаем основное окно
 root = tk.Tk()
 root.title(f"{brand} {model} {modification}, {year}, d - {capacity}, c - {cylcount}, t - {mtype}")
@@ -161,11 +169,17 @@ for idx, result in enumerate(results, 1):
     text = f"{idx} --------\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}\n"
     label = tk.Label(root, text=text, justify="left")
     label.pack(anchor="w")
-
+    # Создаем фрейм для кнопок
+    button_frame = tk.Frame(root)
+    button_frame.pack(anchor="w")
     # Создаем кнопку для копирования названия в буфер обмена
-    copy_button = tk.Button(root, text="Скопировать", command=lambda text=result['name']: copy_to_clipboard(text))
-    copy_button.pack(anchor="w")
-
+    copy_button = tk.Button(button_frame, text="Скопировать", command=lambda text=result['name']: copy_to_clipboard(text))
+    copy_button.pack(side="left")
+    # Создаем кнопку для прямой записи влк в базу
+    copy_and_write_button = tk.Button(button_frame, text="Записать", command=lambda text=result['name']: copy_to_clipboard_and_write(text))
+    copy_and_write_button.pack(side="left")
 
 # Запуск основного цикла приложения
 root.mainloop()
+
+conn.close()
