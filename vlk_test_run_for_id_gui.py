@@ -1,6 +1,5 @@
 ##########################
 #id_to_check = 111355795
-
 #########################
 
 import json
@@ -33,7 +32,7 @@ id_to_check = pyperclip.paste()
 
 #Проверка на айди
 if not id_to_check.isdigit():
-    print('В буфере не ID')
+    messagebox.showinfo("Результат", "В буфере обмена не ID")
     sys.exit()
 
 headers = {
