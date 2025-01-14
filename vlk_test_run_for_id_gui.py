@@ -161,6 +161,7 @@ vlkcursor.close()
 # Создаем основное окно
 root = tk.Tk()
 root.title(f"{brand} {model} {modification}, {year}, d - {capacity}, c - {cylcount}, t - {mtype}")
+root.geometry(f'500x{enumerat*115}') 
 
 # Создаем текстовые метки и кнопки для каждого результата
 for idx, result in enumerate(results, 1):
