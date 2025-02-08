@@ -285,13 +285,14 @@ while stop_flag == False:
                 
         # Вызов функции дополнения vlk
         best_match = None
-        best_match = add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_match) 
+        if mtype != 'кастом':
+            best_match = add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_match)
+        else:
+            best_match = 'кастом'
 
         # Проверка необходимости установить exclude_flag
         exclude_flag = False
         if flag_on_order:
-            exclude_flag = True
-        if mtype == 'кастом':
             exclude_flag = True
         
         # Скрипт для пгри
