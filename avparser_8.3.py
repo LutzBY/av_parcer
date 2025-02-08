@@ -291,6 +291,8 @@ while stop_flag == False:
         exclude_flag = False
         if flag_on_order:
             exclude_flag = True
+        if mtype == 'кастом':
+            exclude_flag = True
         
         # Скрипт для пгри
         parsequery = """
