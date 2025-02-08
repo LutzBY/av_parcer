@@ -31,7 +31,7 @@ headers = {
 }
 
 # Чтение json конфига
-with open('config.json') as file:
+with open('config.json', encoding="utf8") as file:
     config = json.load(file)
 
 mail_login = config['sender login']
@@ -42,6 +42,7 @@ pgre_host = config['postgre host']
 pgre_port = config['postgre port']
 pgre_db = config['postgre database']
 recipients = config['mail recipients']
+exclude_locations = config['exclude_locations']
 
 #Подключение к postgres
 conn = psycopg2.connect(
@@ -293,6 +294,8 @@ while stop_flag == False:
         # Проверка необходимости установить exclude_flag
         exclude_flag = False
         if flag_on_order:
+            exclude_flag = True
+        if location in exclude_locations:
             exclude_flag = True
         
         # Скрипт для пгри
