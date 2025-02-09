@@ -32,7 +32,7 @@ headers = {
 }
 
 # Чтение json конфига
-with open('config.json') as file:
+with open('config.json', encoding="utf8") as file:
     config = json.load(file)
 
 mail_login = config['sender login']

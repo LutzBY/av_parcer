@@ -52,7 +52,7 @@ headers = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
 }
 # Чтение json конфига
-with open('config.json') as file:
+with open('config.json', encoding="utf8") as file:
     config = json.load(file)
 
 mail_login = config['sender login']
