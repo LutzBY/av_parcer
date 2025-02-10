@@ -10,74 +10,43 @@ import tkinter as tk
 from tkinter import messagebox
 import sys
 
-# Функция для копирования текста в буфер обмена
+# Функция кнопки для копирования текста в буфер обмена
 def copy_to_clipboard(text):
     pyperclip.copy(text)  # Используем pyperclip для копирования
     #messagebox.showinfo("Информация", f"'{text}' скопировано в буфер обмена.")  # Показываем уведомление
-    process_flag = False
     root.destroy()  # Закрываем главное окно
     sys.exit()  # Завершаем выполнение программы
 
-# Функция для копирования текста и записи в базу
+# Функция кнопки для копирования текста и записи в базу
 def copy_to_clipboard_and_write(text):
     vlk_to_write = text
     vlk_cursor = conn.cursor()
     organization_query = ("UPDATE av_full SET model_vlk = '%s' WHERE id = %s") % (vlk_to_write, id_to_check) 
     vlk_cursor.execute(organization_query)
     conn.commit()
-    process_flag = False
     root.destroy()
     sys.exit()
 
-# Функция для записи exclude_flag
+# Функция кнопки для записи exclude_flag
 def set_exclude_flag(id_to_check):
     vlk_cursor = conn.cursor()
     set_flag_query = ("UPDATE av_full SET exclude_flag = True WHERE id = %s") % (id_to_check)
     vlk_cursor.execute(set_flag_query)
     conn.commit()
-    process_flag = False
 
-# Функция для записи exclude_flag
+# Функция кнопки для записи exclude_flag
 def set_exclude_flag_and_reset_mvlk(id_to_check):
     vlk_cursor = conn.cursor()
     set_flag_query = ("UPDATE av_full SET exclude_flag = True, model_vlk = '' WHERE id = %s") % (id_to_check) 
     vlk_cursor.execute(set_flag_query)
     conn.commit()
-    process_flag = False
     root.destroy()
     sys.exit()
 
-# Сохранение айди из буфера обмена
-id_to_check = pyperclip.paste()
+### Основная функция
+def vlk_process(id_to_check):
+    global root
 
-#Проверка на айди
-if not id_to_check.isdigit():
-    messagebox.showinfo("Результат", "В буфере обмена не ID")
-    sys.exit()
-
-# Чтение json конфига
-with open('config.json') as file:
-    config = json.load(file)
-
-pgre_login = config['postgre login']
-pgre_password = config['postgre password']
-pgre_host = config['postgre host']
-pgre_port = config['postgre port']
-pgre_db = config['postgre database']
-
-#Подключение к postgres
-conn = psycopg2.connect(
-    host = pgre_host,
-    port = pgre_port,
-    database = pgre_db,
-    user = pgre_login,
-    password = pgre_password
-)
-
-global process_flag
-process_flag = True
-
-while process_flag is True:
     cursor = conn.cursor()
     query = """
         SELECT brand, model, model_misc, year, cylinders, capacity, type
@@ -148,7 +117,7 @@ while process_flag is True:
                 enumerat +=1
         model_ratio_list = list(zip(best_match_list, match_ratio))
 
-        # Пример данных (замени на свои реальные результаты поиска)
+        # Запись найденного результата
         results.append({"№": enumerat,"name": model_found, "type": mtype_found, "ratio": model_comp, "vlk_id": vlk_id})
         
         print(f"""
@@ -160,18 +129,17 @@ while process_flag is True:
         best_model, best_ratio = max(model_ratio_list, key=lambda x: x[1])
         best_match = best_model
 
-
     print (f"----------------")    
     print (f"{brand} {model} {modification}, {year}, d - {capacity}, c - {cylcount}, t - {mtype}, BM - {best_match}")
     vlkcursor.close()
 
-    # Создаем основное окно
+    # Создание окна gui
     root = tk.Tk()
     root_title = (f"{brand} {model} {modification}, {year} г.в. \n{capacity} см3, {cylcount} цил.\nТип - {mtype}")
     label = tk.Label(root, text=root_title, justify="left", background='light grey')
     label.pack(anchor="w")
 
-    # Создаем текстовые метки и кнопки для каждого результата
+    # Его заполнение каждым результатом
     for idx, result in enumerate(results, 1):
         # Отображаем текстовую информацию о каждом элементе
         text = f"{idx} --------\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}\n"
@@ -197,7 +165,7 @@ while process_flag is True:
             command=lambda text=result['name']: copy_to_clipboard_and_write(text))
         copy_and_write_button.pack(side="left")
 
-    # Создаем еще фрейм для нижних кнопок
+    # Создаем еще один фрейм для нижних кнопок
     button_low_frame = tk.Frame(root, pady=10) #width=500, height=300
     button_low_frame.pack(anchor="w", fill="x")
 
@@ -215,7 +183,7 @@ while process_flag is True:
         button_low_frame, 
         text="Перезапустить",
         bg="red",
-        command=lambda: root.destroy()
+        command=lambda: (root.destroy(), vlk_process(id_to_check))  # Закрываем окно и перезапускаем процесс
     )
     restart_button.pack(side="bottom", padx=10, pady=5)
 
@@ -231,4 +199,36 @@ while process_flag is True:
     # Запуск основного цикла приложения
     root.mainloop()
 
+
+# Сохранение айди из буфера обмена
+id_to_check = pyperclip.paste()
+
+#Проверка на айди
+if not id_to_check.isdigit():
+    messagebox.showinfo("Результат", "В буфере обмена не ID")
+    sys.exit()
+
+# Чтение json конфига
+with open('config.json') as file:
+    config = json.load(file)
+
+pgre_login = config['postgre login']
+pgre_password = config['postgre password']
+pgre_host = config['postgre host']
+pgre_port = config['postgre port']
+pgre_db = config['postgre database']
+
+#Подключение к postgres
+conn = psycopg2.connect(
+    host = pgre_host,
+    port = pgre_port,
+    database = pgre_db,
+    user = pgre_login,
+    password = pgre_password
+)
+
+# Запуск главной функции
+vlk_process(id_to_check)
+
+# Закрыть коннекшон
 conn.close()
