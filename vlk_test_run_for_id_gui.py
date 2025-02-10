@@ -133,6 +133,9 @@ def vlk_process(id_to_check):
     print (f"{brand} {model} {modification}, {year}, d - {capacity}, c - {cylcount}, t - {mtype}, BM - {best_match}")
     vlkcursor.close()
 
+    # Сортируем список results для передачи его по убыванию ratio
+    results = sorted(results, key=lambda x: x['ratio'], reverse=True)
+
     # Создание окна gui
     root = tk.Tk()
     root_title = (f"{brand} {model} {modification}, {year} г.в. \n{capacity} см3, {cylcount} цил.\nТип - {mtype}")
@@ -143,10 +146,7 @@ def vlk_process(id_to_check):
     for idx, result in enumerate(results, 1):
         # Отображаем текстовую информацию о каждом элементе
         text = f"{idx} --------\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}\n"
-        if result['ratio'] >= 50:
-            label = tk.Label(root, text=text, justify="left", background='light grey')
-        else:
-            label = tk.Label(root, text=text, justify="left")
+        label = tk.Label(root, text=text, justify="left")
         label.pack(anchor="w")
 
         # Создаем фрейм для кнопок
