@@ -32,7 +32,7 @@ headers = {
 }
 
 # Чтение json конфига
-with open('config.json', encoding="utf8") as file:
+with open('config.json') as file:
     config = json.load(file)
 
 mail_login = config['sender login']
@@ -44,6 +44,13 @@ pgre_port = config['postgre port']
 pgre_db = config['postgre database']
 recipients = config['mail recipients']
 
+# Чтение json исключений
+with open('exceptions.json', encoding="utf8") as file:
+    exceptions_json = json.load(file)
+
+exclude_sellers = exceptions_json['exclude_sellers']
+exclude_brands = exceptions_json['exclude_brands']
+
 #Подключение к postgres
 conn = psycopg2.connect(
     host = pgre_host,
@@ -52,7 +59,6 @@ conn = psycopg2.connect(
     user = pgre_login,
     password = pgre_password
 )
-
 
 current_time_start = datetime.now()
 ctsf = current_time_start.strftime("%Y-%m-%d %H:%M:%S")
@@ -261,13 +267,10 @@ for row in rows:
             
             # Вызов функции проверки на дубликаты 
             if (
-                seller not in ('Продажа мотоциклов и прицеп дач Вязынка', 
-                               'Склад мотоциклов по лучшей цене Вязынка', 
-                               '29 декабря цены увеличатся на 20% ( на НДС) успей купить.', 
-                               'Продажа мотоциклов д.Вязынка')
+                seller not in exclude_sellers
                 and int(capacity) >= 299 
                 and cylcount > 1 
-                and brand not in ('Днепр', 'Jawa', 'ИЖ', 'Эксклюзив', 'Racer', 'Урал', 'Cezet') 
+                and brand not in exclude_brands 
                 and duplicate_flag is False 
                 and condition != 'новый'
             ):
