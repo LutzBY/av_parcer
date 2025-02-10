@@ -1,5 +1,5 @@
 ##########################
-#id_to_check = 111355795
+#id_to_check = 111355795 114225903
 #########################
 
 import json
@@ -9,7 +9,6 @@ import pyperclip
 import tkinter as tk
 from tkinter import messagebox
 import sys
-import time
 
 # Функция для копирования текста в буфер обмена
 def copy_to_clipboard(text):
@@ -25,9 +24,26 @@ def copy_to_clipboard_and_write(text):
     organization_query = ("UPDATE av_full SET model_vlk = '%s' WHERE id = %s") % (vlk_to_write, id_to_check) 
     vlk_cursor.execute(organization_query)
     conn.commit()
-    root.destroy()  # Закрываем главное окно
-    sys.exit()  # Завершаем выполнение программы
+    root.destroy()
+    sys.exit()
 
+# Функция для записи exclude_flag
+def set_exclude_flag(id_to_check):
+    vlk_cursor = conn.cursor()
+    set_flag_query = ("UPDATE av_full SET exclude_flag = True WHERE id = %s") % (id_to_check) 
+    vlk_cursor.execute(set_flag_query)
+    conn.commit()
+
+# Функция для записи exclude_flag
+def set_exclude_flag_and_reset_mvlk(id_to_check):
+    vlk_cursor = conn.cursor()
+    set_flag_query = ("UPDATE av_full SET exclude_flag = True, model_vlk = '' WHERE id = %s") % (id_to_check) 
+    vlk_cursor.execute(set_flag_query)
+    conn.commit()
+    root.destroy()
+    sys.exit()
+
+# Сохранение айди из буфера обмена
 id_to_check = pyperclip.paste()
 
 #Проверка на айди
@@ -35,28 +51,10 @@ if not id_to_check.isdigit():
     messagebox.showinfo("Результат", "В буфере обмена не ID")
     sys.exit()
 
-headers = {
-    'authority': 'moto.av.by',
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-    'accept-language': 'ru,en;q=0.9',
-    'cache-control': 'no-cache',
-    'pragma': 'no-cache',
-    'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "YaBrowser";v="24.1", "Yowser";v="2.5"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'sec-fetch-dest': 'document',
-    'sec-fetch-mode': 'navigate',
-    'sec-fetch-site': 'same-origin',
-    'sec-fetch-user': '?1',
-    'upgrade-insecure-requests': '1',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
-}
 # Чтение json конфига
-with open('config.json', encoding="utf8") as file:
+with open('config.json') as file:
     config = json.load(file)
 
-mail_login = config['sender login']
-mail_password = config['sender password']
 pgre_login = config['postgre login']
 pgre_password = config['postgre password']
 pgre_host = config['postgre host']
@@ -160,24 +158,55 @@ vlkcursor.close()
 
 # Создаем основное окно
 root = tk.Tk()
-root.title(f"{brand} {model} {modification}, {year}, d - {capacity}, c - {cylcount}, t - {mtype}")
-root.geometry(f'500x{enumerat*115}') 
+root_title = (f"{brand} {model} {modification}, {year} г.в. \n{capacity} см3, {cylcount} цил.\nТип - {mtype}")
+label = tk.Label(root, text=root_title, justify="left", background='light grey')
+label.pack(anchor="w")
 
 # Создаем текстовые метки и кнопки для каждого результата
 for idx, result in enumerate(results, 1):
     # Отображаем текстовую информацию о каждом элементе
     text = f"{idx} --------\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}\n"
-    label = tk.Label(root, text=text, justify="left")
+    if result['ratio'] >= 50:
+        label = tk.Label(root, text=text, justify="left", background='light grey')
+    else:
+        label = tk.Label(root, text=text, justify="left")
     label.pack(anchor="w")
+
     # Создаем фрейм для кнопок
     button_frame = tk.Frame(root)
     button_frame.pack(anchor="w")
     # Создаем кнопку для копирования названия в буфер обмена
-    copy_button = tk.Button(button_frame, text="Скопировать", command=lambda text=result['name']: copy_to_clipboard(text))
+    copy_button = tk.Button(
+        button_frame, 
+        text="Скопировать",
+        command=lambda text=result['name']: copy_to_clipboard(text))
     copy_button.pack(side="left")
     # Создаем кнопку для прямой записи влк в базу
-    copy_and_write_button = tk.Button(button_frame, text="Записать", command=lambda text=result['name']: copy_to_clipboard_and_write(text))
+    copy_and_write_button = tk.Button(
+        button_frame, 
+        text="Записать", 
+        command=lambda text=result['name']: copy_to_clipboard_and_write(text))
     copy_and_write_button.pack(side="left")
+
+# Создаем еще фрейм для кнопок
+button_low_frame = tk.Frame(root, pady=10) #width=500, height=300
+button_low_frame.pack(anchor="w", fill="x")
+# Создаем нижние кнопки
+set_exclude_flag_button = tk.Button(
+    button_low_frame, 
+    text="Установить exclude flag true",
+    bg="orange",
+    command=lambda: set_exclude_flag(id_to_check)
+)
+set_exclude_flag_button.pack(side="top", padx=10, pady=5)
+
+set_exclude_flag_clear_vlk_button = tk.Button(
+    button_low_frame, 
+    text="Установить флаг и очистить vlk",
+    bg="orange",
+    command=lambda: set_exclude_flag_and_reset_mvlk(id_to_check)
+)
+set_exclude_flag_clear_vlk_button.pack(side="bottom", padx=10, pady=5) 
 
 # Запуск основного цикла приложения
 root.mainloop()
