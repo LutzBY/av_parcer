@@ -310,11 +310,12 @@ while stop_flag == False:
         # Работа курсора для пгри
         parsecursor.execute(parsequery)
         
-        # Вынять влк из базы
-        vlkquery = " SELECT model_vlk FROM av_full WHERE id = %s " % (id)
+        # Вынять влк и эксклюд флаш из базы
+        vlkquery = " SELECT model_vlk, exclude_flag FROM av_full WHERE id = %s " % (id)
         parsecursor.execute(vlkquery)
         vlkfetch = parsecursor.fetchone()
         mvlk_actual = vlkfetch[0]
+        exclude_flag_actual = vlkfetch[1]
         
         # Вынять средние цены по влк из базы
         prices_a_query = "SELECT AVG(price) as price_a FROM av_full WHERE model_vlk = '%s' AND status = 'Актуально'" % (mvlk_actual)
@@ -398,6 +399,7 @@ URL - {url}""")
 <p>{capacity} см3</p>
 <p>{mileage} км.</p>
 <p>{condition}</p>
+<p>Флаг exclude - {exclude_flag_actual}</p>
 </td>
 </tr>
 <tr style="height: 33px;">
