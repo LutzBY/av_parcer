@@ -76,7 +76,6 @@ old_rows_count = tmpfetch[0]
 print(f"Последняя дата объявления - {latest_ad_date.strftime('%Y-%m-%d-%H-%M-%S')}")
 datecursor.close()
 
-
 # Функция дополнения модели инф-ой из базы знаний по постре
 def add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_match): 
     model_concat = model
@@ -154,6 +153,45 @@ def send_email(subject, body, recipient):
         print(f'Email successfully sent to {recipient}')
     except Exception as e:
         print('Error sending email:', str(e))
+
+# Функция "ручной" проверки дубликатов
+def duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, seller, location, mileage):
+    duplcursor = conn.cursor()
+    query = """
+        SELECT id, url, duplicate_flag
+        FROM public.av_full
+        WHERE brand = %(brand)s
+          AND model = %(model)s
+          AND year = %(year)s
+          AND type = %(type)s
+          AND cylinders = %(cylinders)s
+          AND capacity = %(capacity)s
+          AND LOWER(seller) = %(seller)s
+          AND locations = %(location)s
+          AND mileage BETWEEN %(min_mileage)s AND %(max_mileage)s
+          AND duplicate_flag is false
+        AND id != %(id)s
+        ORDER BY date ASC;
+    """
+    params = {
+        'id': id,
+        'min_mileage': mileage * 0.7,
+        'max_mileage': mileage * 1.3,
+        'brand': brand, 
+        'model': model,
+        'year': year,
+        'type': mtype,
+        'cylinders': cylcount,
+        'capacity': capacity,
+        'seller':seller.lower(),
+        'location': location
+    }
+    duplcursor.execute(query, params)
+    dmc_results = duplcursor.fetchall()
+
+    duplcursor.close()
+
+    return dmc_results
 
 # Создание HTML отчета
 html_mail_contents = f"""
@@ -307,6 +345,13 @@ while stop_flag == False:
         if location in exclude_locations:
             exclude_flag = True
         
+        # Запуск функции проверки дубликатов
+        duplicate_html_block = f"""<p style="text-align: center;"><strong>Не найдено дубликатов</strong></p>""" # Формирование базового блока в хтмл "нет дублей"
+        if int(capacity) >= 299 and cylcount > 1 and brand not in exclude_brands:
+            manual_duplicate_results = duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, seller, location, mileage)
+        else:
+            manual_duplicate_results = []
+            
         # Скрипт для пгри
         parsequery = """
             INSERT INTO av_full(id, price, date, brand, model, model_misc, year, type, cylinders, drive, capacity, mileage, url, locations, status, status_date, model_vlk, seller, condition, exclude_flag, user_description)
@@ -316,6 +361,7 @@ while stop_flag == False:
             price = excluded.price
             WHERE av_full.id = excluded.id;
         """ % (id, price, datetime_obj, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, best_match, seller, condition, exclude_flag, user_description)
+        
         # Работа курсора для пгри
         parsecursor.execute(parsequery)
         
@@ -367,6 +413,18 @@ while stop_flag == False:
             break
         processed_ads += 1
 
+        # Дополнение хтмл отчета строчкой про дубликаты если они есть
+        if len(manual_duplicate_results) > 0:
+            duplicate_html_block = f"""<p style="text-align: center;"><strong>Найдены вероятные дубликаты:</strong></p>"""
+            duplicate_html_block += f"""<a href="{url}">{id}</a>""" # добавить сначала саму объяву
+            # Перебор результатов и проверка наличия дубликатов
+            for x in manual_duplicate_results:
+                duplicate_html_block += f""", """
+                m_d_id = x[0]
+                m_d_url = x[1]
+                m_d_df = x[2]
+                duplicate_html_block += f"""<a href="{m_d_url}">{m_d_id}</a>"""
+
         # Принт объявы и дополнение HTML contents (для маленьких сокращенный)
         print(f"-----------------------------------------------------------------")
         if int(capacity) >= 299 and cylcount > 1 and brand not in exclude_brands:
@@ -408,7 +466,7 @@ URL - {url}""")
 <p>{capacity} см3</p>
 <p>{mileage} км.</p>
 <p>{condition}</p>
-<p>Флаг exclude - {exclude_flag_actual}</p>
+<p>Флаг exclude - <strong>{exclude_flag_actual}</strong></p>
 </td>
 </tr>
 <tr style="height: 33px;">
@@ -421,6 +479,7 @@ URL - {url}""")
 <p style="text-align: center;">{seller}</p>
 <p style="text-align: center;"><strong>Локация</strong></p>
 <p style="text-align: center;">{location}</p>
+{duplicate_html_block}
 </td>
 </tr>
 <tr style="height: 10px;">
