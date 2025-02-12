@@ -37,8 +37,17 @@ def set_exclude_flag(id_to_check):
 # Функция кнопки для записи exclude_flag
 def set_exclude_flag_and_reset_mvlk(id_to_check):
     vlk_cursor = conn.cursor()
-    set_flag_query = ("UPDATE av_full SET exclude_flag = True, model_vlk = '' WHERE id = %s") % (id_to_check) 
-    vlk_cursor.execute(set_flag_query)
+    set_flag_and_reset_query = ("UPDATE av_full SET exclude_flag = True, model_vlk = '' WHERE id = %s") % (id_to_check) 
+    vlk_cursor.execute(set_flag_and_reset_query)
+    conn.commit()
+    root.destroy()
+    sys.exit()
+
+# Функция кнопки для удаления айди
+def delete_id(id_to_check):
+    vlk_cursor = conn.cursor()
+    delete_id_query = ("DELETE FROM av_full WHERE id = %s") % (id_to_check) 
+    vlk_cursor.execute(delete_id_query)
     conn.commit()
     root.destroy()
     sys.exit()
@@ -163,38 +172,51 @@ def vlk_process(id_to_check):
             button_frame, 
             text="Записать", 
             command=lambda text=result['name']: copy_to_clipboard_and_write(text))
-        copy_and_write_button.pack(side="left")
+        copy_and_write_button.pack(side="left", padx=5)
 
-    # Создаем еще один фрейм для нижних кнопок
-    button_low_frame = tk.Frame(root, pady=10) #width=500, height=300
-    button_low_frame.pack(anchor="w", fill="x")
+    # Создаем первый фрейм для нижних кнопок
+    button_low_frame1 = tk.Frame(root, pady=10) #width=500, height=300
+    button_low_frame1.pack(anchor="w", fill="x")
+
+    # Создаем второй фрейм для нижних кнопок
+    button_low_frame2 = tk.Frame(root, pady=10)
+    button_low_frame2.pack(anchor="w", fill="x")
 
     # Кнопка установить флаг
     set_exclude_flag_button = tk.Button(
-        button_low_frame, 
+        button_low_frame1, 
         text="Установить exclude flag true",
         bg="orange",
         command=lambda: set_exclude_flag(id_to_check)
     )
-    set_exclude_flag_button.pack(side="top", padx=10, pady=5)
+    set_exclude_flag_button.pack(side="left", padx=10, pady=5)
 
     # Кнопка повторного запуска скрипта (while process_flag)
     restart_button = tk.Button(
-        button_low_frame, 
+        button_low_frame2, 
         text="Перезапустить",
-        bg="red",
+        bg="green",
         command=lambda: (root.destroy(), vlk_process(id_to_check))  # Закрываем окно и перезапускаем процесс
     )
-    restart_button.pack(side="bottom", padx=10, pady=5)
+    restart_button.pack(side="left", padx=10, pady=5)
+
+    # Кнопка удаления искомого айди из базы
+    delete_button = tk.Button(
+        button_low_frame2, 
+        text="УДАЛИТЬ ЗАПИСЬ",
+        bg="red",
+        command=lambda: delete_id(id_to_check)
+    )
+    delete_button.pack(side="right", padx=10, pady=5)
 
     # Кнопка установить флаг и очистить влк
     set_exclude_flag_clear_vlk_button = tk.Button(
-        button_low_frame, 
+        button_low_frame1, 
         text="Установить флаг и очистить vlk",
         bg="orange",
         command=lambda: set_exclude_flag_and_reset_mvlk(id_to_check)
     )
-    set_exclude_flag_clear_vlk_button.pack(side="bottom", padx=10, pady=5)
+    set_exclude_flag_clear_vlk_button.pack(side="right", padx=10, pady=5)
 
     # Запуск основного цикла приложения
     root.mainloop()
