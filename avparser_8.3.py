@@ -330,6 +330,7 @@ while stop_flag == False:
         refresh_for_print = rdatetime_obj.strftime('%d.%m.%y %H:%M')
         seller = seller.replace("'", ".")
         modification = modification.replace("'", ".")
+        user_description = user_description.replace("'", ".")
                 
         # Вызов функции дополнения vlk
         best_match = None
