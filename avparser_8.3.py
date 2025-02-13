@@ -417,14 +417,13 @@ while stop_flag == False:
         # Дополнение хтмл отчета строчкой про дубликаты если они есть
         if len(manual_duplicate_results) > 0:
             duplicate_html_block = f"""<p style="text-align: center;"><strong>Найдены вероятные дубликаты:</strong></p>"""
-            duplicate_html_block += f"""<a href="{url}">{id}</a>""" # добавить сначала саму объяву
+            #duplicate_html_block += f"""<a href="{url}">Осн. - {id}</a>""" # добавить сначала саму объяву
             # Перебор результатов и проверка наличия дубликатов
             for x in manual_duplicate_results:
-                duplicate_html_block += f""", """
                 m_d_id = x[0]
                 m_d_url = x[1]
-                m_d_df = x[2]
-                duplicate_html_block += f"""<a href="{m_d_url}">{m_d_id}</a>"""
+                if x != manual_duplicate_results[-1]:
+                    duplicate_html_block += f""", """
 
         # Принт объявы и дополнение HTML contents (для маленьких сокращенный)
         print(f"-----------------------------------------------------------------")
