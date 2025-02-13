@@ -165,7 +165,7 @@ def duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, selle
           AND year = %(year)s
           AND type = %(type)s
           AND cylinders = %(cylinders)s
-          AND capacity = %(capacity)s
+          AND capacity BETWEEN %(min_capacity)s AND %(max_capacity)s
           AND LOWER(seller) = %(seller)s
           AND locations = %(location)s
           AND mileage BETWEEN %(min_mileage)s AND %(max_mileage)s
@@ -177,12 +177,13 @@ def duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, selle
         'id': id,
         'min_mileage': mileage * 0.7,
         'max_mileage': mileage * 1.3,
+        'min_capacity': capacity * 0.9,
+        'max_capacity': capacity * 1.1,
         'brand': brand, 
         'model': model,
         'year': year,
         'type': mtype,
         'cylinders': cylcount,
-        'capacity': capacity,
         'seller':seller.lower(),
         'location': location
     }
