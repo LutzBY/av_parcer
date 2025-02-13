@@ -52,6 +52,63 @@ def delete_id(id_to_check):
     root.destroy()
     sys.exit()
 
+# Функция кнопки для пометки дубликатов
+def mark_duplicates_and_set_oldest_date_in_(id_to_check):
+    def on_enter(event=None):
+        # Получаем текст из поля ввода
+        dupl_id_list = entry.get()
+        if not dupl_id_list.strip():
+            messagebox.showwarning("Ошибка", "Поле не должно быть пустым!")
+            return
+        
+        try: # Выполнение квери на замену дубликатов
+            dupl_cursor = conn.cursor()
+
+            # квери выставить флажок дубликата
+            dupl_query1 = """SELECT date
+            FROM public.av_full
+            WHERE id in (%s)
+            order by date asc""" % (dupl_id_list)
+            dupl_cursor.execute(dupl_query1)
+            dupl_earliest_date = dupl_cursor.fetchone()
+            dupl_earliest_date = dupl_earliest_date[0]
+
+            # квери для дубликатов - выставить флажок дубликата и записать duplicate_id
+            dupl_query2 = """UPDATE public.av_full
+            SET duplicate_flag = True, duplicate_id = %s
+            WHERE id in (%s);""" % (id_to_check, dupl_id_list)
+            dupl_cursor.execute(dupl_query2)
+
+            # квери для искомого id - выставить более старую дату
+            dupl_query3 = """UPDATE public.av_full
+            SET date = '%s'
+            WHERE id = %s;""" % (dupl_earliest_date, id_to_check)
+            dupl_cursor.execute(dupl_query3)
+
+            # Закрываем окно после успешного ввода
+            entry_window.destroy()
+            conn.commit()
+            root.destroy()
+            sys.exit()
+
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
+    
+    # Окно для ввода
+    entry_window = tk.Toplevel(root)
+    entry_window.title("Дубликаты через запятую")
+    
+    # Поле ввода
+    entry = tk.Entry(entry_window, width=50)
+    entry.pack(pady=5)
+    entry.bind("<Return>", on_enter)  # Нажатие Enter для вызова функции on_enter
+
+    # Устанавливаем фокус на поле ввода
+    entry.focus_set()
+
+    # Запуск окна
+    entry_window.mainloop()
+
 ### Основная функция
 def vlk_process(id_to_check):
     global root
@@ -217,6 +274,15 @@ def vlk_process(id_to_check):
         command=lambda: set_exclude_flag_and_reset_mvlk(id_to_check)
     )
     set_exclude_flag_clear_vlk_button.pack(side="right", padx=10, pady=5)
+
+    # Кнопка запуска пометки дубликатов
+    mark_duplicates_button = tk.Button(
+        button_low_frame2, 
+        text="Пометить дубликаты",
+        bg="orange",
+        command=lambda: mark_duplicates_and_set_oldest_date_in_(id_to_check)
+    )
+    mark_duplicates_button.pack(side="bottom", padx=10, pady=5)
 
     # Запуск основного цикла приложения
     root.mainloop()
