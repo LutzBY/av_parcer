@@ -137,6 +137,7 @@ def check_for_duplicates (id_value):
     cursor.execute(select_query)
     dupl_rows = cursor.fetchall()
     dupl_count = 0 # счетчик количества объяв-дубликатов
+    is_not_yet_marked_as_duplicate = 0 # были ли в выборке уже помеченные как дубликаты объявы
 
     if dupl_rows:
         dupl_id_list = []
@@ -149,6 +150,8 @@ def check_for_duplicates (id_value):
             dupl_id_list.append(dupl_id)
             #print(f"id - {dupl_id}, дата - {dupl_dates}")
             dupl_count += 1
+            if dupl_n[13] is False:
+                is_not_yet_marked_as_duplicate += 1
 
         dupl_date = min(dupl_date_list)
         
@@ -171,6 +174,7 @@ def check_for_duplicates (id_value):
         
         # записать изменения
         conn.commit()
+    if is_not_yet_marked_as_duplicate > 0:
         return 1
     else:
         print(f'Дубликатов для id:{id_value} не обнаружено')
