@@ -202,21 +202,48 @@ def vlk_process(id_to_check):
     # Сортируем список results для передачи его по убыванию ratio
     results = sorted(results, key=lambda x: x['ratio'], reverse=True)
 
-    # Создание окна gui
+    ## Блок окна tk inter
+    # Создание самого объекта окна gui
     root = tk.Tk()
     root_title = (f"{brand} {model} {modification}, {year} г.в. \n{capacity} см3, {cylcount} цил.\nТип - {mtype}")
     label = tk.Label(root, text=root_title, justify="left", background='light grey')
     label.pack(anchor="w")
+    root.minsize(420, 600)
 
-    # Его заполнение каждым результатом
+    # Создаем в нем фрейм для скроллинга
+    scrollable_frame = tk.Frame(root)
+    scrollable_frame.pack(fill="both", expand=True)
+
+    # Добавляем объект Canvas для прокрутки
+    canvas = tk.Canvas(scrollable_frame)
+    canvas.pack(side="left", fill="both", expand=True)
+
+    # Добавляем объект Scrollbar и связываем с Canvas
+    scrollbar = tk.Scrollbar(scrollable_frame, orient="vertical", command=canvas.yview)
+    scrollbar.pack(side="right", fill="y")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    # Создаем главный внутренний фрейм, который будет содержать все элементы
+    inner_frame = tk.Frame(canvas)
+
+    # Создаем окно, чтобы Canvas мог отображать содержимое внутреннего фрейма
+    canvas.create_window((0, 0), window=inner_frame, anchor="nw")
+
+    # Функция для обновления размеров Canvas при изменении размеров внутреннего фрейма
+    def update_canvas(event):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+
+    inner_frame.bind("<Configure>", update_canvas)
+
+    # Заполнение окна каждым результатом
     for idx, result in enumerate(results, 1):
         # Отображаем текстовую информацию о каждом элементе
         text = f"{idx} --------\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}\n"
-        label = tk.Label(root, text=text, justify="left")
+        label = tk.Label(inner_frame, text=text, justify="left")
         label.pack(anchor="w")
 
         # Создаем фрейм для кнопок
-        button_frame = tk.Frame(root)
+        button_frame = tk.Frame(inner_frame)
         button_frame.pack(anchor="w")
         # Создаем кнопку для копирования названия в буфер обмена
         copy_button = tk.Button(
@@ -232,11 +259,11 @@ def vlk_process(id_to_check):
         copy_and_write_button.pack(side="left", padx=5)
 
     # Создаем первый фрейм для нижних кнопок
-    button_low_frame1 = tk.Frame(root, pady=10) #width=500, height=300
+    button_low_frame1 = tk.Frame(inner_frame, pady=10) #width=500, height=300
     button_low_frame1.pack(anchor="w", fill="x")
 
     # Создаем второй фрейм для нижних кнопок
-    button_low_frame2 = tk.Frame(root, pady=10)
+    button_low_frame2 = tk.Frame(inner_frame, pady=10)
     button_low_frame2.pack(anchor="w", fill="x")
 
     # Кнопка установить флаг
@@ -279,7 +306,7 @@ def vlk_process(id_to_check):
     mark_duplicates_button = tk.Button(
         button_low_frame2, 
         text="Пометить дубликаты",
-        bg="orange",
+        bg="violet",
         command=lambda: mark_duplicates_and_set_oldest_date_in_(id_to_check)
     )
     mark_duplicates_button.pack(side="bottom", padx=10, pady=5)
