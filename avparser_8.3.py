@@ -423,6 +423,7 @@ while stop_flag == False:
             for x in manual_duplicate_results:
                 m_d_id = x[0]
                 m_d_url = x[1]
+                duplicate_html_block += f"""<a href="{m_d_id}">{m_d_url}</a>"""
                 if x != manual_duplicate_results[-1]:
                     duplicate_html_block += f""", """
 
