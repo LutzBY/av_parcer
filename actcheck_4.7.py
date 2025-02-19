@@ -358,7 +358,7 @@ mail_contents = (f"""
     не открылась страница у {broken_link_count} штук
 Цена изменилась у {price_changed_count} штук
 Общее именение цен составило {price_difference_sum} USD
-Найдено объявлений с дубликатами - {duplicates_global_count} шт.
+Записано объявлений с дубликатами - {duplicates_global_count} шт.
 Спасибо за внимание <3
 """
 )
