@@ -103,8 +103,8 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check):
     entry.pack(pady=5)
     entry.bind("<Return>", on_enter)  # Нажатие Enter для вызова функции on_enter
 
-    # Устанавливаем фокус на поле ввода
-    entry.focus_set()
+    # Устанавливаем фокус на поле ввода 
+    #entry.focus_set() # багует ctrl+c ctrl+v
 
     # Запуск окна
     entry_window.mainloop()
