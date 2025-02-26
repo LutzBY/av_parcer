@@ -349,7 +349,12 @@ while stop_flag == False:
         
         # Запуск функции проверки дубликатов
         duplicate_html_block = f"""<p style="text-align: center;"><strong>Не найдено дубликатов</strong></p>""" # Формирование базового блока в хтмл "нет дублей"
-        if int(capacity) >= 299 and cylcount > 1 and brand not in exclude_brands:
+        if (
+            int(capacity) >= 299
+            and cylcount > 1
+            and brand not in exclude_brands
+            and condition != 'новый'
+        ):
             manual_duplicate_results = duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, seller, location, mileage)
         else:
             manual_duplicate_results = []
