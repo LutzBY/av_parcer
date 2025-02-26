@@ -64,8 +64,8 @@ current_time_start = datetime.now()
 ctsf = current_time_start.strftime("%Y-%m-%d %H:%M:%S")
 print(f"Привет! Текущая дата - {ctsf}")
 
-# Забираем всю таблицу и НЕ делаем бекап
 cursor = conn.cursor()
+# Забираем всю таблицу и НЕ делаем бекап
 select_query = "SELECT * from av_full"
 cursor.execute(select_query)
 rows_full = cursor.fetchall()
@@ -329,6 +329,13 @@ for row in rows:
     
     time.sleep(wait_amount)
 
+# После обработки получить актуальные данные из базы - дубликаты
+select_query = """select count(duplicate_flag)
+from av_full
+where duplicate_flag is true"""
+cursor.execute(select_query)
+duplicates_in_db = cursor.fetchone()[0]
+
 # Закрытие курсора и подключения    
 cursor.close()
 conn.close()
@@ -359,6 +366,7 @@ mail_contents = (f"""
 Цена изменилась у {price_changed_count} штук
 Общее именение цен составило {price_difference_sum} USD
 Записано объявлений с дубликатами - {duplicates_global_count} шт.
+Всего сейчас в базе дубликатов - {duplicates_in_db} шт.
 Спасибо за внимание <3
 """
 )
