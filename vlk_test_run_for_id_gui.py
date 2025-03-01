@@ -115,7 +115,7 @@ def vlk_process(id_to_check):
 
     cursor = conn.cursor()
     query = """
-        SELECT brand, model, model_misc, year, cylinders, capacity, type
+        SELECT brand, model, model_misc, year, cylinders, capacity, type, model_vlk
         FROM av_full
         WHERE id IN (%s);
     """ % id_to_check
@@ -123,7 +123,7 @@ def vlk_process(id_to_check):
     row = cursor.fetchall()
 
     # Функция дополнения модели инф-ой из базы знаний по постре
-    brand, model, modification, year, cylcount, capacity, mtype = row[0]
+    brand, model, modification, year, cylcount, capacity, mtype, actual_vlk = row[0]
     if modification:
         model_concat = model + " " + modification
     else:
@@ -205,7 +205,7 @@ def vlk_process(id_to_check):
     ## Блок окна tk inter
     # Создание самого объекта окна gui
     root = tk.Tk()
-    root_title = (f"{brand} {model} {modification}, {year} г.в. \n{capacity} см3, {cylcount} цил.\nТип - {mtype}")
+    root_title = (f"{brand} {model} {modification}, {year} г.в. \n{capacity} см3, {cylcount} цил.\nТип - {mtype},\nVLK - {actual_vlk}")
     label = tk.Label(root, text=root_title, justify="left", background='light grey')
     label.pack(anchor="w")
     root.minsize(420, 600)
