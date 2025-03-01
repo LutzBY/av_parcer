@@ -175,8 +175,8 @@ def duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, selle
     """
     params = {
         'id': id,
-        'min_mileage': mileage * 0.7,
-        'max_mileage': mileage * 1.3,
+        'min_mileage': int(mileage) * 0.7,
+        'max_mileage': int(mileage) * 1.3,
         'min_capacity': int(capacity) * 0.9,
         'max_capacity': int(capacity) * 1.1,
         'brand': brand, 
