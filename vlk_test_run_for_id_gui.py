@@ -197,9 +197,9 @@ def vlk_process(id_to_check):
 
         print(f"""
     {enumerat} --------
-    {model_found} ({count_vlk} шт.)
+    {model_found}
     {mtype_found}
-    ratio = {model_comp}, vlk_id = {vlk_id}""")
+    ratio = {model_comp}, vlk_id = {vlk_id}, в базе - {count_vlk} шт.""")
         
         best_model, best_ratio = max(model_ratio_list, key=lambda x: x[1])
         best_match = best_model
@@ -248,7 +248,7 @@ def vlk_process(id_to_check):
 
     for idx, result in enumerate(results, 1):
         # Отображаем текстовую информацию о каждом элементе
-        text = f"{idx} ------ {result['vlk_sums']} шт.\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}\n"
+        text = f"{idx} ------\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}, в базе - {result['vlk_sums']} шт.\n"
         label = tk.Label(inner_frame, text=text, justify="left")
         label.pack(anchor="w")
 
