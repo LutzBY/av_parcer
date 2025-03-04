@@ -104,7 +104,7 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check):
     entry.bind("<Return>", on_enter)  # Нажатие Enter для вызова функции on_enter
 
     # Устанавливаем фокус на поле ввода 
-    #entry.focus_set() # багует ctrl+c ctrl+v
+    #entry.focus_set() # багует ctrl+c ctrl+v (нет, багует раскладка, это просто не нужно ща)
 
     # Запуск окна
     entry_window.mainloop()
@@ -183,12 +183,21 @@ def vlk_process(id_to_check):
                 enumerat +=1
         model_ratio_list = list(zip(best_match_list, match_ratio))
 
+        # Подсчет сколько встречается найденное влк
+        count_vlk_query = """
+        select count(model_vlk)
+        from av_full
+        where model_vlk = '%s'
+        """ % model_found
+        vlkcursor.execute(count_vlk_query)
+        count_vlk = vlkcursor.fetchone()[0]
+
         # Запись найденного результата
-        results.append({"№": enumerat,"name": model_found, "type": mtype_found, "ratio": model_comp, "vlk_id": vlk_id})
-        
+        results.append({"№": enumerat,"name": model_found, "type": mtype_found, "ratio": model_comp, "vlk_id": vlk_id, "vlk_sums": count_vlk},)
+
         print(f"""
     {enumerat} --------
-    {model_found}
+    {model_found} ({count_vlk} шт.)
     {mtype_found}
     ratio = {model_comp}, vlk_id = {vlk_id}""")
         
@@ -236,9 +245,10 @@ def vlk_process(id_to_check):
     inner_frame.bind("<Configure>", update_canvas)
 
     # Заполнение окна каждым результатом
+
     for idx, result in enumerate(results, 1):
         # Отображаем текстовую информацию о каждом элементе
-        text = f"{idx} --------\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}\n"
+        text = f"{idx} ------ {result['vlk_sums']} шт.\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}\n"
         label = tk.Label(inner_frame, text=text, justify="left")
         label.pack(anchor="w")
 
