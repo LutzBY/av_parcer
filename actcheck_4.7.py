@@ -150,7 +150,7 @@ def check_for_duplicates (id_value):
             dupl_id_list.append(dupl_id)
             #print(f"id - {dupl_id}, дата - {dupl_dates}")
             dupl_count += 1
-            if dupl_n[13] is False:
+            if dupl_n[12] is False:
                 is_not_yet_marked_as_duplicate += 1
 
         dupl_date = min(dupl_date_list)
