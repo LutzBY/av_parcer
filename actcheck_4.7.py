@@ -168,7 +168,7 @@ def check_for_duplicates (id_value):
 
         # квери выставить новую дату
         query2 = """UPDATE public.av_full
-        SET date = '%s'
+        SET date_corrected = '%s'
         WHERE id = %d;""" % (dupl_date, id_value)
         cursor.execute(query2)
         

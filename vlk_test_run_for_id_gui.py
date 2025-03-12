@@ -81,7 +81,7 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check):
 
             # квери для искомого id - выставить более старую дату
             dupl_query3 = """UPDATE public.av_full
-            SET date = '%s'
+            SET date_corrected = '%s'
             WHERE id = %s;""" % (dupl_earliest_date, id_to_check)
             dupl_cursor.execute(dupl_query3)
 
