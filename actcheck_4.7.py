@@ -124,7 +124,7 @@ def set_orgainsation (id_value):
 # Функция проверки на дубликаты
 def check_for_duplicates (id_value):
     # Ищем дубликат по id_value, список не будет содержать строку искомого айди
-    select_query = """SELECT id, date, price, model_vlk, brand, model, model_misc, year, type, cylinders, capacity, mileage, exclude_flag, url
+    select_query = """SELECT id, date, price, model_vlk, brand, model, model_misc, year, type, cylinders, capacity, mileage, duplicate_flag, url
     FROM public.av_full
     WHERE (brand, model, model_misc, year, type, cylinders, capacity, mileage, seller, locations) = 
     (
