@@ -172,7 +172,7 @@ def vlk_process(id_to_check):
         else:
             if mtype_found == mtype:
                 model_comp = fuzz.token_set_ratio(model_concat.lower(), model_found.lower())
-                match_ratio.append(model_comp * 1.2)
+                match_ratio.append(model_comp * 1.25)
                 best_match_list.append(model_found)
                 enumerat +=1
                 
