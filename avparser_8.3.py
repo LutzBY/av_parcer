@@ -380,8 +380,8 @@ while stop_flag == False:
         exclude_flag_actual = vlkfetch[1]
         
         # Вынять средние цены по влк из базы
-        prices_a_query = "SELECT AVG(price) as price_a FROM av_full WHERE model_vlk = '%s' AND status = 'Актуально'" % (mvlk_actual)
-        prices_f_query = "SELECT AVG(price) as price_f FROM av_full WHERE model_vlk = '%s'" % (mvlk_actual)
+        prices_a_query = "SELECT AVG(price) as price_a, COUNT(*) as price_a_count FROM av_full WHERE model_vlk = '%s' AND status = 'Актуально'" % (mvlk_actual)
+        prices_f_query = "SELECT AVG(price) as price_f, COUNT(*) as price_f_count FROM av_full WHERE model_vlk = '%s'" % (mvlk_actual)
 
         parsecursor.execute(prices_a_query)
         price_a_result = parsecursor.fetchone()
@@ -389,8 +389,11 @@ while stop_flag == False:
         parsecursor.execute(prices_f_query)
         price_f_result = parsecursor.fetchone()
 
+        # вынимаем цены и количество вхождений по влк
         price_a = price_a_result[0] if price_a_result[0] is not None else None
+        price_a_count = price_a_result[1] if price_a_result[1] is not None else None
         price_f = price_f_result[0] if price_f_result[0] is not None else None
+        price_f_count = price_f_result[1] if price_f_result[1] is not None else None
 
         if price_a is not None and mvlk_actual not in (None, '', ' '):
             price_a = int(price_a)
@@ -498,7 +501,7 @@ URL - {url}""")
 <td style="text-align: center; height: 62px; width: 484.953px;">
 <h4><strong>{price} USD</strong></h4>
 </td>
-<td style="text-align: center; width: 108.281px;" colspan="4"><strong>Ценовая статистика согласно актуальному vlk:</strong><br />Средняя по актуальным = {price_a}, разница = <span style="color: {price_color_a};">{price_dif_fr_act}</span><br />Средняя за все время = {price_f}, разница = <span style="color: {price_color_f};">{price_dif_fr_full}</span><strong><br /></strong></td>
+<td style="text-align: center; width: 108.281px;" colspan="4"><strong>Ценовая статистика согласно актуальному vlk:</strong><br />AVG по актуальным = {price_a} ({price_a_count} шт.), разница = <span style="color: {price_color_a};">{price_dif_fr_act}</span><br />AVG за все время = {price_f} ({price_f_count} шт.), разница = <span style="color: {price_color_f};">{price_dif_fr_full}</span><strong><br /></strong></td>
 </tr>
 </tbody>
 </table>
