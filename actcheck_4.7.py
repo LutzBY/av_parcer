@@ -188,7 +188,7 @@ def check_for_duplicates (id_value):
 def phone_get_request(id_value):
     phone_url = f"https://api.av.by/offers/{id_value}/phones" 
     phone_response = requests.get(phone_url, headers=headers)
-    p_to_write = ''
+    p_to_write = []
 
     # Проверка успешности
     if phone_response.status_code == 200:
@@ -198,11 +198,7 @@ def phone_get_request(id_value):
             p_code = phone['country']['code']
             p_number = phone['number']
             p_full_number = f"+{p_code}{p_number}"
-            if phone != phone_data[-1]:
-                p_to_write += f'{p_full_number}, '
-            else:
-                p_to_write += f'{p_full_number}'
-            
+            p_to_write.append(p_full_number)
         # пишем
         phone_query = """
         UPDATE av_full
@@ -211,8 +207,8 @@ def phone_get_request(id_value):
         """
         cursor.execute(phone_query, (p_to_write, id_value))
         conn.commit()
-        print(f"Для ID {id_value} записан номер: {p_to_write}")
-        return 1  
+        print(f"Для ID {id_value} записан(ы) номер(а): {p_to_write}")
+        return 1
     else:
         print(f"Ошибка {phone_response.status_code}: {phone_response.text}")
         return 0
