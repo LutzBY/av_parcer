@@ -32,8 +32,8 @@ headers = {
 }
     # если теперь что-то будет не так, то попробовать requests.Session()
     #подставить ключи если будет надо
-    #"X-Api-Key": "kec36f6b4e7c7d170fd17fb4",
-    #"X-User-Group": "233823956-55a7-4841-82de-47dab28f0fbd",
+    #"X-Api-Key": "-",
+    #"X-User-Group": "-",
 
 # Чтение json конфига
 with open('config.json') as file:
