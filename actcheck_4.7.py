@@ -30,6 +30,10 @@ headers = {
     'upgrade-insecure-requests': '1',
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
 }
+    # если теперь что-то будет не так, то попробовать requests.Session()
+    #подставить ключи если будет надо
+    #"X-Api-Key": "kec36f6b4e7c7d170fd17fb4",
+    #"X-User-Group": "233823956-55a7-4841-82de-47dab28f0fbd",
 
 # Чтение json конфига
 with open('config.json') as file:
@@ -74,7 +78,7 @@ print(f"Строк в базе: {rows_count}")
 
 # Готовим нужные столбцы и строки
 select_query = """
-SELECT id, status, status_date, url, price, seller, capacity, cylinders, brand, condition
+SELECT id, status, status_date, url, price, seller, capacity, cylinders, brand, condition, seller_ph_nr
 FROM av_full 
 WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке')
 ORDER by date desc
@@ -180,6 +184,39 @@ def check_for_duplicates (id_value):
         print(f'Дубликатов для id:{id_value} не обнаружено')
         return 0
 
+# Функция получения и записи номера продавца
+def phone_get_request(id_value):
+    phone_url = f"https://api.av.by/offers/{id_value}/phones" 
+    phone_response = requests.get(phone_url, headers=headers)
+    p_to_write = ''
+
+    # Проверка успешности
+    if phone_response.status_code == 200:
+        phone_data = phone_response.json()  # Получаем джсон
+        for phone in phone_data:
+            p_country = phone['country']['label']
+            p_code = phone['country']['code']
+            p_number = phone['number']
+            p_full_number = f"+{p_code}{p_number}"
+            if phone != phone_data[-1]:
+                p_to_write += f'{p_full_number}, '
+            else:
+                p_to_write += f'{p_full_number}'
+            
+        # пишем
+        phone_query = """
+        UPDATE av_full
+        SET seller_ph_nr = %s
+        WHERE id = %s
+        """
+        cursor.execute(phone_query, (p_to_write, id_value))
+        conn.commit()
+        print(f"Для ID {id_value} записан номер: {p_to_write}")
+        return 1  
+    else:
+        print(f"Ошибка {phone_response.status_code}: {phone_response.text}")
+        return 0
+
 # Подсчет итераций
 changed_status_count = 0
 stayed_active_count = 0
@@ -189,6 +226,7 @@ price_changed_count = 0
 price_difference_sum = 0
 broken_link_count = 0
 duplicates_global_count = 0
+phone_writed_counter = 0
 
 # Сам цикл
 for row in rows:
@@ -203,6 +241,7 @@ for row in rows:
     cylcount = int(row[7])
     brand = row[8]
     condition = row[9]
+    seller_ph_nr = row[10]
     
     # вынимаем свежий флаг
     flag_query = """
@@ -310,6 +349,18 @@ for row in rows:
                 update_and_write('Актуально', 'null', id_value)
                 stayed_active_count += 1 # Крутим счетчик
                 
+                # Вызываем функцию поиска номера для активных объяв
+                if (
+                    int(capacity) >= 299 # это чтобы исключить индурики
+                    and cylcount > 1 # это тоже чтобы исключить индурики
+                    and brand not in exclude_brands # это совкоциклы и гавно
+                    and seller_ph_nr is None  
+                ):
+                    phone_writed_counter += phone_get_request(id_value)
+                else:
+                    print(f'Запись номера для id:{id_value} не проводится')
+                
+                
         # Если страница открылась но она с домиком 404
         except (KeyError, json.JSONDecodeError, TypeError):
             # Обн. базу, уст. статус и стат. дату для соотв id
@@ -367,6 +418,7 @@ mail_contents = (f"""
 Общее именение цен составило {price_difference_sum} USD
 Записано объявлений с дубликатами - {duplicates_global_count} шт.
 Всего сейчас в базе дубликатов - {duplicates_in_db} шт.
+Записано номеров телефонов - {phone_writed_counter} шт.
 Спасибо за внимание <3
 """
 )
