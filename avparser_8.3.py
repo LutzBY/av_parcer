@@ -557,5 +557,3 @@ for recipient in recipients:
 # Записать-закрыть курсор
 conn.commit()
 conn.close()
-
-print(f'Обработаны id {ids}') # отладочный список обработанных объявлений
