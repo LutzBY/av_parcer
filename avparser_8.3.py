@@ -502,7 +502,7 @@ URL - {url}""")
 </tr>
 <tr style="height: 62px;">
 <td style="text-align: center; height: 62px; width: 484.953px;">
-<h4><strong>Ценовая статистика согласно актуальному vlk:</strong><br/>Средняя по актуальным = {price_a} ({price_a_count} шт.), разница = <span style="color: {price_color_a};">{price_dif_fr_act}</span><br/>Средняя за все время = {price_f} ({price_f_count} шт.), разница = <span style="color: {price_color_f};">{price_dif_fr_full}</span></h4>
+<strong>Ценовая статистика согласно актуальному vlk:</strong><br/>Средняя по актуальным = {price_a} ({price_a_count} шт.), разница = <span style="color: {price_color_a};">{price_dif_fr_act}</span><br/>Средняя за все время = {price_f} ({price_f_count} шт.), разница = <span style="color: {price_color_f};">{price_dif_fr_full}</span>
 </td>
 <td style="text-align: center; width: 108.281px;" colspan="4"><strong>{price} USD</strong></td>
 </tr>
