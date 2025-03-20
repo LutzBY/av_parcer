@@ -384,6 +384,24 @@ where duplicate_flag is true"""
 cursor.execute(select_query)
 duplicates_in_db = cursor.fetchone()[0]
 
+# Проверка на новые юрлица
+select_query = """
+SELECT count (af.id)
+FROM AV_FULL af
+LEFT JOIN av_organizations ao
+ON af.seller_id = ao.id
+WHERE title is null
+AND seller_id is not null
+GROUP BY seller
+ORDER BY count desc
+"""
+cursor.execute(select_query)
+new_companies = cursor.fetchone()
+if new_companies:
+    new_companies_print = f'Найдено {new_companies[0]} новых юрлиц. Прошу внести!'
+else:
+    new_companies_print = 'Нет новых юрлиц'
+
 # Закрытие курсора и подключения    
 cursor.close()
 conn.close()
@@ -411,11 +429,12 @@ mail_contents = (f"""
     закрытый статус сохранился у {unchanged_status_count} штук,
     ссылка недоступна у {dead_link_count} штук
     не открылась страница у {broken_link_count} штук
-Цена изменилась у {price_changed_count} штук
-Общее именение цен составило {price_difference_sum} USD
-Записано объявлений с дубликатами - {duplicates_global_count} шт.
-Всего сейчас в базе дубликатов - {duplicates_in_db} шт.
-Записано номеров телефонов - {phone_writed_counter} шт.
+- Цена изменилась у {price_changed_count} штук
+- Общее именение цен составило {price_difference_sum} USD
+- Записано объявлений с дубликатами - {duplicates_global_count} шт.
+- Всего сейчас в базе дубликатов - {duplicates_in_db} шт.
+- Записано номеров телефонов - {phone_writed_counter} шт.
+- {new_companies_print}
 Спасибо за внимание <3
 """
 )
