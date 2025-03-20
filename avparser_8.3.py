@@ -383,8 +383,19 @@ while stop_flag == False:
         exclude_flag_actual = vlkfetch[1]
         
         # Вынять средние цены по влк из базы
-        prices_a_query = "SELECT AVG(price) as price_a, COUNT(*) as price_a_count FROM av_full WHERE model_vlk = '%s' AND status = 'Актуально'" % (mvlk_actual)
-        prices_f_query = "SELECT AVG(price) as price_f, COUNT(*) as price_f_count FROM av_full WHERE model_vlk = '%s'" % (mvlk_actual)
+        prices_a_query = """
+            SELECT AVG(price) as price_a, COUNT(*) as price_a_count 
+            FROM av_full 
+            WHERE model_vlk = '%s'
+            AND status = 'Актуально'
+            AND duplicate_flag is FALSE
+            AND exclude_flag is FALSE""" % (mvlk_actual)
+        prices_f_query = """
+            SELECT AVG(price) as price_a, COUNT(*) as price_a_count 
+            FROM av_full 
+            WHERE model_vlk = '%s'
+            AND duplicate_flag is FALSE
+            AND exclude_flag is FALSE""" % (mvlk_actual)
 
         parsecursor.execute(prices_a_query)
         price_a_result = parsecursor.fetchone()
