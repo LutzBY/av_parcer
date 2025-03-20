@@ -309,7 +309,8 @@ for row in rows:
                 seller not in exclude_sellers
                 and int(capacity) >= 299 
                 and cylcount > 1 
-                and brand not in exclude_brands 
+                and brand not in exclude_brands
+                and seller not in exclude_sellers
                 and duplicate_flag is False 
                 and condition != 'новый'
             ):
