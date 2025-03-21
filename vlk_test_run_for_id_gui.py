@@ -109,7 +109,78 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check):
     # Запуск окна
     entry_window.mainloop()
 
-### Основная функция
+# Функция изменения данных и перезапуска скрипта
+def update_and_restart(id_to_check, capacity, cylcount, year, conn, root, vlk_process):
+    def on_save_and_restart(): # Функция кнопки "Сохранить и перезапустить"
+        # Через гет получаем новые значения которые вводятся в поля
+        new_capacity = entry_capacity.get().strip()
+        new_cylinders = entry_cylinders.get().strip()
+        new_year = entry_year.get().strip()
+
+        if not new_capacity or not new_cylinders or not new_year:
+            messagebox.showwarning("Ошибка", "Все поля должны быть заполнены!")
+            return
+    
+        try:
+            # Выполняем UPDATE
+            cursor = conn.cursor()
+            query = f"""
+                UPDATE public.av_full
+                   SET capacity = '{new_capacity}',
+                       cylinders = '{new_cylinders}',
+                       year = '{new_year}'
+                 WHERE id = {id_to_check};
+            """
+            cursor.execute(query)
+            conn.commit()
+
+            # Закрываем текущее окно редактирования
+            edit_window.destroy()
+
+            # Запускаем функцию заново по новым данным
+            root.destroy()
+            vlk_process(id_to_check)
+
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
+            return
+
+    # Создаём Toplevel-окно
+    edit_window = tk.Toplevel(root)
+    edit_window.title("Редактирование")
+
+    # Метки и поля для capacity
+    lbl_capacity = tk.Label(edit_window, text="Объём (capacity):")
+    lbl_capacity.pack(pady=(10, 0))
+    entry_capacity = tk.Entry(edit_window, width=20)
+    entry_capacity.pack(pady=5)
+    entry_capacity.insert(0, str(capacity))  # Предзаполняем
+
+    # Метки и поля для cylinders
+    lbl_cylinders = tk.Label(edit_window, text="Число цилиндров (cylcount):")
+    lbl_cylinders.pack(pady=(10, 0))
+    entry_cylinders = tk.Entry(edit_window, width=20)
+    entry_cylinders.pack(pady=5)
+    entry_cylinders.insert(0, str(cylcount))  # Предзаполняем
+
+    # Метки и поля для year
+    lbl_year = tk.Label(edit_window, text="Год выпуска (year):")
+    lbl_year.pack(pady=(10, 0))
+    entry_year = tk.Entry(edit_window, width=20)
+    entry_year.pack(pady=5)
+    entry_year.insert(0, str(year))  # Предзаполняем
+
+    # Кнопка "Сохранить и перезапустить"
+    btn_save = tk.Button(edit_window, text="Сохранить и перезапустить", command=on_save_and_restart)
+    btn_save.pack(pady=10)
+
+    # Фокус на поле ввода
+    entry_capacity.focus_set()
+
+    # Запуск цикла сообщений для окна
+    edit_window.mainloop()
+
+### ОСНОВНАЯ ФУНКЦИЯ
 def vlk_process(id_to_check):
     global root
 
@@ -285,12 +356,12 @@ def vlk_process(id_to_check):
     )
     set_exclude_flag_button.pack(side="left", padx=10, pady=5)
 
-    # Кнопка повторного запуска скрипта (while process_flag)
+    # Кнопка повторного запуска скрипта с заменой значений
     restart_button = tk.Button(
         button_low_frame2, 
-        text="Перезапустить",
+        text="Изменить данные",
         bg="green",
-        command=lambda: (root.destroy(), vlk_process(id_to_check))  # Закрываем окно и перезапускаем процесс
+        command=lambda: (update_and_restart(id_to_check, capacity, cylcount, year, conn, root, vlk_process))  # Закрываем окно и перезапускаем процесс
     )
     restart_button.pack(side="left", padx=10, pady=5)
 
@@ -323,7 +394,6 @@ def vlk_process(id_to_check):
 
     # Запуск основного цикла приложения
     root.mainloop()
-
 
 # Сохранение айди из буфера обмена
 id_to_check = pyperclip.paste()
