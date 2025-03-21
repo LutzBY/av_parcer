@@ -110,9 +110,10 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check):
     entry_window.mainloop()
 
 # Функция изменения данных и перезапуска скрипта
-def update_and_restart(id_to_check, capacity, cylcount, year, conn, root, vlk_process):
+def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, root, vlk_process):
     def on_save_and_restart(): # Функция кнопки "Сохранить и перезапустить"
         # Через гет получаем новые значения которые вводятся в поля
+        new_vlk = entry_vlk.get().strip()
         new_capacity = entry_capacity.get().strip()
         new_cylinders = entry_cylinders.get().strip()
         new_year = entry_year.get().strip()
@@ -128,7 +129,8 @@ def update_and_restart(id_to_check, capacity, cylcount, year, conn, root, vlk_pr
                 UPDATE public.av_full
                    SET capacity = '{new_capacity}',
                        cylinders = '{new_cylinders}',
-                       year = '{new_year}'
+                       year = '{new_year}',
+                       model_vlk = '{new_vlk}'
                  WHERE id = {id_to_check};
             """
             cursor.execute(query)
@@ -149,6 +151,13 @@ def update_and_restart(id_to_check, capacity, cylcount, year, conn, root, vlk_pr
     edit_window = tk.Toplevel(root)
     edit_window.title("Редактирование")
 
+    # Метки и поля для vlk
+    lbl_vlk = tk.Label(edit_window, text="Актуальная VLK")
+    lbl_vlk.pack(pady=(10, 0))
+    entry_vlk = tk.Entry(edit_window, width=20)
+    entry_vlk.pack(pady=5)
+    entry_vlk.insert(0, str(actual_vlk))  # Предзаполняем
+
     # Метки и поля для capacity
     lbl_capacity = tk.Label(edit_window, text="Объём (capacity):")
     lbl_capacity.pack(pady=(10, 0))
@@ -157,7 +166,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, conn, root, vlk_pr
     entry_capacity.insert(0, str(capacity))  # Предзаполняем
 
     # Метки и поля для cylinders
-    lbl_cylinders = tk.Label(edit_window, text="Число цилиндров (cylcount):")
+    lbl_cylinders = tk.Label(edit_window, text="Цилиндров (cylcount):")
     lbl_cylinders.pack(pady=(10, 0))
     entry_cylinders = tk.Entry(edit_window, width=20)
     entry_cylinders.pack(pady=5)
@@ -361,7 +370,7 @@ def vlk_process(id_to_check):
         button_low_frame2, 
         text="Изменить данные",
         bg="green",
-        command=lambda: (update_and_restart(id_to_check, capacity, cylcount, year, conn, root, vlk_process))  # Закрываем окно и перезапускаем процесс
+        command=lambda: (update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, root, vlk_process))  # Закрываем окно и перезапускаем процесс
     )
     restart_button.pack(side="left", padx=10, pady=5)
 
