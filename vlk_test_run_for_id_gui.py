@@ -110,8 +110,10 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check):
     entry_window.mainloop()
 
 # Функция изменения данных и перезапуска скрипта
-def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, root, vlk_process):
-    def on_save_and_restart(): # Функция кнопки "Сохранить и перезапустить"
+def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, root, vlk_process, keeper):
+    
+    # Функция кнопки "Сохранить и перезапустить"
+    def on_save_and_restart():
         # Через гет получаем новые значения которые вводятся в поля
         new_vlk = entry_vlk.get().strip()
         new_capacity = entry_capacity.get().strip()
@@ -147,6 +149,39 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
             messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
             return
 
+    # Функция кнопки "Сохранить и перезапустить"
+    def on_save_and_stop():
+        # Через гет получаем новые значения которые вводятся в поля
+        new_vlk = entry_vlk.get().strip()
+        new_capacity = entry_capacity.get().strip()
+        new_cylinders = entry_cylinders.get().strip()
+        new_year = entry_year.get().strip()
+
+        if not new_capacity or not new_cylinders or not new_year:
+            messagebox.showwarning("Ошибка", "Все поля должны быть заполнены!")
+            return
+    
+        try:
+            # Выполняем UPDATE
+            cursor = conn.cursor()
+            query = f"""
+                UPDATE public.av_full
+                   SET capacity = '{new_capacity}',
+                       cylinders = '{new_cylinders}',
+                       year = '{new_year}',
+                       model_vlk = '{new_vlk}'
+                 WHERE id = {id_to_check};
+            """
+            cursor.execute(query)
+            conn.commit()
+
+            # Запускаем функцию заново по новым данным
+            root.destroy()
+
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
+            return
+        
     # Создаём Toplevel-окно
     edit_window = tk.Toplevel(root)
     edit_window.title("Редактирование")
@@ -159,28 +194,32 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
     entry_vlk.insert(0, str(actual_vlk))  # Предзаполняем
 
     # Метки и поля для capacity
-    lbl_capacity = tk.Label(edit_window, text="Объём (capacity):")
+    lbl_capacity = tk.Label(edit_window, text=f"Объём (исх - {keeper.get_old_values()[2]}):")
     lbl_capacity.pack(pady=(10, 0))
     entry_capacity = tk.Entry(edit_window, width=20)
     entry_capacity.pack(pady=5)
     entry_capacity.insert(0, str(capacity))  # Предзаполняем
 
     # Метки и поля для cylinders
-    lbl_cylinders = tk.Label(edit_window, text="Цилиндров (cylcount):")
+    lbl_cylinders = tk.Label(edit_window, text=f"Цилиндров (исх - {keeper.get_old_values()[1]}):")
     lbl_cylinders.pack(pady=(10, 0))
     entry_cylinders = tk.Entry(edit_window, width=20)
     entry_cylinders.pack(pady=5)
     entry_cylinders.insert(0, str(cylcount))  # Предзаполняем
 
     # Метки и поля для year
-    lbl_year = tk.Label(edit_window, text="Год выпуска (year):")
+    lbl_year = tk.Label(edit_window, text=f"Год выпуска (исх - {keeper.get_old_values()[0]}):")
     lbl_year.pack(pady=(10, 0))
     entry_year = tk.Entry(edit_window, width=20)
     entry_year.pack(pady=5)
     entry_year.insert(0, str(year))  # Предзаполняем
 
     # Кнопка "Сохранить и перезапустить"
-    btn_save = tk.Button(edit_window, text="Сохранить и перезапустить", command=on_save_and_restart)
+    btn_save = tk.Button(edit_window, text="Сохранить и перезапустить", command=on_save_and_restart, bg="green")
+    btn_save.pack(pady=10)
+
+    # Кнопка "Сохранить и закрыть"
+    btn_save = tk.Button(edit_window, text="Сохранить и закрыть", command=on_save_and_stop, bg="orange")
     btn_save.pack(pady=10)
 
     # Фокус на поле ввода
@@ -192,7 +231,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
 ### ОСНОВНАЯ ФУНКЦИЯ
 def vlk_process(id_to_check):
     global root
-
+    
     cursor = conn.cursor()
     query = """
         SELECT brand, model, model_misc, year, cylinders, capacity, type, model_vlk
@@ -212,6 +251,9 @@ def vlk_process(id_to_check):
     displacement = float(capacity)
 
     cursor.close()
+
+    # cохраняем исходные капасити
+    keeper.save_values(year, cylcount, capacity)
 
     vlkcursor = conn.cursor()
     query = """
@@ -370,7 +412,7 @@ def vlk_process(id_to_check):
         button_low_frame2, 
         text="Изменить данные",
         bg="green",
-        command=lambda: (update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, root, vlk_process))  # Закрываем окно и перезапускаем процесс
+        command=lambda: (update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, root, vlk_process, keeper))  # Закрываем окно и перезапускаем процесс
     )
     restart_button.pack(side="left", padx=10, pady=5)
 
@@ -406,6 +448,29 @@ def vlk_process(id_to_check):
 
 # Сохранение айди из буфера обмена
 id_to_check = pyperclip.paste()
+
+# Сохранение исходных значений
+class OldValuesKeeper:
+    def __init__(self):
+        # Атрибуты экземпляра для хранения старых значений
+        self.old_capacity = None
+        self.old_cylinders = None
+        self.old_year = None
+
+    def save_values(self, capacity, cylcount, year):
+        # Проверяем, сохранены ли уже значения
+        if self.old_capacity is None and self.old_cylinders is None and self.old_year is None:
+            # Сохраняем значения только при первом вызове
+            self.old_capacity = capacity
+            self.old_cylinders = cylcount
+            self.old_year = year
+
+    def get_old_values(self):
+        # Метод для получения сохраненных значений
+        return self.old_capacity, self.old_cylinders, self.old_year
+
+# Создание экземпляра класса
+keeper = OldValuesKeeper()
 
 #Проверка на айди
 if not id_to_check.isdigit():
