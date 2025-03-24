@@ -228,6 +228,26 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
     # Запуск цикла сообщений для окна
     edit_window.mainloop()
 
+# Сохранение исходных значений
+class OldValuesKeeper:
+    def __init__(self):
+        # Атрибуты экземпляра для хранения старых значений
+        self.old_capacity = None
+        self.old_cylinders = None
+        self.old_year = None
+
+    def save_values(self, capacity, cylcount, year):
+        # Проверяем, сохранены ли уже значения
+        if self.old_capacity is None and self.old_cylinders is None and self.old_year is None:
+            # Сохраняем значения только при первом вызове
+            self.old_capacity = capacity
+            self.old_cylinders = cylcount
+            self.old_year = year
+
+    def get_old_values(self):
+        # Метод для получения сохраненных значений
+        return self.old_capacity, self.old_cylinders, self.old_year
+
 ### ОСНОВНАЯ ФУНКЦИЯ
 def vlk_process(id_to_check):
     global root
@@ -448,26 +468,6 @@ def vlk_process(id_to_check):
 
 # Сохранение айди из буфера обмена
 id_to_check = pyperclip.paste()
-
-# Сохранение исходных значений
-class OldValuesKeeper:
-    def __init__(self):
-        # Атрибуты экземпляра для хранения старых значений
-        self.old_capacity = None
-        self.old_cylinders = None
-        self.old_year = None
-
-    def save_values(self, capacity, cylcount, year):
-        # Проверяем, сохранены ли уже значения
-        if self.old_capacity is None and self.old_cylinders is None and self.old_year is None:
-            # Сохраняем значения только при первом вызове
-            self.old_capacity = capacity
-            self.old_cylinders = cylcount
-            self.old_year = year
-
-    def get_old_values(self):
-        # Метод для получения сохраненных значений
-        return self.old_capacity, self.old_cylinders, self.old_year
 
 # Создание экземпляра класса
 keeper = OldValuesKeeper()
