@@ -288,7 +288,10 @@ for row in rows:
             # Сверка цены
             price_upd = data['props']['initialState']['advert']['advert']['price']['usd']['amount']
             if price_ex != price_upd:
-                price_query = ("UPDATE av_full SET price = '%s' WHERE id = %s") % (price_upd, id_value) 
+                price_query =  ("""
+                UPDATE av_full
+                SET price_change = price_change || '{"%s"}'
+                WHERE id = %s""") % (price_upd, id_value)
                 cursor.execute(price_query)
                 conn.commit()
                 price_diff = price_upd - price_ex
