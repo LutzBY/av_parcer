@@ -213,6 +213,50 @@ def phone_get_request(id_value):
         print(f"Ошибка {phone_response.status_code}: {phone_response.text}")
         return 0
 
+# Функция парсинга новых юрлиц
+def parse_new_organisations(seller_id_list):
+    try:
+        for id in seller_id_list:
+            org_url = f"https://api.av.by/organizations/{id}"
+            org_response = requests.get(org_url, headers=headers)
+            
+            # Проверка успешности
+            if org_response.status_code == 200:
+                item = org_response.json()  # Получаем джсон
+                o_phone = []
+                for i in item['infoPhones']:
+                    o_phone.append(f'+{i['phone']['country']['code']}{i['phone']['number']}')  #375291112121
+
+                o_creation = item['infoPhones'][0]['createdAt']
+                o_creation = datetime.strptime(o_creation, '%Y-%m-%dT%H:%M:%S%z') # Преобразования текстового значения в дату
+                o_creation = o_creation.replace(tzinfo=None) # убираем таймзон
+
+                o_region = item['region']['label'] # Минская область
+                o_city = item['city']['locationName'] # Минск
+                o_legal_address = item['legalAddress'] # г. Минск, Долгиновский тракт, 186
+                o_legal_address = o_legal_address.replace("'", ".")
+                o_id = id
+                o_title = item['title'] # ООО «ДрайвМоторс»
+                o_title = o_title.replace("'", ".")
+                o_legal_name = item['legalName'] # ООО «ДрайвМоторс»
+                o_legal_name = o_legal_name.replace("'", ".")
+                o_unp = item['unp'] # 191111259
+                o_url = item.get('siteUrl', None)
+                print(o_title, o_phone)
+                # Кверя
+                parsequery = """
+                    INSERT INTO av_organizations(id, date_created, title, legal_name, unp_num, phone, region, city, legal_address, url)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO NOTHING
+                """
+                # Работа курсора для пгри
+                cursor.execute(parsequery, (o_id, o_creation, o_title, o_legal_name, o_unp, o_phone, o_region, o_city, o_legal_address, o_url))
+                conn.commit()
+                print(f'{o_id} записан')
+    # Если страница открылась но она с домиком 404
+    except (KeyError, json.JSONDecodeError, TypeError):
+        print('Произошла ошибка открытия страницы')
+
 # Подсчет итераций
 changed_status_count = 0
 stayed_active_count = 0
@@ -389,19 +433,20 @@ duplicates_in_db = cursor.fetchone()[0]
 
 # Проверка на новые юрлица
 select_query = """
-SELECT count (af.id)
-FROM AV_FULL af
-LEFT JOIN av_organizations ao
-ON af.seller_id = ao.id
-WHERE title is null
-AND seller_id is not null
-GROUP BY seller
-ORDER BY count desc
+select distinct(seller_id)
+from av_full af
+left join av_organizations ao
+on af.seller_id = ao.id
+where seller_id is not null
+and legal_name is null
 """
 cursor.execute(select_query)
-new_companies = cursor.fetchone()
+
+new_companies = cursor.fetchall()
 if new_companies:
-    new_companies_print = f'Найдено {new_companies[0]} новых юрлиц. Прошу внести!'
+    new_companies_print = f'Найдено {len(new_companies)} новых юрлиц'
+    seller_id_list = [int(c[0]) for c in new_companies]
+    parse_new_organisations(seller_id_list)
 else:
     new_companies_print = 'Нет новых юрлиц'
 
