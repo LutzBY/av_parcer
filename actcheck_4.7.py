@@ -253,6 +253,7 @@ def parse_new_organisations(seller_id_list):
                 cursor.execute(parsequery, (o_id, o_creation, o_title, o_legal_name, o_unp, o_phone, o_region, o_city, o_legal_address, o_url))
                 conn.commit()
                 print(f'{o_id} записан')
+                new_companies_written +=1
     # Если страница открылась но она с домиком 404
     except (KeyError, json.JSONDecodeError, TypeError):
         print('Произошла ошибка открытия страницы')
@@ -267,6 +268,7 @@ price_difference_sum = 0
 broken_link_count = 0
 duplicates_global_count = 0
 phone_writed_counter = 0
+new_companies_written = 0
 
 # Сам цикл
 for row in rows:
@@ -444,9 +446,9 @@ cursor.execute(select_query)
 
 new_companies = cursor.fetchall()
 if new_companies:
-    new_companies_print = f'Найдено {len(new_companies)} новых юрлиц'
     seller_id_list = [int(c[0]) for c in new_companies]
     parse_new_organisations(seller_id_list)
+    new_companies_print = f'Найдено {len(new_companies)} новых юрлиц, записано {new_companies_written}'
 else:
     new_companies_print = 'Нет новых юрлиц'
 
