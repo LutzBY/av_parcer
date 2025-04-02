@@ -81,7 +81,7 @@ select_query = """
 SELECT id, status, status_date, url, price, seller, capacity, cylinders, brand, condition, seller_ph_nr
 FROM av_full 
 WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке')
-ORDER by date desc
+ORDER by date asc
 """
 cursor.execute(select_query)
 rows = cursor.fetchall()
@@ -258,7 +258,43 @@ def parse_new_organisations(seller_id_list):
     except (KeyError, json.JSONDecodeError, TypeError):
         print('Произошла ошибка открытия страницы')
 
-# Подсчет итераций
+# Функция получения и записи истории изменения цен
+def get_price_history (id_value, curr_byn_usd, curr_eur_usd):
+    # получения json истории по айди
+    pr_history_url = f"https://api.av.by/offers/{id_value}/price-history" 
+    pr_h_response = requests.get(pr_history_url, headers=headers)
+
+    # Проверка успешности
+    if pr_h_response.status_code == 200:
+        pr_h_data = pr_h_response.json()  # Получаем джсон
+        for i in pr_h_data:
+            pr_h_date = i['date']
+            pr_h_date = datetime.strptime(pr_h_date, '%Y-%m-%dT%H:%M:%S%z') # Преобразования текстового значения в дату
+            pr_h_date = pr_h_date.replace(tzinfo=None) # убираем таймзон
+            pr_h_currency = i['currency']
+            pr_h_amount = i['amount']
+            pr_h_idu = f'{id_value}_{pr_h_date.year}-{pr_h_date.month}-{pr_h_date.day}_{pr_h_date.hour}-{pr_h_date.minute}-{pr_h_date.second}'
+            if pr_h_currency == 'byn':
+                pr_h_usd_eq = int(round(pr_h_amount / curr_byn_usd, 0))
+            elif pr_h_currency == 'eur':
+                pr_h_usd_eq = int(round(pr_h_amount * curr_eur_usd, 0))
+            else:
+                pr_h_usd_eq = pr_h_amount
+            
+            # пишем каждую строку а в конце коммит
+            pr_h_query = """
+            INSERT INTO av_price_history (id, id_av, date, amount, currency, usd_eq)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (id) DO NOTHING
+            """
+            cursor.execute(pr_h_query, (pr_h_idu, id_value, pr_h_date, pr_h_amount, pr_h_currency, pr_h_usd_eq))
+            conn.commit()
+        return 1
+    else:
+        print(f"Ошибка {pr_h_response.status_code}: {pr_h_response.text}")
+        return 0
+
+# Подсчет итераций (счетчики)
 changed_status_count = 0
 stayed_active_count = 0
 dead_link_count = 0
@@ -269,7 +305,17 @@ broken_link_count = 0
 duplicates_global_count = 0
 phone_writed_counter = 0
 new_companies_written = 0
+price_history_counter = 0
 
+# апи на курсы
+curr_api = "https://api.nbrb.by/exrates/rates?periodicity=0"
+response = requests.get(curr_api)
+curr_resp = response.json()
+curr_byn_usd = next((c['Cur_OfficialRate'] for c in curr_resp if c['Cur_Abbreviation'] == 'USD'), None)
+curr_byn_eur = next((c['Cur_OfficialRate'] for c in curr_resp if c['Cur_Abbreviation'] == 'EUR'), None)
+curr_eur_usd = curr_byn_eur / curr_byn_usd
+
+###########
 # Сам цикл
 for row in rows:
     id_value = row[0] # стобец id с индексом 0
@@ -348,6 +394,19 @@ for row in rows:
                 else:
                     pd = ''
                 print(f"Изменилась цена для id {id_value} на {pd}{price_diff} USD, price_diff_sum составляет {price_difference_sum} USD")
+                
+                # Вызов функции сбора истории изменения цен
+                if (
+                    seller not in exclude_sellers
+                    and int(capacity) >= 299 
+                    # and cylcount > 1 
+                    and brand not in exclude_brands
+                    and duplicate_flag is False
+                ):
+                    price_history_counter += get_price_history(id_value, curr_byn_usd, curr_eur_usd)
+                else:
+                    print(f'Сбор истории цены для id:{id_value} не проводится')
+                    
             else:
                 print(f"Цена для id {id_value} осталась прежней")
             
@@ -388,6 +447,7 @@ for row in rows:
                 else:
                     print(f"статус {status_value} не изменился для id - {id_value}")
                     unchanged_status_count +=1 # Крутим счетчик
+                    time.sleep(wait_amount)
                     continue
 
             else: #Если статус "active" то объява еще актуальная или стала актуальной
@@ -404,9 +464,8 @@ for row in rows:
                 ):
                     phone_writed_counter += phone_get_request(id_value)
                 else:
-                    print(f'Запись номера для id:{id_value} не проводится')
-                
-                
+                    print(f'Запись номера для id:{id_value} не проводится') 
+        
         # Если страница открылась но она с домиком 404
         except (KeyError, json.JSONDecodeError, TypeError):
             # Обн. базу, уст. статус и стат. дату для соотв id
@@ -474,17 +533,17 @@ mail_contents = (f"""
 В базе {rows_count} строк
 Для проверки отобрано {rows_count_na} строк
 Проверка актуальности завершена успешно:
-    смена статуса у {changed_status_count} штук, 
-    осталось активными {stayed_active_count} штук,
-    закрытый статус сохранился у {unchanged_status_count} штук,
-    ссылка недоступна у {dead_link_count} штук
-    не открылась страница у {broken_link_count} штук
-- Цена изменилась у {price_changed_count} штук
-- Общее именение цен составило {price_difference_sum} USD
-- Записано объявлений с дубликатами - {duplicates_global_count} шт.
-- Всего сейчас в базе дубликатов - {duplicates_in_db} шт.
-- Записано номеров телефонов - {phone_writed_counter} шт.
-- {new_companies_print}
+    - смена статуса у {changed_status_count} штук, 
+    - осталось активными {stayed_active_count} штук,
+    - закрытый статус сохранился у {unchanged_status_count} штук,
+    - ссылка недоступна у {dead_link_count} штук
+    - не открылась страница у {broken_link_count} штук
+Цена изменилась у {price_changed_count} штук
+Общее именение цен составило {price_difference_sum} USD, записано в av_price_history - {price_history_counter} шт.
+Записано объявлений с дубликатами - {duplicates_global_count} шт.
+Всего сейчас в базе дубликатов - {duplicates_in_db} шт.
+Записано номеров телефонов - {phone_writed_counter} шт.
+{new_companies_print}
 Спасибо за внимание <3
 """
 )
