@@ -68,13 +68,14 @@ current_time_start = datetime.now()
 ctsf = current_time_start.strftime("%Y-%m-%d %H:%M:%S")
 print(f"Привет! Текущая дата - {ctsf}")
 
+# Открываем курсор
 cursor = conn.cursor()
-# Забираем всю таблицу и НЕ делаем бекап
-select_query = "SELECT * from av_full"
+
+# Посчитываем кол-во строк
+select_query = "SELECT count(*) from av_full"
 cursor.execute(select_query)
-rows_full = cursor.fetchall()
-rows_count = cursor.rowcount
-print(f"Строк в базе: {rows_count}")
+rows_full = cursor.fetchone()[0]
+print(f"Строк в базе: {rows_full}")
 
 # Готовим нужные столбцы и строки
 select_query = """
@@ -88,6 +89,16 @@ rows = cursor.fetchall()
 rows_count_na = cursor.rowcount
 print(f"Строк для проверки: {rows_count_na}")
 
+# апи на курсы
+curr_api = "https://api.nbrb.by/exrates/rates?periodicity=0"
+response = requests.get(curr_api)
+curr_resp = response.json()
+curr_byn_usd = next((c['Cur_OfficialRate'] for c in curr_resp if c['Cur_Abbreviation'] == 'USD'), None)
+curr_byn_eur = next((c['Cur_OfficialRate'] for c in curr_resp if c['Cur_Abbreviation'] == 'EUR'), None)
+curr_eur_usd = curr_byn_eur / curr_byn_usd
+print(f'Курсы составляют: BYN-USD {curr_byn_usd}, BYN-EUR {curr_byn_eur}, EUR-USD {curr_eur_usd}')
+
+## ФУНКЦИИ
 # Квери на запись и курсор execute
 def update_and_write(updated_status, updated_status_date, id_value):
     update_query = ("UPDATE av_full SET status = '%s', status_date = %s WHERE id = %s") % (updated_status, updated_status_date, id_value) 
@@ -307,14 +318,6 @@ phone_writed_counter = 0
 new_companies_written = 0
 price_history_counter = 0
 
-# апи на курсы
-curr_api = "https://api.nbrb.by/exrates/rates?periodicity=0"
-response = requests.get(curr_api)
-curr_resp = response.json()
-curr_byn_usd = next((c['Cur_OfficialRate'] for c in curr_resp if c['Cur_Abbreviation'] == 'USD'), None)
-curr_byn_eur = next((c['Cur_OfficialRate'] for c in curr_resp if c['Cur_Abbreviation'] == 'EUR'), None)
-curr_eur_usd = curr_byn_eur / curr_byn_usd
-
 ###########
 # Сам цикл
 for row in rows:
@@ -530,7 +533,7 @@ mail_contents = (f"""
 Привет!
 Дата начала - {ctsf}
 Дата завершения - {ctff}, времени заняло - {elapsed_minutes_formatted} минут
-В базе {rows_count} строк
+В базе {rows_full} строк
 Для проверки отобрано {rows_count_na} строк
 Проверка актуальности завершена успешно:
     - смена статуса у {changed_status_count} штук, 
