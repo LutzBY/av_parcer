@@ -396,6 +396,13 @@ while stop_flag == False:
             WHERE model_vlk = '%s'
             AND duplicate_flag is FALSE
             AND exclude_flag is FALSE""" % (mvlk_actual)
+        price_year_query = """
+            SELECT AVG(price) as price_y
+            FROM av_full
+            WHERE model_vlk = '%s'
+            AND year = %s
+            AND duplicate_flag is FALSE
+            AND exclude_flag is FALSE""" % (mvlk_actual, year)
 
         parsecursor.execute(prices_a_query)
         price_a_result = parsecursor.fetchone()
@@ -403,11 +410,17 @@ while stop_flag == False:
         parsecursor.execute(prices_f_query)
         price_f_result = parsecursor.fetchone()
 
+        parsecursor.execute(price_year_query)
+        price_year_result = parsecursor.fetchone()
+
         # вынимаем цены и количество вхождений по влк
         price_a = price_a_result[0] if price_a_result[0] is not None else None
         price_a_count = price_a_result[1] if price_a_result[1] is not None else None
+
         price_f = price_f_result[0] if price_f_result[0] is not None else None
         price_f_count = price_f_result[1] if price_f_result[1] is not None else None
+
+        price_y = price_year_result[0] if price_f_result[0] is not None else None
 
         if price_a is not None and mvlk_actual not in (None, '', ' '):
             price_a = int(price_a)
@@ -431,6 +444,14 @@ while stop_flag == False:
             price_color_a = "#9e9e9e"
             price_color_f = "#9e9e9e"
         
+        if price_y is not None and mvlk_actual not in (None, '', ' '):
+            price_y = int(price_y)
+            price_diff_y_act = price - price_y
+            price_color_y = "#ff9900" if price_diff_y_act > 0 else "#99cc00"
+        else:
+            price_y = '-'
+            price_color_y = "#9e9e9e"
+
         # Сверка даты
         if rdatetime_obj <= latest_ad_date: 
             stop_flag = True
@@ -515,7 +536,7 @@ URL - {url}""")
 <td style="text-align: center; height: 62px; width: 484.953px;">
 <strong>Ценовая статистика согласно актуальному vlk:</strong><br/>Средняя по актуальным = {price_a} ({price_a_count} шт.), разница = <span style="color: {price_color_a};">{price_dif_fr_act}</span><br/>Средняя за все время = {price_f} ({price_f_count} шт.), разница = <span style="color: {price_color_f};">{price_dif_fr_full}</span>
 </td>
-<td style="text-align: center; width: 108.281px;" colspan="4"><strong>{price} USD</strong></td>
+<td style="text-align: center; width: 108.281px;" colspan="4"><strong>{price} USD</strong><br />Цена по vlk с таким же годом: <span style="color: {price_color_y};"><br />{price_y} USD</span></td>
 </tr>
 </tbody>
 </table>
