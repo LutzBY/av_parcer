@@ -34,10 +34,19 @@ def set_exclude_flag(id_to_check):
     vlk_cursor.execute(set_flag_query)
     conn.commit()
 
-# Функция кнопки для записи exclude_flag
+# легаси Функция кнопки для записи exclude_flag
 def set_exclude_flag_and_reset_mvlk(id_to_check):
     vlk_cursor = conn.cursor()
     set_flag_and_reset_query = ("UPDATE av_full SET exclude_flag = True, model_vlk = '' WHERE id = %s") % (id_to_check) 
+    vlk_cursor.execute(set_flag_and_reset_query)
+    conn.commit()
+    root.destroy()
+    sys.exit()
+
+# Функция кнопки установить влк "кастом"
+def set_exclude_mvlk_to_cutom(id_to_check):
+    vlk_cursor = conn.cursor()
+    set_flag_and_reset_query = ("UPDATE av_full SET model_vlk = 'кастом' WHERE id = %s") % (id_to_check) 
     vlk_cursor.execute(set_flag_and_reset_query)
     conn.commit()
     root.destroy()
@@ -448,9 +457,9 @@ def vlk_process(id_to_check):
     # Кнопка установить флаг и очистить влк
     set_exclude_flag_clear_vlk_button = tk.Button(
         button_low_frame1, 
-        text="Установить флаг и очистить vlk",
+        text="Установить vlk 'кастом'",
         bg="orange",
-        command=lambda: set_exclude_flag_and_reset_mvlk(id_to_check)
+        command=lambda: set_exclude_mvlk_to_cutom(id_to_check)
     )
     set_exclude_flag_clear_vlk_button.pack(side="right", padx=10, pady=5)
 
