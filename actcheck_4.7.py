@@ -98,6 +98,19 @@ curr_byn_eur = next((c['Cur_OfficialRate'] for c in curr_resp if c['Cur_Abbrevia
 curr_eur_usd = curr_byn_eur / curr_byn_usd
 print(f'Курсы составляют: BYN-USD {curr_byn_usd}, BYN-EUR {curr_byn_eur}, EUR-USD {curr_eur_usd}')
 
+# Подсчет итераций (счетчики)
+changed_status_count = 0
+stayed_active_count = 0
+dead_link_count = 0
+unchanged_status_count = 0
+price_changed_count = 0
+price_difference_sum = 0
+broken_link_count = 0
+duplicates_global_count = 0
+phone_writed_counter = 0
+new_companies_written = 0
+price_history_counter = 0
+
 ## ФУНКЦИИ
 # Квери на запись и курсор execute
 def update_and_write(updated_status, updated_status_date, id_value):
@@ -226,6 +239,7 @@ def phone_get_request(id_value):
 
 # Функция парсинга новых юрлиц
 def parse_new_organisations(seller_id_list):
+    print (f'Производим парсинг новых организаций. Список id - {seller_id_list}')
     try:
         for id in seller_id_list:
             org_url = f"https://api.av.by/organizations/{id}"
@@ -253,6 +267,7 @@ def parse_new_organisations(seller_id_list):
                 o_legal_name = o_legal_name.replace("'", ".")
                 o_unp = item['unp'] # 191111259
                 o_url = item.get('siteUrl', None)
+                print('-------')
                 print(o_title, o_phone)
                 # Кверя
                 parsequery = """
@@ -264,6 +279,7 @@ def parse_new_organisations(seller_id_list):
                 cursor.execute(parsequery, (o_id, o_creation, o_title, o_legal_name, o_unp, o_phone, o_region, o_city, o_legal_address, o_url))
                 conn.commit()
                 print(f'{o_id} записан')
+                print('-------')
                 new_companies_written +=1
     # Если страница открылась но она с домиком 404
     except (KeyError, json.JSONDecodeError, TypeError):
@@ -304,19 +320,6 @@ def get_price_history (id_value, curr_byn_usd, curr_eur_usd):
     else:
         print(f"Ошибка {pr_h_response.status_code}: {pr_h_response.text}")
         return 0
-
-# Подсчет итераций (счетчики)
-changed_status_count = 0
-stayed_active_count = 0
-dead_link_count = 0
-unchanged_status_count = 0
-price_changed_count = 0
-price_difference_sum = 0
-broken_link_count = 0
-duplicates_global_count = 0
-phone_writed_counter = 0
-new_companies_written = 0
-price_history_counter = 0
 
 ###########
 # Сам цикл
