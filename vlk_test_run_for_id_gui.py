@@ -365,7 +365,7 @@ def vlk_process(id_to_check):
     ## Блок окна tk inter
     # Создание самого объекта окна gui
     root = tk.Tk()
-    root_title = (f"{brand} {model} {modification}, {year} г.в. \n{capacity} см3, {cylcount} цил.\nТип - {mtype},\nVLK - {actual_vlk}")
+    root_title = (f"{id_to_check}\n{brand} {model} {modification}, {year} г.в. \n{capacity} см3, {cylcount} цил.\nТип - {mtype},\nVLK - {actual_vlk}")
     label = tk.Label(root, text=root_title, justify="left", background='light grey')
     label.pack(anchor="w")
     root.minsize(420, 600)
