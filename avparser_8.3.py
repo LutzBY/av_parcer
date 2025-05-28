@@ -169,7 +169,6 @@ def duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, selle
           AND LOWER(seller) = %(seller)s
           AND locations = %(location)s
           AND mileage BETWEEN %(min_mileage)s AND %(max_mileage)s
-          AND duplicate_flag is false
         AND id != %(id)s
         ORDER BY date ASC;
     """
