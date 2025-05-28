@@ -358,9 +358,18 @@ while stop_flag == False:
             and brand not in exclude_brands
             and condition != 'новый'
         ):
-            manual_duplicate_results = duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, seller, location, mileage)
+            # Получение выгрузки потенциальных дубликатов и разбивка их на старые и новые
+            dmc_results = duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, seller, location, mileage)
+            dmc_is_duplicate = []
+            dmc_not_duplicate = []
+            for i in dmc_results:
+                if i[2] is True:
+                    dmc_is_duplicate.append(i)
+                else:
+                    dmc_not_duplicate.append(i)
         else:
-            manual_duplicate_results = []
+            dmc_is_duplicate = []
+            dmc_not_duplicate = []
             
         # Скрипт для пгри
         parsequery = """
@@ -459,15 +468,27 @@ while stop_flag == False:
         processed_ads += 1
 
         # Дополнение хтмл отчета строчкой про дубликаты если они есть
-        if len(manual_duplicate_results) > 0:
+        # Блок дубликатов которые duplicate = False
+        if len(dmc_not_duplicate) > 0:
             duplicate_html_block = f"""<p style="text-align: center;"><strong>Найдены вероятные дубликаты:</strong></p>"""
             #duplicate_html_block += f"""<a href="{url}">Осн. - {id}</a>""" # добавить сначала саму объяву
             # Перебор результатов и проверка наличия дубликатов
-            for x in manual_duplicate_results:
+            for x in dmc_not_duplicate:
                 m_d_id = x[0]
                 m_d_url = x[1]
                 duplicate_html_block += f"""<a href="{m_d_url}">{m_d_id}</a>"""
-                if x != manual_duplicate_results[-1]:
+                if x != dmc_not_duplicate[-1]:
+                    duplicate_html_block += f""", """
+        # Блок дубликатов которые duplicate = True
+        if len(dmc_is_duplicate) > 0:
+            duplicate_html_block = f"""<p style="text-align: center;"><strong>Найдены старые дубликаты:</strong></p>"""
+            #duplicate_html_block += f"""<a href="{url}">Осн. - {id}</a>""" # добавить сначала саму объяву
+            # Перебор результатов и проверка наличия дубликатов
+            for x in dmc_is_duplicate:
+                m_d_id = x[0]
+                m_d_url = x[1]
+                duplicate_html_block += f"""<a href="{m_d_url}">{m_d_id}</a>"""
+                if x != dmc_is_duplicate[-1]:
                     duplicate_html_block += f""", """
 
         # Принт объявы и дополнение HTML contents (для маленьких сокращенный)
