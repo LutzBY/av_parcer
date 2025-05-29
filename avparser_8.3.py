@@ -480,7 +480,7 @@ while stop_flag == False:
                     duplicate_html_block += f""", """
         # Блок дубликатов которые duplicate = True
         if len(dmc_is_duplicate) > 0:
-            duplicate_html_block = f"""<p style="text-align: center;"><strong>Найдены старые дубликаты:</strong></p>"""
+            duplicate_html_block += f"""<p style="text-align: center;"><strong>Найдены старые дубликаты:</strong></p>"""
             #duplicate_html_block += f"""<a href="{url}">Осн. - {id}</a>""" # добавить сначала саму объяву
             # Перебор результатов и проверка наличия дубликатов
             for x in dmc_is_duplicate:
