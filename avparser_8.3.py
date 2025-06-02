@@ -466,29 +466,26 @@ while stop_flag == False:
             break
         processed_ads += 1
 
-        # Дополнение хтмл отчета строчкой про дубликаты если они есть
-        # Блок дубликатов которые duplicate = False
-        if len(dmc_not_duplicate) > 0:
-            duplicate_html_block = f"""<p style="text-align: center;"><strong>Найдены вероятные дубликаты:</strong></p>"""
-            #duplicate_html_block += f"""<a href="{url}">Осн. - {id}</a>""" # добавить сначала саму объяву
-            # Перебор результатов и проверка наличия дубликатов
-            for x in dmc_not_duplicate:
+        # Дополнение хтмл отчета строчкой про дубликаты если они есть       
+        if len(dmc_not_duplicate or dmc_is_duplicate) > 0:
+            duplicate_html_block = f"""<p style="text-align: center;"><strong>Найдены дубликаты (<span style="color: #ff6600;">вероятные</span> / <span style="color: #008000;">старые</span>):</strong></p>"""
+            # Блок дубликатов которые duplicate = False
+            for idx, x in enumerate(dmc_not_duplicate):
                 m_d_id = x[0]
                 m_d_url = x[1]
-                duplicate_html_block += f"""<a href="{m_d_url}">{m_d_id}</a>"""
-                if x != dmc_not_duplicate[-1]:
-                    duplicate_html_block += f""", """
-        # Блок дубликатов которые duplicate = True
-        if len(dmc_is_duplicate) > 0:
-            duplicate_html_block += f"""<p style="text-align: center;"><strong>Найдены старые дубликаты:</strong></p>"""
-            #duplicate_html_block += f"""<a href="{url}">Осн. - {id}</a>""" # добавить сначала саму объяву
-            # Перебор результатов и проверка наличия дубликатов
-            for x in dmc_is_duplicate:
+                duplicate_html_block += f"""<a href="{m_d_url}" style="color: #ff6600;">{m_d_id}</a>"""
+                # Добавляем запятую, если это не последний элемент из обоих списков
+                if idx != len(dmc_not_duplicate) - 1 or len(dmc_is_duplicate) > 0:
+                    duplicate_html_block += ", "
+
+            # Блок дубликатов которые duplicate = True
+            for idx, x in enumerate(dmc_is_duplicate):
                 m_d_id = x[0]
                 m_d_url = x[1]
-                duplicate_html_block += f"""<a href="{m_d_url}">{m_d_id}</a>"""
-                if x != dmc_is_duplicate[-1]:
-                    duplicate_html_block += f""", """
+                duplicate_html_block += f"""<a href="{m_d_url}" style="color: #008000;">{m_d_id}</a>"""
+                # Добавляем запятую, если это не последний элемент
+                if idx != len(dmc_is_duplicate) - 1:
+                    duplicate_html_block += ", "
 
         # Принт объявы и дополнение HTML contents (для маленьких сокращенный)
         print(f"-----------------------------------------------------------------")
