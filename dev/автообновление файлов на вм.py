@@ -67,12 +67,11 @@ def copy_files(local_dir, vm_dir, needed_files):
 def main():
     # 1. Проверка и клонирование репозитория
     check_and_clone_repo(repo_url, local_dir)
-
-    # 2. Проверка хэшей
+    # 2. Обновление репозитория
+    pull_repo(local_dir)
+    
+    # 3. Проверка хэшей
     if not compare_hashes(local_dir, vm_dir, needed_files):
-        # 3. Обновление репозитория
-        pull_repo(local_dir)
-
         # 4. Копирование нужных файлов
         copy_files(local_dir, vm_dir, needed_files)
     else:
