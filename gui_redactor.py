@@ -119,7 +119,7 @@ def main_app_window(id_to_check):
         button_low_frame2, 
         text="Установить vlk 'кастом'",
         bg="orange",
-        command=lambda: set_exclude_mvlk_to_cutom(id_to_check)
+        command=lambda: set_exclude_mvlk_to_cutom(id_to_check, root)
     )
     set_exclude_flag_clear_vlk_button.pack(side="bottom", padx=10, pady=5)
 
@@ -329,7 +329,7 @@ def set_exclude_flag_and_reset_mvlk(id_to_check):
     sys.exit()
 
 # Функция кнопки установить влк "кастом"
-def set_exclude_mvlk_to_cutom(id_to_check):
+def set_exclude_mvlk_to_cutom(id_to_check, root):
     vlk_cursor = conn.cursor()
     set_flag_and_reset_query = ("UPDATE av_full SET model_vlk = 'кастом' WHERE id = %s") % (id_to_check) 
     vlk_cursor.execute(set_flag_and_reset_query)
@@ -338,7 +338,7 @@ def set_exclude_mvlk_to_cutom(id_to_check):
     sys.exit()
 
 # Функция кнопки для удаления айди
-def delete_id(id_to_check):
+def delete_id(id_to_check, root):
     vlk_cursor = conn.cursor()
     delete_id_query = ("DELETE FROM av_full WHERE id = %s") % (id_to_check) 
     vlk_cursor.execute(delete_id_query)
