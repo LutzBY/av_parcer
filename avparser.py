@@ -197,8 +197,12 @@ def duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, selle
 html_mail_contents = f"""
     <html>
     <body>
-    <pre style="text-align: center;">Привет! Отчет скрипта парсинга на дату: {current_time_str} </pre>
-    <pre style="text-align: center;">Последняя дата объявления из базы: {latest_ad_date.strftime('%Y-%m-%d-%H-%M-%S')}</pre>
+    <h2 style="text-align: center;">Привет! Отчет сформирован на дату:</h2>
+    <h4 style="text-align: center;">{current_time_str}</h4>
+    <h2 style="text-align: center;">Последняя дата объявления из базы:</h2>
+    <h4 style="text-align: center;">{latest_ad_date.strftime('%Y-%m-%d-%H-%M-%S')}</h4>
+    <hr />
+    <p>&nbsp;</p>
     </body>
     </html>
     """
