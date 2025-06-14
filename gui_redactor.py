@@ -79,7 +79,7 @@ def main_app_window(id_to_check):
         button_low_frame1,
         text="Запуск VLK поиска",
         bg="green",
-        command=lambda: [root.destroy(), vlk_search_process(id_to_check, brand, model, modification, year, cylcount, capacity, mtype, actual_vlk)]
+        command=lambda: vlk_search_process(id_to_check, brand, model, modification, year, cylcount, capacity, mtype, actual_vlk)
     )
     btn_start_vlk.pack(side="left", padx=10, pady=5)
 
