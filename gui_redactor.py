@@ -507,21 +507,21 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
     entry_vlk.insert(0, str(actual_vlk))  # Предзаполняем
 
     # Метки и поля для capacity
-    lbl_capacity = tk.Label(edit_window, text=f"Объём (исх - {keeper.get_old_values()[2]}):")
+    lbl_capacity = tk.Label(edit_window, text=f"Объём (исх - {keeper.old_capacity}):")
     lbl_capacity.pack(pady=(10, 0))
     entry_capacity = tk.Entry(edit_window, width=20)
     entry_capacity.pack(pady=5)
     entry_capacity.insert(0, str(capacity))  # Предзаполняем
 
     # Метки и поля для cylinders
-    lbl_cylinders = tk.Label(edit_window, text=f"Цилиндров (исх - {keeper.get_old_values()[1]}):")
+    lbl_cylinders = tk.Label(edit_window, text=f"Цилиндров (исх - {keeper.old_cylinders}):")
     lbl_cylinders.pack(pady=(10, 0))
     entry_cylinders = tk.Entry(edit_window, width=20)
     entry_cylinders.pack(pady=5)
     entry_cylinders.insert(0, str(cylcount))  # Предзаполняем
 
     # Метки и поля для year
-    lbl_year = tk.Label(edit_window, text=f"Год выпуска (исх - {keeper.get_old_values()[0]}):")
+    lbl_year = tk.Label(edit_window, text=f"Год выпуска (исх - {keeper.old_year}):")
     lbl_year.pack(pady=(10, 0))
     entry_year = tk.Entry(edit_window, width=20)
     entry_year.pack(pady=5)
