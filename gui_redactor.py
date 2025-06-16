@@ -89,7 +89,7 @@ def main_app_window(id_to_check):
         text="Изменить данные",
         bg="cyan",
         command=lambda: update_and_restart(
-            id_to_check, capacity, cylcount, year, actual_vlk, conn, root,
+            id_to_check, capacity, cylcount, year, mtype, actual_vlk, conn, root,
             lambda new_id: main_app_window(new_id),
             keeper
         )
@@ -404,7 +404,7 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
     entry_window.mainloop()
 
 # Функция изменения данных и перезапуска скрипта
-def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, root, vlk_process, keeper):
+def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk, conn, root, vlk_process, keeper):
     
     # Функция кнопки "Сохранить и перезапустить"
     def on_save_and_restart():
@@ -413,7 +413,9 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
         new_capacity = entry_capacity.get().strip()
         new_cylinders = entry_cylinders.get().strip()
         new_year = entry_year.get().strip()
-        if not new_capacity or not new_cylinders or not new_year:
+        new_mtype = entry_mtype.get().strip()
+
+        if not new_capacity or not new_cylinders or not new_year or not new_mtype:
             messagebox.showwarning("Ошибка", "Все поля должны быть заполнены!")
             return
         try:
@@ -424,6 +426,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
                        cylinders = '{new_cylinders}',
                        year = '{new_year}',
                        model_vlk = '{new_vlk}'
+                       type = '{new_mtype}'
                  WHERE id = {id_to_check};
             """
             cursor.execute(query)
@@ -444,7 +447,9 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
         new_capacity = entry_capacity.get().strip()
         new_cylinders = entry_cylinders.get().strip()
         new_year = entry_year.get().strip()
-        if not new_capacity or not new_cylinders or not new_year:
+        new_mtype = entry_mtype.get().strip()
+
+        if not new_capacity or not new_cylinders or not new_year or not new_mtype:
             messagebox.showwarning("Ошибка", "Все поля должны быть заполнены!")
             return
         try:
@@ -454,7 +459,8 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
                    SET capacity = '{new_capacity}',
                        cylinders = '{new_cylinders}',
                        year = '{new_year}',
-                       model_vlk = '{new_vlk}'
+                       model_vlk = '{new_vlk}',
+                       type = '{new_mtype}'
                  WHERE id = {id_to_check};
             """
             cursor.execute(query)
@@ -473,7 +479,9 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
         new_capacity = entry_capacity.get().strip()
         new_cylinders = entry_cylinders.get().strip()
         new_year = entry_year.get().strip()
-        if not new_capacity or not new_cylinders or not new_year:
+        new_mtype = entry_mtype.get().strip()
+
+        if not new_capacity or not new_cylinders or not new_year or not new_mtype:
             messagebox.showwarning("Ошибка", "Все поля должны быть заполнены!")
             return
         try:
@@ -488,7 +496,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
                 new_year,
                 new_cylinders,
                 new_capacity,
-                keeper.old_type,
+                new_mtype,
                 actual_vlk
             )
         except Exception as e:
@@ -526,6 +534,13 @@ def update_and_restart(id_to_check, capacity, cylcount, year, actual_vlk, conn, 
     entry_year = tk.Entry(edit_window, width=20)
     entry_year.pack(pady=5)
     entry_year.insert(0, str(year))  # Предзаполняем
+
+    # Метки и поля для mtype
+    lbl_mtype = tk.Label(edit_window, text=f"Год выпуска (исх - {keeper.old_type}):")
+    lbl_mtype.pack(pady=(10, 0))
+    entry_mtype = tk.Entry(edit_window, width=20)
+    entry_mtype.pack(pady=5)
+    entry_mtype.insert(0, str(mtype))  # Предзаполняем
 
     # Кнопка "Сохранить и перезапустить"
     btn_save = tk.Button(edit_window, text="Сохранить и перезапустить", command=on_save_and_restart, bg="green")
