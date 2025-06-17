@@ -425,7 +425,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
                    SET capacity = '{new_capacity}',
                        cylinders = '{new_cylinders}',
                        year = '{new_year}',
-                       model_vlk = '{new_vlk}'
+                       model_vlk = '{new_vlk}',
                        type = '{new_mtype}'
                  WHERE id = {id_to_check};
             """
