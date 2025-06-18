@@ -59,7 +59,6 @@ def main_app_window(id_to_check):
     # Создаем главное диалоговое окно
     root = tk.Tk()
     root.title("Главное меню")
-    root.attributes('-topmost', True)
     info = (f"{id_to_check}\n{brand} {model} {modification}, {year} г.в. \n{capacity} см3, {cylcount} цил.\nТип - {mtype},\nVLK - {actual_vlk}")
     label = tk.Label(root, text=info, justify="left", background='light grey')
     label.pack(anchor="w", padx=10, pady=10)
@@ -106,7 +105,16 @@ def main_app_window(id_to_check):
     )
     btn_delete.pack(side="bottom", padx=10, pady=5)
 
-        # Кнопка установить флаг
+    # Кнопка перезапустить с новым айди
+    btn_restart = tk.Button(
+        button_low_frame2,
+        text="НОВЫЙ АЙДИ",
+        bg="cyan",
+        command=lambda: get_id_from_clipboard(root)
+    )
+    btn_restart.pack(side="bottom", padx=10, pady=5)
+
+    # Кнопка установить флаг
     set_exclude_flag_button = tk.Button(
         button_low_frame2, 
         text="Установить exclude flag true",
@@ -134,6 +142,18 @@ def main_app_window(id_to_check):
     mark_duplicates_button.pack(side="bottom", padx=10, pady=5)
 
     root.mainloop()
+
+def get_id_from_clipboard(root):
+    # Сохранение айди из буфера обмена
+    id_to_check = pyperclip.paste()
+
+    #Закрываем старое окно
+    root.update()
+
+    #Проверка на айди
+    if not id_to_check.isdigit():
+        messagebox.showinfo("Результат", "В буфере обмена не ID")
+    main_app_window(id_to_check)
 
 # Функция получения данных из базы
 def load_data_from_db(id_to_check):
@@ -392,7 +412,6 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
     # Окно для ввода
     entry_window = tk.Toplevel(root)
     entry_window.title("Дубликаты через запятую")
-    entry_window.attributes('-topmost', True)
     
     # Поле ввода
     entry = tk.Entry(entry_window, width=50)
@@ -565,17 +584,6 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
 
 #### ИСПОЛНЕНИЕ
 
-# Сохранение айди из буфера обмена
-id_to_check = pyperclip.paste()
-
-# Создание экземпляра класса
-keeper = OldValuesKeeper()
-
-#Проверка на айди
-if not id_to_check.isdigit():
-    messagebox.showinfo("Результат", "В буфере обмена не ID")
-    sys.exit()
-
 # Чтение json конфига
 with open('config.json') as file:
     config = json.load(file)
@@ -594,6 +602,11 @@ conn = psycopg2.connect(
     user = pgre_login,
     password = pgre_password
 )
+
+id_to_check = 111355795
+
+# Создание экземпляра класса
+keeper = OldValuesKeeper()
 
 # Запуск главной функции
 main_app_window(id_to_check)
