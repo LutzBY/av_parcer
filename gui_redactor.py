@@ -243,6 +243,7 @@ def vlk_search_process(id_to_check, brand, model, modification, year, cylcount, 
     label = tk.Label(root, text=root_title, justify="left", background='light grey')
     label.pack(anchor="w")
     root.minsize(420, 600)
+    root.attributes('-topmost', True)
 
     # Создаем в нем фрейм для скроллинга
     scrollable_frame = tk.Frame(root)
@@ -508,6 +509,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
     # Создаём Toplevel-окно
     edit_window = tk.Toplevel(root)
     edit_window.title("Редактирование")
+    edit_window.attributes('-topmost', True)
 
     # Метки и поля для vlk
     lbl_vlk = tk.Label(edit_window, text="Актуальная VLK")
