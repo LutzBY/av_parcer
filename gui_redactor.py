@@ -14,7 +14,7 @@ import sys
 class OldValuesKeeper:
     def __init__(self):
         # Атрибуты экземпляра для хранения старых значений
-        # brand, model, model_misc, year, cylinders, capacity, type, model_vlk
+        # brand, model, modification, year, cylcount, capacity, mtype, actual_vlk, price, status, set_exclude_flag, duplicate_flag
         self.old_brand = None
         self.old_model = None
         self.old_model_misc = None
@@ -50,32 +50,68 @@ class OldValuesKeeper:
     def get_old_values(self):
         # Метод для получения сохраненных значений
         return self.old_brand, self.old_model, self.old_model_misc, self.old_year, self.old_cylinders, self.old_capacity, self.old_type, self.old_model_vlk, self.old_capacity
+    def clear_old_values (self):
+        self.old_brand = None
+        self.old_model = None
+        self.old_model_misc = None
+        self.old_year = None
+        self.old_cylinders = None
+        self.old_capacity = None
+        self.old_type = None
+        self.old_model_vlk = None
+
+# Функция для перезапуска по новому айди
+def get_id_from_clipboard(root, keeper):
+    # Сохранение айди из буфера обмена
+    id_to_check = pyperclip.paste()
+
+    #Закрываем старое окно
+    root.destroy()
+    
+    #Проверка на айди
+    if not id_to_check.isdigit():
+        messagebox.showinfo("Результат", "В буфере обмена не ID")
+    
+    # Создание экземпляра класса
+    keeper.clear_old_values()
+
+    main_app_window(id_to_check)
 
 # Создание главного окна ткинтер
 def main_app_window(id_to_check):
     # Загружаем данные из базы (без  выполнения поиска VLK)
-    brand, model, modification, year, cylcount, capacity, mtype, actual_vlk = load_data_from_db(id_to_check)
-
+    brand, model, modification, year, cylcount, capacity, mtype, actual_vlk, price, status, exclude_flag, duplicate_flag = load_data_from_db(id_to_check, keeper)
+    
     # Создаем главное диалоговое окно
     root = tk.Tk()
     root.title("Главное меню")
     root.attributes('-topmost', True)
-    info = (f"{id_to_check}\n{brand} {model} {modification}, {year} г.в. \n{capacity} см3, {cylcount} цил.\nТип - {mtype},\nVLK - {actual_vlk}")
+    info = (f"""{id_to_check}, {status}, VLK - {actual_vlk}
+        {brand} {model} {modification}
+        {year} г.в. {capacity} см3, {cylcount} цил.
+        {mtype}
+        {price} USD
+    E.Flag - {exclude_flag}, D.Flag - {duplicate_flag}""")
     label = tk.Label(root, text=info, justify="left", background='light grey')
     label.pack(anchor="w", padx=10, pady=10)
     root.minsize(420, 200)
+    root.geometry('%dx%d+%d+%d' % (400, 300, 1300, 250)) # размер ш.в. и положение (отступы) ш.в.
 
     # --- Кнопки ---
 
-    # Создаем первый фрейм для нижних кнопок
+    # Создаем первый фрейм для верхних кнопок
     button_low_frame1 = tk.Frame(root, pady=10) #width=500, height=300
     button_low_frame1.pack(anchor="w", fill="x")
 
-    # Создаем второй фрейм для нижних кнопок
+    # Создаем второй фрейм для средних кнопок
     button_low_frame2 = tk.Frame(root, pady=10)
     button_low_frame2.pack(anchor="w", fill="x")
 
-    # Кнопка запуска поиска VLK
+    # Создаем второй фрейм для нижних кнопок
+    button_low_frame3 = tk.Frame(root, pady=10)
+    button_low_frame3.pack(anchor="w", fill="x")
+
+    # Фрейм 1 - Кнопка запуска поиска VLK
     btn_start_vlk = tk.Button(
         button_low_frame1,
         text="Запуск VLK поиска",
@@ -84,7 +120,16 @@ def main_app_window(id_to_check):
     )
     btn_start_vlk.pack(side="left", padx=10, pady=5)
 
-    # Кнопка изменить данные
+    # Фрейм 1 - Кнопка запуска пометки дубликатов
+    mark_duplicates_button = tk.Button(
+        button_low_frame1, 
+        text="Пометить дубликаты",
+        bg="violet",
+        command=lambda: mark_duplicates_and_set_oldest_date_in_(id_to_check, root)
+    )
+    mark_duplicates_button.pack(side="left", padx=10, pady=5)
+
+    # Фрейм 1 - Кнопка изменить данные
     btn_edit = tk.Button(
         button_low_frame1,
         text="Изменить данные",
@@ -97,16 +142,7 @@ def main_app_window(id_to_check):
     )
     btn_edit.pack(side="right", padx=10, pady=5)
 
-    # Кнопка удалить запись
-    btn_delete = tk.Button(
-        button_low_frame2,
-        text="УДАЛИТЬ ЗАПИСЬ",
-        bg="red",
-        command=lambda: delete_id(id_to_check, root)
-    )
-    btn_delete.pack(side="bottom", padx=10, pady=5)
-
-        # Кнопка установить флаг
+    # Фрейм 2 - Кнопка установить флаг
     set_exclude_flag_button = tk.Button(
         button_low_frame2, 
         text="Установить exclude flag true",
@@ -115,7 +151,7 @@ def main_app_window(id_to_check):
     )
     set_exclude_flag_button.pack(side="left", padx=10, pady=5)
 
-    # Кнопка установить флаг и очистить влк
+    # Фрейм 2 - Кнопка установить флаг и очистить влк
     set_exclude_flag_clear_vlk_button = tk.Button(
         button_low_frame2, 
         text="Установить vlk 'кастом'",
@@ -124,22 +160,31 @@ def main_app_window(id_to_check):
     )
     set_exclude_flag_clear_vlk_button.pack(side="bottom", padx=10, pady=5)
 
-    # Кнопка запуска пометки дубликатов
-    mark_duplicates_button = tk.Button(
-        button_low_frame1, 
-        text="Пометить дубликаты",
-        bg="violet",
-        command=lambda: mark_duplicates_and_set_oldest_date_in_(id_to_check, root)
+    # Фрейм 3 - Кнопка удалить запись
+    btn_delete = tk.Button(
+        button_low_frame3,
+        text="УДАЛИТЬ ЗАПИСЬ",
+        bg="red",
+        command=lambda: delete_id(id_to_check, root)
     )
-    mark_duplicates_button.pack(side="bottom", padx=10, pady=5)
+    btn_delete.pack(side="right", padx=10, pady=5)
+
+    # Фрейм 3 - Кнопка перезапустить с новым айди
+    btn_restart = tk.Button(
+        button_low_frame3,
+        text="НОВЫЙ АЙДИ",
+        bg="yellow",
+        command=lambda: get_id_from_clipboard(root, keeper)
+    )
+    btn_restart.pack(side="left", padx=10, pady=5)
 
     root.mainloop()
 
 # Функция получения данных из базы
-def load_data_from_db(id_to_check):
+def load_data_from_db(id_to_check, keeper):
     cursor = conn.cursor()
     query = """
-        SELECT brand, model, model_misc, year, cylinders, capacity, type, model_vlk
+        SELECT brand, model, model_misc, year, cylinders, capacity, type, model_vlk, price, status, exclude_flag, duplicate_flag
         FROM av_full
         WHERE id IN (%s);
     """ % id_to_check
@@ -148,8 +193,7 @@ def load_data_from_db(id_to_check):
     cursor.close()
     # сохраняем значения
     keeper.save_values(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
-    return row  # brand, model, modification, year, cylcount, capacity, mtype, actual_vlk
-
+    return row  # brand, model, modification, year, cylcount, capacity, mtype, actual_vlk, price, status, set_exclude_flag, duplicate_flag
 # Функция mvlk
 def vlk_search_process(id_to_check, brand, model, modification, year, cylcount, capacity, mtype, actual_vlk):
     global root
@@ -291,7 +335,7 @@ def vlk_search_process(id_to_check, brand, model, modification, year, cylcount, 
         copy_and_write_button = tk.Button(
             button_frame, 
             text="Записать", 
-            command=lambda text=result['name']: copy_to_clipboard_and_write(text))
+            command=lambda text=result['name']: copy_to_clipboard_and_write(text, id_to_check))
         copy_and_write_button.pack(side="left", padx=5)
 
     # Запуск основного цикла приложения
@@ -302,17 +346,17 @@ def copy_to_clipboard(text):
     pyperclip.copy(text)  # Используем pyperclip для копирования
     #messagebox.showinfo("Информация", f"'{text}' скопировано в буфер обмена.")  # Показываем уведомление
     root.destroy()  # Закрываем главное окно
-    sys.exit()  # Завершаем выполнение программы
+    # sys.exit()  # Завершаем выполнение программы
 
 # Функция кнопки для копирования текста и записи в базу
-def copy_to_clipboard_and_write(text):
+def copy_to_clipboard_and_write(text, id_to_check):
     vlk_to_write = text
     vlk_cursor = conn.cursor()
     organization_query = ("UPDATE av_full SET model_vlk = '%s' WHERE id = %s") % (vlk_to_write, id_to_check) 
     vlk_cursor.execute(organization_query)
     conn.commit()
     root.destroy()
-    sys.exit()
+    # sys.exit()
 
 # Функция кнопки для записи exclude_flag
 def set_exclude_flag(id_to_check):
@@ -328,7 +372,7 @@ def set_exclude_flag_and_reset_mvlk(id_to_check):
     vlk_cursor.execute(set_flag_and_reset_query)
     conn.commit()
     root.destroy()
-    sys.exit()
+    # sys.exit()
 
 # Функция кнопки установить влк "кастом"
 def set_exclude_mvlk_to_cutom(id_to_check, root):
@@ -336,8 +380,8 @@ def set_exclude_mvlk_to_cutom(id_to_check, root):
     set_flag_and_reset_query = ("UPDATE av_full SET model_vlk = 'кастом' WHERE id = %s") % (id_to_check) 
     vlk_cursor.execute(set_flag_and_reset_query)
     conn.commit()
-    root.destroy()
-    sys.exit()
+    # root.destroy()
+    # sys.exit()
 
 # Функция кнопки для удаления айди
 def delete_id(id_to_check, root):
@@ -345,8 +389,8 @@ def delete_id(id_to_check, root):
     delete_id_query = ("DELETE FROM av_full WHERE id = %s") % (id_to_check) 
     vlk_cursor.execute(delete_id_query)
     conn.commit()
-    root.destroy()
-    sys.exit()
+    # root.destroy()
+    # sys.exit()
 
 # Функция кнопки для пометки дубликатов
 def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
@@ -384,8 +428,11 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
             # Закрываем окно после успешного ввода
             entry_window.destroy()
             conn.commit()
-            root.destroy()
-            sys.exit()
+            # root.destroy()
+            # sys.exit()
+
+            # Выводим сообщение
+            messagebox.showinfo(f'Искомый айди - {id_to_check} ', f'Записаны {dupl_id_list} c датой {dupl_earliest_date}')
 
         except Exception as e:
             messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
@@ -437,7 +484,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
             edit_window.destroy()
 
             # Подгружаем новые данные из базы (для точности — вдруг там триггер что-то сменил)
-            row = load_data_from_db(id_to_check)
+            row = load_data_from_db(id_to_check, keeper)
             vlk_search_process(id_to_check, *row)
         except Exception as e:
             messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
@@ -469,8 +516,8 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
             cursor.execute(query)
             conn.commit()
             edit_window.destroy()
-            root.destroy()
-            sys.exit()
+            # root.destroy()
+            # sys.exit()
         except Exception as e:
             messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
             return
