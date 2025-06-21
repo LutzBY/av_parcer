@@ -485,7 +485,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
 
             # Подгружаем новые данные из базы (для точности — вдруг там триггер что-то сменил)
             row = load_data_from_db(id_to_check, keeper)
-            vlk_search_process(id_to_check, *row)
+            vlk_search_process(id_to_check, row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]) 
         except Exception as e:
             messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
             return
