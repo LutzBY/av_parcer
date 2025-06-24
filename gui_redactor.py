@@ -431,8 +431,8 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
             # root.destroy()
             # sys.exit()
 
-            # Выводим сообщение
-            messagebox.showinfo(f'Искомый айди - {id_to_check} ', f'Записаны {dupl_id_list} c датой {dupl_earliest_date}')
+            # Выводим сообщение (закомичено, мешает)
+           # messagebox.showinfo(f'Искомый айди - {id_to_check} ', f'Записаны {dupl_id_list} c датой {dupl_earliest_date}')
 
         except Exception as e:
             messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
