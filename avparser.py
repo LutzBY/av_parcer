@@ -13,6 +13,7 @@ from email.utils import COMMASPACE
 from requests.exceptions import ChunkedEncodingError, RequestException
 import time
 
+# Хэдеры
 headers = {
     'authority': 'moto.av.by',
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -66,7 +67,7 @@ url_page = "https://moto.av.by/filter?category_type=1&price_usd[min]=1&condition
 current_time_str = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 print(f"Привет! Текущая дата - {current_time_str}")
 
-# Забираем последнюю дату и количество стобцов
+# Забираем последнюю дату и количество стобцов для заголовка отчёта
 datecursor = conn.cursor()
 datequery = "SELECT count(id), max(date) from av_full"
 datecursor.execute(datequery)
@@ -237,12 +238,21 @@ while stop_flag == False:
             soup = BeautifulSoup(src, 'lxml')
             script_element = soup.find("script", id="__NEXT_DATA__") #Достаем жсон
             break
-        except ChunkedEncodingError or RequestException or json.JSONDecodeError or script_element is None or response.status_code != 200:
-            print(f"Ошибка при чтении страницы. Попытка {response_attempt + 1} из {max_response_retries} не удалась. Повтор через 10 секунд.")
+        except ChunkedEncodingError or RequestException or json.JSONDecodeError or AttributeError or script_element is None or response.status_code != 200 or script_element:
+            print(f"Ошибка при чтении страницы {url_cycle}. Попытка {response_attempt + 1} из {max_response_retries} не удалась. Повтор через 10 секунд.")
             time.sleep(10)
             error_counter += 1
         except:
             print(f'Непредвиденная ошибка при чтении страницы {url_cycle}')
+            # Параметры отправки на email
+            subject = 'Ошибка работы скриптов. №1 Парсинг и апдейт modelvlk'
+            for recipient in recipients:
+                html_mail_contents = f"""
+                <p>Произошла ошибка при попытке открыть страницу {url_cycle}</p>
+                <p>Содержимое файла "script_element":</p>
+                <p>{script_element}</p>
+                """
+                send_email(subject, html_mail_contents, recipient)
             break
 
     json_string = script_element.string #Конвертируем жсон в стринг
@@ -596,7 +606,9 @@ print(f"Все хорошо! Прошел {page_counter} страниц, в ст
 # Дополнение HTML хвостом
 html_mail_contents += f"""<hr />
 <h2 style="text-align: center;">КОНЕЦ ОТЧЕТА</h2>
-<h4 style="text-align: center;">Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений! Ошибок при открытии страницы - {error_counter}</h4>"""
+<h4 style="text-align: center;">Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений!</h4>
+<h4 style="text-align: center;">Ошибок при открытии страницы - {error_counter}</h4>
+"""
 
 # Параметры отправки на email
 subject = 'Результат работы скриптов. №1 Парсинг и апдейт modelvlk'
