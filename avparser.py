@@ -249,8 +249,8 @@ while stop_flag == False:
             for recipient in recipients:
                 html_mail_contents = f"""
                 <p>Произошла ошибка при попытке открыть страницу {url_cycle}</p>
-                <p>Содержимое файла "script_element":</p>
-                <p>{script_element}</p>
+                <p>Содержимое файла "src":</p>
+                <p>{src}</p>
                 """
                 send_email(subject, html_mail_contents, recipient)
             break
