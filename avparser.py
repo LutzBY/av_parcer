@@ -231,27 +231,33 @@ while stop_flag == False:
     response_attempt = 0
     max_response_retries = 10
     error_counter = 0
+
     for response_attempt in range(max_response_retries):
         try:
             response = requests.get(url_cycle, headers=headers)
+            response.raise_for_status() # Выбросит исключение, если статус не 200
             src = response.text
             soup = BeautifulSoup(src, 'lxml')
             script_element = soup.find("script", id="__NEXT_DATA__") #Достаем жсон
+            
+            if script_element is None:
+                raise ValueError("Элемент <script id='__NEXT_DATA__'> не найден на странице.")
             break
-        except ChunkedEncodingError or RequestException or json.JSONDecodeError or AttributeError or script_element is None or response.status_code != 200 or script_element:
-            print(f"Ошибка при чтении страницы {url_cycle}. Попытка {response_attempt + 1} из {max_response_retries} не удалась. Повтор через 10 секунд.")
+
+        except (ChunkedEncodingError, RequestException, json.JSONDecodeError, AttributeError, ValueError) as err:
+            print(f"Ошибка {err} при чтении страницы {url_cycle}. Попытка {response_attempt + 1} из {max_response_retries} не удалась. Повтор через 10 секунд.")
             time.sleep(10)
             error_counter += 1
-        except:
+        if response_attempt == max_response_retries - 1:
             print(f'Непредвиденная ошибка при чтении страницы {url_cycle}')
             # Параметры отправки на email
             subject = 'Ошибка работы скриптов. №1 Парсинг и апдейт modelvlk'
+            html_mail_contents = f"""
+            <p>Произошла ошибка при попытке открыть страницу {url_cycle}</p>
+            <p>Содержимое файла "src":</p>
+            <p>{src}</p>
+            """
             for recipient in recipients:
-                html_mail_contents = f"""
-                <p>Произошла ошибка при попытке открыть страницу {url_cycle}</p>
-                <p>Содержимое файла "src":</p>
-                <p>{src}</p>
-                """
                 send_email(subject, html_mail_contents, recipient)
             break
 
