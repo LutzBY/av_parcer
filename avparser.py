@@ -1,5 +1,5 @@
 # AVPARCER #
-version = '30.06.2025'
+version = '02.07.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -53,6 +53,7 @@ with open('exceptions.json', encoding="utf8") as file:
 
 exclude_locations = exceptions_json['exclude_locations']
 exclude_brands = exceptions_json['exclude_brands']
+exclude_sellers = exceptions_json['exclude_sellers']
 
 #Подключение к postgres
 conn = psycopg2.connect(
@@ -375,6 +376,7 @@ while stop_flag == False:
             int(capacity) >= 299
             and cylcount > 1
             and brand not in exclude_brands
+            and seller not in exclude_sellers
             and condition != 'новый'
         ):
             # Получение выгрузки потенциальных дубликатов и разбивка их на старые и новые
@@ -387,6 +389,7 @@ while stop_flag == False:
                 else:
                     dmc_not_duplicate.append(i)
         else:
+            duplicate_html_block = f"""<p style="text-align: center;"><strong>НПроверка дубликатов не проводится</strong></p>"""
             dmc_is_duplicate = []
             dmc_not_duplicate = []
             
