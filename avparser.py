@@ -1,5 +1,5 @@
 # AVPARCER #
-version = '02.07.2025'
+version = '03.07.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -389,7 +389,7 @@ while stop_flag == False:
                 else:
                     dmc_not_duplicate.append(i)
         else:
-            duplicate_html_block = f"""<p style="text-align: center;"><strong>НПроверка дубликатов не проводится</strong></p>"""
+            duplicate_html_block = f"""<p style="text-align: center;"><strong>Проверка дубликатов не проводится</strong></p>"""
             dmc_is_duplicate = []
             dmc_not_duplicate = []
             

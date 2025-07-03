@@ -449,9 +449,15 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
 
     # Устанавливаем фокус на поле ввода 
     entry.focus_set() # не нужно ща
-
-    # Запуск окна
-    entry_window.mainloop()
+    
+    # Предзаполняем из буфера обмена
+    entry.insert(0, pyperclip.paste())
+    if entry.get() == id_to_check:
+        messagebox.showerror("Ошибка", "Искомый айди равен айди дубликата")
+        return
+    else:
+        # Запуск окна
+        entry_window.mainloop()
 
 # Функция изменения данных и перезапуска скрипта
 def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk, conn, root, vlk_process, keeper):
