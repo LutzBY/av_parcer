@@ -1,3 +1,6 @@
+# ACTCHECK #
+version = '07.07.2025'
+
 import requests
 from urllib.parse import urlencode
 from bs4 import BeautifulSoup
@@ -81,7 +84,7 @@ print(f"Строк в базе: {rows_full}")
 select_query = """
 SELECT id, status, status_date, url, price, seller, capacity, cylinders, brand, condition, seller_ph_nr
 FROM av_full 
-WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке')
+WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке', 'Неактивно')
 ORDER by date desc
 """
 cursor.execute(select_query)
@@ -110,6 +113,7 @@ duplicates_global_count = 0
 phone_writed_counter = 0
 new_companies_written = 0
 price_history_counter = 0
+to_check_counter = 0
 
 ## ФУНКЦИИ
 # Квери на запись и курсор execute
@@ -434,8 +438,18 @@ for row in rows:
 
             #Если табличка закрыто есть
             if ad_status_script != 'active': 
-                updated_status = data['props']['initialState']['advert']['advert']['publicStatus']['label']
-
+                # updated_status = data['props']['initialState']['advert']['advert']['publicStatus']['label']
+                updated_status = data['props']['initialState']['advert']['advert']['removeReason']
+                if updated_status == 'cancelled_sale':
+                    updated_status = 'Удалено'
+                if updated_status == 'sold_avby':
+                    updated_status = 'Продано'
+                if updated_status == 'sold_other_place':
+                    updated_status = 'Продано'
+                else:
+                    updated_status = 'ПРОВЕРИТЬ'
+                    to_check_counter += 1
+                
                 #Если статус изменился:
                 if status_value != updated_status:
                     try:
@@ -549,6 +563,7 @@ mail_contents = (f"""
 Записано объявлений с дубликатами - {duplicates_global_count} шт.
 Всего сейчас в базе дубликатов - {duplicates_in_db} шт.
 Записано номеров телефонов - {phone_writed_counter} шт.
+Требуется проверить статус у {to_check_counter} шт. (ПРОВЕРИТЬ)
 {new_companies_print}
 Спасибо за внимание <3
 """

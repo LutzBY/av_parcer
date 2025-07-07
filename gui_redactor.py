@@ -447,8 +447,15 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
     entry.pack(pady=5)
     entry.bind("<Return>", on_enter)  # Нажатие Enter для вызова функции on_enter
 
+    # Создаем кнопку для записи (вызова on_enter)
+    submit_button = tk.Button(
+        entry_window, 
+        text="Записать", 
+        command=on_enter)
+    submit_button.pack(side="right", padx=5)
+
     # Устанавливаем фокус на поле ввода 
-    entry.focus_set() # не нужно ща
+    entry.focus_set()
     
     # Предзаполняем из буфера обмена
     entry.insert(0, pyperclip.paste())
