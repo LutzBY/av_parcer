@@ -69,7 +69,7 @@ url_page = "https://moto.av.by/filter?category_type=1&price_usd[min]=1&condition
 # Страница для парсинга
 
 current_time_str = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-print(f"Привет! Текущая дата - {current_time_str}")
+print(f"Привет! Текущая дата - {current_time_str}, версия - {version}")
 
 # Забираем последнюю дату и количество стобцов для заголовка отчёта
 datecursor = conn.cursor()

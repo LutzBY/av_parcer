@@ -69,7 +69,7 @@ conn = psycopg2.connect(
 
 current_time_start = datetime.now()
 ctsf = current_time_start.strftime("%Y-%m-%d %H:%M:%S")
-print(f"Привет! Текущая дата - {ctsf}")
+print(f"Привет! Текущая дата - {ctsf}, версия - {version}")
 
 # Открываем курсор
 cursor = conn.cursor()
