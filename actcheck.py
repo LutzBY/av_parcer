@@ -1,5 +1,5 @@
 # ACTCHECK #
-version = '07.07.2025'
+version = '12.07.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -84,7 +84,7 @@ print(f"Строк в базе: {rows_full}")
 select_query = """
 SELECT id, status, status_date, url, price, seller, capacity, cylinders, brand, condition, seller_ph_nr
 FROM av_full 
-WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке', 'Неактивно')
+WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке', 'Неактивно', 'ПРОВЕРИТЬ')
 ORDER by date desc
 """
 cursor.execute(select_query)
@@ -442,9 +442,9 @@ for row in rows:
                 updated_status = data['props']['initialState']['advert']['advert']['removeReason']
                 if updated_status == 'cancelled_sale':
                     updated_status = 'Удалено'
-                if updated_status == 'sold_avby':
+                elif updated_status == 'sold_avby':
                     updated_status = 'Продано'
-                if updated_status == 'sold_other_place':
+                elif updated_status == 'sold_other_place':
                     updated_status = 'Продано'
                 else:
                     updated_status = 'ПРОВЕРИТЬ'
