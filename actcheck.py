@@ -103,6 +103,7 @@ print(f'Курсы составляют: BYN-USD {curr_byn_usd}, BYN-EUR {curr_b
 
 # Подсчет итераций (счетчики)
 changed_status_count = 0
+changed_status_to_sold = 0
 stayed_active_count = 0
 dead_link_count = 0
 unchanged_status_count = 0
@@ -114,6 +115,7 @@ phone_writed_counter = 0
 new_companies_written = 0
 price_history_counter = 0
 to_check_counter = 0
+price_cumulative = 0
 
 ## ФУНКЦИИ
 # Квери на запись и курсор execute
@@ -444,8 +446,12 @@ for row in rows:
                     updated_status = 'Удалено'
                 elif updated_status == 'sold_avby':
                     updated_status = 'Продано'
+                    price_cumulative += price_upd
+                    changed_status_to_sold += 1
                 elif updated_status == 'sold_other_place':
                     updated_status = 'Продано'
+                    price_cumulative += price_upd
+                    changed_status_to_sold += 1
                 else:
                     updated_status = 'ПРОВЕРИТЬ'
                     to_check_counter += 1
@@ -554,6 +560,7 @@ mail_contents = (f"""
 Для проверки отобрано {rows_count_na} строк
 Проверка актуальности завершена успешно:
     - смена статуса у {changed_status_count} штук, 
+    - сменило статус на продано {changed_status_to_sold} шт., с общей суммой {price_cumulative} USD,
     - осталось активными {stayed_active_count} штук,
     - закрытый статус сохранился у {unchanged_status_count} штук,
     - ссылка недоступна у {dead_link_count} штук
