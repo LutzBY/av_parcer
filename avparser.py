@@ -502,22 +502,21 @@ while stop_flag == False:
                 if idx != len(dmc_not_duplicate) - 1 or len(dmc_is_duplicate) > 0:
                     duplicate_html_block += ", "
 
+            # Блок дубликатов которые duplicate = True
+            duplicates_grouped = defaultdict(list)
+            for item in dmc_is_duplicate:
+                m_d_id = item[0]
+                m_d_url = item[1]
+                m_d_dupl_id = item[3]   # duplicate_id
 
-        # Блок дубликатов которые duplicate = True
-        duplicates_grouped = defaultdict(list)
-        for item in dmc_is_duplicate:
-            m_d_id = item[0]        # например, 107069185
-            m_d_url = item[1]       # ссылка
-            m_d_dupl_id = item[3]   # например, 109140984
+                # Формируем строку id-ссылка для каждого
+                link = f'<a href="{m_d_url.strip()}" style="color: #008000;">{m_d_id}</a>'
+                duplicates_grouped[m_d_dupl_id].append(link)
 
-            # Добавляем ID как ссылку, но храним только ID для вывода
-            link = f'<a href="{m_d_url.strip()}" style="color: #008000;">{m_d_id}</a>'
-            duplicates_grouped[m_d_dupl_id].append(link)
-
-        if duplicates_grouped:
-            for dupl_id, ids in duplicates_grouped.items():
-                duplicate_html_block += f"<br>Для id {dupl_id}:<br>"
-                duplicate_html_block += ", ".join(ids)
+            if duplicates_grouped:
+                for dupl_id, ids in duplicates_grouped.items():
+                    duplicate_html_block += f"<br>Для id {dupl_id}:<br>"
+                    duplicate_html_block += ", ".join(ids)
 
         # Принт объявы и дополнение HTML contents (для маленьких сокращенный)
 
