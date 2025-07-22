@@ -1,5 +1,5 @@
-# AVPARCER #
-version = '03.07.2025'
+# AVPARSER #
+version = '22.07.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -15,6 +15,7 @@ from email.mime.text import MIMEText
 from email.utils import COMMASPACE
 from requests.exceptions import ChunkedEncodingError, RequestException
 import time
+from collections import defaultdict
 
 # Хэдеры
 headers = {
@@ -163,7 +164,7 @@ def send_email(subject, body, recipient):
 def duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, seller, location, mileage):
     duplcursor = conn.cursor()
     query = """
-        SELECT id, url, duplicate_flag
+        SELECT id, url, duplicate_flag, duplicate_id
         FROM public.av_full
         WHERE brand = %(brand)s
           AND model = %(model)s
@@ -489,7 +490,7 @@ while stop_flag == False:
             break
         processed_ads += 1
 
-        # Дополнение хтмл отчета строчкой про дубликаты если они есть       
+        # Дополнение хтмл отчета строчкой про дубликаты если они есть
         if len(dmc_not_duplicate or dmc_is_duplicate) > 0:
             duplicate_html_block = f"""<p style="text-align: center;"><strong>Найдены дубликаты (<span style="color: #ff6600;">вероятные</span> / <span style="color: #008000;">старые</span>):</strong></p>"""
             # Блок дубликатов которые duplicate = False
@@ -501,16 +502,25 @@ while stop_flag == False:
                 if idx != len(dmc_not_duplicate) - 1 or len(dmc_is_duplicate) > 0:
                     duplicate_html_block += ", "
 
-            # Блок дубликатов которые duplicate = True
-            for idx, x in enumerate(dmc_is_duplicate):
-                m_d_id = x[0]
-                m_d_url = x[1]
-                duplicate_html_block += f"""<a href="{m_d_url}" style="color: #008000;">{m_d_id}</a>"""
-                # Добавляем запятую, если это не последний элемент
-                if idx != len(dmc_is_duplicate) - 1:
-                    duplicate_html_block += ", "
+
+        # Блок дубликатов которые duplicate = True
+        duplicates_grouped = defaultdict(list)
+        for item in dmc_is_duplicate:
+            m_d_id = item[0]        # например, 107069185
+            m_d_url = item[1]       # ссылка
+            m_d_dupl_id = item[3]   # например, 109140984
+
+            # Добавляем ID как ссылку, но храним только ID для вывода
+            link = f'<a href="{m_d_url.strip()}" style="color: #008000;">{m_d_id}</a>'
+            duplicates_grouped[m_d_dupl_id].append(link)
+
+        if duplicates_grouped:
+            for dupl_id, ids in duplicates_grouped.items():
+                duplicate_html_block += f"<br>Для id {dupl_id}:<br>"
+                duplicate_html_block += ", ".join(ids)
 
         # Принт объявы и дополнение HTML contents (для маленьких сокращенный)
+
         print(f"-----------------------------------------------------------------")
         if int(capacity) >= 299 and cylcount > 1 and brand not in exclude_brands:
             print (f"""
