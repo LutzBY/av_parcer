@@ -444,11 +444,7 @@ for row in rows:
                 updated_status = data['props']['initialState']['advert']['advert']['removeReason']
                 if updated_status == 'cancelled_sale':
                     updated_status = 'Удалено'
-                elif updated_status == 'sold_avby':
-                    updated_status = 'Продано'
-                    price_cumulative += price_upd
-                    changed_status_to_sold += 1
-                elif updated_status == 'sold_other_place':
+                elif updated_status in ['sold_avby', 'sold', 'sold_other_place']:
                     updated_status = 'Продано'
                     price_cumulative += price_upd
                     changed_status_to_sold += 1
