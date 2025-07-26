@@ -1,5 +1,5 @@
 # ACTCHECK #
-version = '23.07.2025'
+version = '26.07.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -555,7 +555,7 @@ mail_contents = (f"""
 Для проверки отобрано {rows_count_na} строк
 Проверка актуальности завершена успешно:
     - смена статуса у {changed_status_count} штук, 
-    - сменило статус на продано {changed_status_to_sold} шт., с общей суммой {price_cumulative} USD, средняя - {price_cumulative / changed_status_to_sold} USD
+    - сменило статус на продано {changed_status_to_sold} шт., с общей суммой {price_cumulative} USD, средняя - {round(price_cumulative / changed_status_to_sold, 1)} USD
     - осталось активными {stayed_active_count} штук,
     - закрытый статус сохранился у {unchanged_status_count} штук,
     - ссылка недоступна у {dead_link_count} штук
