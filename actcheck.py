@@ -84,7 +84,7 @@ print(f"Строк в базе: {rows_full}")
 select_query = """
 SELECT id, status, status_date, url, price, seller, capacity, cylinders, brand, condition, seller_ph_nr
 FROM av_full 
-WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке', 'Неактивно', 'ПРОВЕРИТЬ')
+WHERE status IN ('Актуально', 'Временно недоступно', 'На проверке', 'Неактивно', 'ПРОВЕРИТЬ', 'Недоступная ссылка')
 ORDER by date desc
 """
 cursor.execute(select_query)
