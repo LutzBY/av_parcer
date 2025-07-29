@@ -71,7 +71,6 @@ def get_id_from_clipboard(root, keeper):
     #Проверка на айди
     if not id_to_check.isdigit():
         messagebox.showinfo("Результат", "В буфере обмена не ID")
-    
     # Создание экземпляра класса
     keeper.clear_old_values()
 
@@ -188,12 +187,16 @@ def load_data_from_db(id_to_check, keeper):
         FROM av_full
         WHERE id IN (%s);
     """ % id_to_check
-    cursor.execute(query)
-    row = cursor.fetchall()[0]
-    cursor.close()
-    # сохраняем значения
-    keeper.save_values(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
-    return row  # brand, model, modification, year, cylcount, capacity, mtype, actual_vlk, price, status, set_exclude_flag, duplicate_flag
+    try:
+        cursor.execute(query)
+        row = cursor.fetchall()[0]
+        cursor.close()
+        # сохраняем значения
+        keeper.save_values(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+        return row  # brand, model, modification, year, cylcount, capacity, mtype, actual_vlk, price, status, set_exclude_flag, duplicate_flag
+    except IndexError:
+        messagebox.showinfo("Ошибка", "Такого айди нет в базе")
+
 # Функция mvlk
 def vlk_search_process(id_to_check, brand, model, modification, year, cylcount, capacity, mtype, actual_vlk):
     global root
