@@ -603,7 +603,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
     entry_year.insert(0, str(year))  # Предзаполняем
 
     # Метки и поля для mtype
-    lbl_mtype = tk.Label(edit_window, text=f"Год выпуска (исх - {keeper.old_type}):")
+    lbl_mtype = tk.Label(edit_window, text=f"Тип (исх - {keeper.old_type}):")
     lbl_mtype.pack(pady=(10, 0))
     entry_mtype = tk.Entry(edit_window, width=20)
     entry_mtype.pack(pady=5)
