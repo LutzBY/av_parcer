@@ -207,7 +207,7 @@ html_mail_contents = f"""
     <h4 style="text-align: center;">{current_time_str}</h4>
     <h2 style="text-align: center;">Последняя дата объявления из базы:</h2>
     <h4 style="text-align: center;">{latest_ad_date.strftime('%Y-%m-%d-%H-%M-%S')}</h4>
-    <h4 style="text-align: center;">Версия avparcer на {version}</h4>
+    <h4 style="text-align: center;">Версия avparser на {version}</h4>
     <hr />
     <p>&nbsp;</p>
     </body>
