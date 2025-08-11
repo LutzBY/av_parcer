@@ -286,7 +286,7 @@ def parse_new_organisations(seller_id_list):
                 conn.commit()
                 print(f'{o_id} записан')
                 print('-------')
-                new_companies_written +=1
+                new_companies_written +=1 ### ТУТ ПРОИСХОДИТ ОШИБКА UnboundLocalError
     # Если страница открылась но она с домиком 404
     except (KeyError, json.JSONDecodeError, TypeError):
         print('Произошла ошибка открытия страницы')
