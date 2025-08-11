@@ -1,5 +1,5 @@
 # ACTCHECK #
-version = '26.07.2025'
+version = '11.08.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -244,7 +244,7 @@ def phone_get_request(id_value):
         return 0
 
 # Функция парсинга новых юрлиц
-def parse_new_organisations(seller_id_list):
+def parse_new_organisations(seller_id_list, new_companies_written):
     print (f'Производим парсинг новых организаций. Список id - {seller_id_list}')
     try:
         for id in seller_id_list:
@@ -528,7 +528,7 @@ cursor.execute(select_query)
 new_companies = cursor.fetchall()
 if new_companies:
     seller_id_list = [int(c[0]) for c in new_companies]
-    parse_new_organisations(seller_id_list)
+    parse_new_organisations(seller_id_list, new_companies_written)
     new_companies_print = f'Найдено {len(new_companies)} новых юрлиц, записано {new_companies_written}'
 else:
     new_companies_print = 'Нет новых юрлиц'
