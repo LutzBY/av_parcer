@@ -16,6 +16,8 @@ from email.utils import COMMASPACE
 from requests.exceptions import ChunkedEncodingError, RequestException
 import time
 from collections import defaultdict
+import openai
+from openai import APIStatusError
 
 # Хэдеры
 headers = {
@@ -47,6 +49,7 @@ pgre_host = config['postgre host']
 pgre_port = config['postgre port']
 pgre_db = config['postgre database']
 recipients = config['mail recipients']
+poe_api_key = config['api_key']
 
 # Чтение json исключений
 with open('exceptions.json', encoding="utf8") as file:
@@ -198,6 +201,39 @@ def duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, selle
     duplcursor.close()
 
     return dmc_results
+
+# Функция подбора модели по llm
+def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
+    # Инициализация клиента
+    client = openai.OpenAI(
+    api_key= poe_api_key,
+    base_url="https://api.poe.com/v1",
+    )
+
+    # Передаваемое сообщение
+    messages = [
+        {
+            "role": "system",
+            "content": "Определи наиболее вероятное поколение мотоцикла по: brand, model, modification, year, cylcount, capacity, mtype. "
+                "Отвечай строго в формате: 'Марка Модель (период лет выпуска этой модели)'. Как 'Yamaha YZF-R1 (2007 - 2008) "
+                "Если модели имеют разные названия для рынков — объедини через слеш: 'ZX-6R / ZX600G (1998–1999)'. "
+                "Учитывай возможные ошибки во вводе."
+        },
+        {
+            "role": 'user', 'content': f'Попробуй - {brand}, {model}, {modification}, {year}, {cylcount}, {capacity}, {mtype}'
+        } 
+        ]
+
+    # Создание чата и его атрибуты
+    chat = client.chat.completions.create(
+        model="Llama-3.1-405B", # GPT-4o, Claude-Sonnet-4, Gemini-2.5-Pro, Grok-4, gpt-3.5-turbo
+        messages=messages,
+        temperature=0,
+        #max_tokens=64
+    )
+    
+    # Получение первого ответа
+    return chat.choices[0].message.content
 
 # Создание HTML отчета
 html_mail_contents = f"""
@@ -364,6 +400,31 @@ while stop_flag == False:
         else:
             best_match = 'кастом'
 
+        # Вызов функции add_mvlk_llm по условиям, запись mvlk_llm
+        if (
+            int(capacity) >= 299
+            and cylcount > 1
+            and brand not in exclude_brands
+            and mtype != 'кастом'
+            #### and refresh_for_print == publish_for_print
+            # and seller not in exclude_sellers
+            # and condition != 'новый'  
+            ):
+            try:
+                # вызвать
+                mvlk_llm = add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype)
+                
+                # запись в базу выполняется в пункте # Скрипт для пгри
+        
+                # добавить в принт и в html
+                mvlk_llm_print = (f'mvlk_llm - {mvlk_llm}')
+
+            except (APIStatusError) as err:
+                mvlk_llm_print = ('н.д.')
+                print(f'Для {id} oшибка - {err.code}')
+        else:
+            mvlk_llm_print = ('-')
+        
         # Проверка необходимости установить exclude_flag
         exclude_flag = False
         if flag_on_order:
@@ -396,13 +457,13 @@ while stop_flag == False:
             
         # Скрипт для пгри
         parsequery = """
-            INSERT INTO av_full(id, price, date, brand, model, model_misc, year, type, cylinders, drive, capacity, mileage, url, locations, status, status_date, model_vlk, seller, condition, exclude_flag, user_description, seller_id)
-            VALUES (%s, %s, '%s', '%s', '%s', '%s', %s, '%s', %s, '%s', %s, %s, '%s', '%s', 'Актуально', null, '%s', '%s', '%s', %s, '%s', %s)
+            INSERT INTO av_full(id, price, date, brand, model, model_misc, year, type, cylinders, drive, capacity, mileage, url, locations, status, status_date, model_vlk, seller, condition, exclude_flag, user_description, seller_id, model_vlk_llm)
+            VALUES (%s, %s, '%s', '%s', '%s', '%s', %s, '%s', %s, '%s', %s, %s, '%s', '%s', 'Актуально', null, '%s', '%s', '%s', %s, '%s', %s, '%s')
             ON CONFLICT (id) DO UPDATE 
             SET 
             price = excluded.price
             WHERE av_full.id = excluded.id;
-        """ % (id, price, datetime_obj, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, best_match, seller, condition, exclude_flag, user_description, seller_id)
+        """ % (id, price, datetime_obj, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, best_match, seller, condition, exclude_flag, user_description, seller_id, mvlk_llm)
         
         # Работа курсора для пгри
         parsecursor.execute(parsequery)
@@ -527,6 +588,7 @@ while stop_flag == False:
 Publ. at {publish_for_print}, Refr. at {refresh_for_print}
 Name - {brand} {model} {modification} ({year}, {capacity} ccm)
 Actual mvlk - {mvlk_actual} (Best mvlk - {best_match})
+mvlk_llm - {mvlk_llm_print}
 Seller - {seller}
 URL - {url}""")
         
@@ -538,7 +600,7 @@ URL - {url}""")
 <tbody>
 <tr style="height: 10px;">
 <td style="width: 484.953px; height: 10px;">
-<p style="text-align: left;"><strong>№ {processed_ads}</strong></p>
+<p style="text-align: left;"><strong>№ {processed_ads} - {mvlk_llm_print}</strong></p>
 <p style="text-align: left;">{id}</p>
 </td>
 <td style="width: 108.281px; height: 10px;">
