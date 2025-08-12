@@ -137,7 +137,8 @@ def main_app_window(id_to_check):
         command=lambda: update_and_restart(
             id_to_check, capacity, cylcount, year, mtype, actual_vlk, conn, root,
             lambda new_id: main_app_window(new_id),
-            keeper
+            keeper,
+            model_vlk_llm
         )
     )
     btn_edit.pack(side="right", padx=10, pady=5)
@@ -471,7 +472,7 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
         entry_window.mainloop()
 
 # Функция изменения данных и перезапуска скрипта
-def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk, conn, root, vlk_process, keeper):
+def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk, conn, root, vlk_process, keeper, model_vlk_llm):
     
     # Функция кнопки "Сохранить и перезапустить"
     def on_save_and_restart():
@@ -515,6 +516,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
         new_cylinders = entry_cylinders.get().strip()
         new_year = entry_year.get().strip()
         new_mtype = entry_mtype.get().strip()
+        new_model_vlk_llm = entry_model_vlk_llm.get().strip()
 
         if not new_capacity or not new_cylinders or not new_year or not new_mtype:
             messagebox.showwarning("Ошибка", "Все поля должны быть заполнены!")
@@ -527,7 +529,8 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
                        cylinders = '{new_cylinders}',
                        year = '{new_year}',
                        model_vlk = '{new_vlk}',
-                       type = '{new_mtype}'
+                       type = '{new_mtype}',
+                       model_vlk_llm = '{new_model_vlk_llm}'
                  WHERE id = {id_to_check};
             """
             cursor.execute(query)
@@ -581,6 +584,13 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
     entry_vlk = tk.Entry(edit_window, width=20)
     entry_vlk.pack(pady=5)
     entry_vlk.insert(0, str(actual_vlk))  # Предзаполняем
+
+    # Метки и поля для vlk_llm
+    lbl_model_vlk_llm = tk.Label(edit_window, text="Актуальная VLK-LLM")
+    lbl_model_vlk_llm.pack(pady=(10, 0))
+    entry_model_vlk_llm = tk.Entry(edit_window, width=20)
+    entry_model_vlk_llm.pack(pady=5)
+    entry_model_vlk_llm.insert(0, str(model_vlk_llm))  # Предзаполняем
 
     # Метки и поля для capacity
     lbl_capacity = tk.Label(edit_window, text=f"Объём (исх - {keeper.old_capacity}):")
