@@ -79,17 +79,18 @@ def get_id_from_clipboard(root, keeper):
 # Создание главного окна ткинтер
 def main_app_window(id_to_check):
     # Загружаем данные из базы (без  выполнения поиска VLK)
-    brand, model, modification, year, cylcount, capacity, mtype, actual_vlk, price, status, exclude_flag, duplicate_flag = load_data_from_db(id_to_check, keeper)
+    brand, model, modification, year, cylcount, capacity, mtype, actual_vlk, price, status, exclude_flag, duplicate_flag, model_vlk_llm = load_data_from_db(id_to_check, keeper)
     
     # Создаем главное диалоговое окно
     root = tk.Tk()
     root.title("Главное меню")
     root.attributes('-topmost', True)
-    info = (f"""{id_to_check}, {status}, VLK - {actual_vlk}
+    info = (f"""{id_to_check}, {status}, {price} USD
+    VLK - {actual_vlk}
+    LLM - {model_vlk_llm}
         {brand} {model} {modification}
         {year} г.в. {capacity} см3, {cylcount} цил.
         {mtype}
-        {price} USD
     E.Flag - {exclude_flag}, D.Flag - {duplicate_flag}""")
     label = tk.Label(root, text=info, justify="left", background='light grey')
     label.pack(anchor="w", padx=10, pady=10)
@@ -183,7 +184,7 @@ def main_app_window(id_to_check):
 def load_data_from_db(id_to_check, keeper):
     cursor = conn.cursor()
     query = """
-        SELECT brand, model, model_misc, year, cylinders, capacity, type, model_vlk, price, status, exclude_flag, duplicate_flag
+        SELECT brand, model, model_misc, year, cylinders, capacity, type, model_vlk, price, status, exclude_flag, duplicate_flag, model_vlk_llm
         FROM av_full
         WHERE id IN (%s);
     """ % id_to_check
@@ -193,7 +194,7 @@ def load_data_from_db(id_to_check, keeper):
         cursor.close()
         # сохраняем значения
         keeper.save_values(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
-        return row  # brand, model, modification, year, cylcount, capacity, mtype, actual_vlk, price, status, set_exclude_flag, duplicate_flag
+        return row  # brand, model, modification, year, cylcount, capacity, mtype, actual_vlk, price, status, set_exclude_flag, duplicate_flag, model_vlk_llm
     except IndexError:
         messagebox.showinfo("Ошибка", "Такого айди нет в базе")
 
