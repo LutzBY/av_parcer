@@ -1,5 +1,5 @@
 # AVPARSER #
-version = '22.07.2025'
+version = '13.08.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -37,6 +37,12 @@ headers = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
 }
 
+# Счетчики
+page_counter = 0
+processed_ads = 0
+llm_iter_counter = 0 # счетчик вызова add_mvlk_llm
+token_usage = 0 # счетчик токенов add_mvlk_llm
+
 # Чтение json конфига
 with open('config.json') as file:
     config = json.load(file)
@@ -49,7 +55,7 @@ pgre_host = config['postgre host']
 pgre_port = config['postgre port']
 pgre_db = config['postgre database']
 recipients = config['mail recipients']
-poe_api_key = config['api_key']
+poe_api_keys = config['api_keys']
 
 # Чтение json исключений
 with open('exceptions.json', encoding="utf8") as file:
@@ -204,9 +210,14 @@ def duplicates_manual_check(brand, model, year, mtype, cylcount, capacity, selle
 
 # Функция подбора модели по llm
 def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
+    global token_usage
+
+    # Получаем rolling ключ
+    api_key = poe_api_keys[llm_iter_counter % len(poe_api_keys)]
+    
     # Инициализация клиента
     client = openai.OpenAI(
-    api_key= poe_api_key,
+    api_key= api_key,
     base_url="https://api.poe.com/v1",
     )
 
@@ -217,7 +228,7 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
             "content": "Определи наиболее вероятное поколение мотоцикла по: brand, model, modification, year, cylcount, capacity, mtype. "
                 "Отвечай строго в формате: 'Марка Модель (период лет выпуска этой модели)'. Как 'Yamaha YZF-R1 (2007 - 2008) "
                 "Если модели имеют разные названия для рынков — объедини через слеш: 'ZX-6R / ZX600G (1998–1999)'. "
-                "Учитывай возможные ошибки во вводе."
+                "Учитывай возможные ошибки во вводе. Если модель не определилась ставь 'н.д.'"
         },
         {
             "role": 'user', 'content': f'Попробуй - {brand}, {model}, {modification}, {year}, {cylcount}, {capacity}, {mtype}'
@@ -232,6 +243,11 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
         #max_tokens=64
     )
     
+    # Вывод и подсчет количества потраченных токенов
+    print(f'ключ на итерации - {api_key}')
+    print(f'completion_ = {chat.usage.completion_tokens}, prompt_ = {chat.usage.prompt_tokens}')
+    token_usage += chat.usage.prompt_tokens
+
     # Получение первого ответа
     return chat.choices[0].message.content
 
@@ -250,10 +266,7 @@ html_mail_contents = f"""
     </html>
     """
 
-#цикл перебора страниц и парсинг
-page_counter = 0
-processed_ads = 0
-
+# Цикл перебора страниц и парсинг
 # запуск курсора
 parsecursor = conn.cursor()
 
@@ -413,14 +426,15 @@ while stop_flag == False:
             try:
                 # вызвать
                 mvlk_llm = add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype)
+                llm_iter_counter += 1
                 
                 # запись в базу выполняется в пункте # Скрипт для пгри
         
                 # добавить в принт и в html
-                mvlk_llm_print = (f'mvlk_llm - {mvlk_llm}')
+                mvlk_llm_print = mvlk_llm
 
             except (APIStatusError) as err:
-                mvlk_llm_print = ('н.д.')
+                mvlk_llm_print = 'н.д.'
                 print(f'Для {id} oшибка - {err.code}')
         else:
             mvlk_llm_print = ('-')
@@ -685,13 +699,13 @@ URL - {url}""")
 ## Завершающий блок
 parsecursor.close()
 print(f"---- ВЫВОД ------------------------------------------------------")
-print(f"Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений! Ошибок - {error_counter}")
+print(f"Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений! Ошибок - {error_counter}, обработано LLM {llm_iter_counter} объявлений, потрачено токенов {token_usage}")
 
 # Дополнение HTML хвостом
 html_mail_contents += f"""<hr />
 <h2 style="text-align: center;">КОНЕЦ ОТЧЕТА</h2>
 <h4 style="text-align: center;">Все хорошо! Прошел {page_counter} страниц, в старой базе было {old_rows_count} строк. Обработано {processed_ads} объявлений!</h4>
-<h4 style="text-align: center;">Ошибок при открытии страницы - {error_counter}</h4>
+<h4 style="text-align: center;">Ошибок при открытии страницы - {error_counter}, обработано LLM {llm_iter_counter} объявлений, потрачено токенов {token_usage}</h4>
 """
 
 # Параметры отправки на email

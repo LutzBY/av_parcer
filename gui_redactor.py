@@ -9,6 +9,7 @@ import pyperclip
 import tkinter as tk
 from tkinter import messagebox
 import sys
+from av_parser_utils import add_mvlk_llm
 
 # Сохранение исходных значений
 class OldValuesKeeper:
@@ -138,7 +139,8 @@ def main_app_window(id_to_check):
             id_to_check, capacity, cylcount, year, mtype, actual_vlk, conn, root,
             lambda new_id: main_app_window(new_id),
             keeper,
-            model_vlk_llm
+            model_vlk_llm,
+            modification
         )
     )
     btn_edit.pack(side="right", padx=10, pady=5)
@@ -472,7 +474,7 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
         entry_window.mainloop()
 
 # Функция изменения данных и перезапуска скрипта
-def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk, conn, root, vlk_process, keeper, model_vlk_llm):
+def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk, conn, root, vlk_process, keeper, model_vlk_llm, modification):
     
     # Функция кнопки "Сохранить и перезапустить"
     def on_save_and_restart():
@@ -573,10 +575,76 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
             messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
             return
 
+    def run_add_mvlk_llm():
+        def enter_new_mvlk_llm_and_close():
+            # Через гет получаем новые значения которые вводятся в поля
+            new_model_vlk_llm = entry.get().strip()
+
+            if not new_model_vlk_llm:
+                messagebox.showwarning("Ошибка", "Все поля должны быть заполнены!")
+                return
+            try:
+                cursor = conn.cursor()
+                query = f"""
+                    UPDATE public.av_full
+                    SET capacity = '{new_capacity}',
+                        cylinders = '{new_cylinders}',
+                        year = '{new_year}',
+                        type = '{new_mtype}',
+                        model_vlk_llm = '{new_model_vlk_llm}'
+                    WHERE id = {id_to_check};
+                """
+                cursor.execute(query)
+                conn.commit()
+                entry_window.destroy()
+                # root.destroy()
+                # sys.exit()
+            except Exception as e:
+                messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
+                return
+
+        new_modification = entry_modification.get().strip()
+        new_capacity = entry_capacity.get().strip()
+        new_cylinders = entry_cylinders.get().strip()
+        new_year = entry_year.get().strip()
+        new_mtype = entry_mtype.get().strip()
+        
+        mvlk_llm = add_mvlk_llm (keeper.old_brand, keeper.old_model, new_modification, new_year, new_cylinders, new_capacity, new_mtype)
+
+        # Окно для ввода
+        entry_window = tk.Toplevel(root)
+        entry_window.title(f"Результат mvlk_llm (затрачено - )") #token_usage
+        entry_window.attributes('-topmost', True)
+        
+        # Поле ввода
+        entry = tk.Entry(entry_window, width=50)
+        entry.pack(pady=5)
+        entry.insert(0, mvlk_llm)
+        entry.bind("<Return>", enter_new_mvlk_llm_and_close)  # Нажатие Enter для вызова функции on_enter
+
+        # Создаем кнопку для записи (дублирует логику <Return>)
+        submit_button = tk.Button(
+            entry_window, 
+            text="Записать", 
+            command=enter_new_mvlk_llm_and_close) 
+        submit_button.pack(side="right", padx=5)
+
+        # Устанавливаем фокус на поле ввода 
+        entry.focus_set()
+        
+        entry_window.mainloop()
+
     # Создаём Toplevel-окно
-    edit_window = tk.Toplevel(root)
+    edit_window = tk.Toplevel(root, width=40)
     edit_window.title("Редактирование")
     edit_window.attributes('-topmost', True)
+
+    # Метки и поля для vlk_llm
+    lbl_model_vlk_llm = tk.Label(edit_window, text="Актуальная VLK-LLM")
+    lbl_model_vlk_llm.pack(pady=(10, 0))
+    entry_model_vlk_llm = tk.Entry(edit_window, width=40)
+    entry_model_vlk_llm.pack(pady=5)
+    entry_model_vlk_llm.insert(0, str(model_vlk_llm))  # Предзаполняем
 
     # Метки и поля для vlk
     lbl_vlk = tk.Label(edit_window, text="Актуальная VLK")
@@ -584,13 +652,6 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
     entry_vlk = tk.Entry(edit_window, width=20)
     entry_vlk.pack(pady=5)
     entry_vlk.insert(0, str(actual_vlk))  # Предзаполняем
-
-    # Метки и поля для vlk_llm
-    lbl_model_vlk_llm = tk.Label(edit_window, text="Актуальная VLK-LLM")
-    lbl_model_vlk_llm.pack(pady=(10, 0))
-    entry_model_vlk_llm = tk.Entry(edit_window, width=20)
-    entry_model_vlk_llm.pack(pady=5)
-    entry_model_vlk_llm.insert(0, str(model_vlk_llm))  # Предзаполняем
 
     # Метки и поля для capacity
     lbl_capacity = tk.Label(edit_window, text=f"Объём (исх - {keeper.old_capacity}):")
@@ -613,6 +674,13 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
     entry_year.pack(pady=5)
     entry_year.insert(0, str(year))  # Предзаполняем
 
+    # Метки и поля для modification
+    lbl_modification = tk.Label(edit_window, text="Польз. модификация")
+    lbl_modification.pack(pady=(10, 0))
+    entry_modification = tk.Entry(edit_window, width=20)
+    entry_modification.pack(pady=5)
+    entry_modification.insert(0, str(modification))  # Предзаполняем
+
     # Метки и поля для mtype
     lbl_mtype = tk.Label(edit_window, text=f"Тип (исх - {keeper.old_type}):")
     lbl_mtype.pack(pady=(10, 0))
@@ -631,6 +699,10 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
     # Кнопка "Сохранить и закрыть"
     btn_save = tk.Button(edit_window, text="Сохранить и закрыть", command=on_save_and_stop, bg="orange")
     btn_save.pack(pady=10)
+
+    # Кнопка "Запустить add_mvlk_llm"
+    btn_run_add_mvlk_llm = tk.Button(edit_window, text="Запустить add_mvlk_llm", command=run_add_mvlk_llm, bg="violet")
+    btn_run_add_mvlk_llm.pack(pady=10)
     
     # Фокус на поле ввода
     entry_capacity.focus_set()
