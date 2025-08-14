@@ -609,11 +609,12 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
         new_year = entry_year.get().strip()
         new_mtype = entry_mtype.get().strip()
         
-        mvlk_llm = add_mvlk_llm (keeper.old_brand, keeper.old_model, new_modification, new_year, new_cylinders, new_capacity, new_mtype)
+        # Вызов функции, получение ответа и количества токенов
+        mvlk_llm, token_usage = add_mvlk_llm (keeper.old_brand, keeper.old_model, new_modification, new_year, new_cylinders, new_capacity, new_mtype)
 
         # Окно для ввода
         entry_window = tk.Toplevel(root)
-        entry_window.title(f"Результат mvlk_llm (затрачено - )") #token_usage
+        entry_window.title(f"Результат mvlk_llm (затрачено - {token_usage})") #token_usage
         entry_window.attributes('-topmost', True)
         
         # Поле ввода

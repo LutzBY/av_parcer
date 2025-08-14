@@ -1,5 +1,5 @@
 # AVPARSER #
-version = '13.08.2025'
+version = '14.08.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -227,8 +227,15 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
             "role": "system",
             "content": "Определи наиболее вероятное поколение мотоцикла по: brand, model, modification, year, cylcount, capacity, mtype. "
                 "Отвечай строго в формате: 'Марка Модель (период лет выпуска этой модели)'. Как 'Yamaha YZF-R1 (2007 - 2008) "
-                "Если модели имеют разные названия для рынков — объедини через слеш: 'ZX-6R / ZX600G (1998–1999)'. "
-                "Учитывай возможные ошибки во вводе. Если модель не определилась ставь 'н.д.'"
+                "Если модели имеют разные названия для рынков или известны под разными именами — объедини через слеш: 'ZX-6R / ZX600G (1998–1999)', GSX650F / Bandit 650. "
+                "НЕ используй год из данных как ответ — найди период выпуска поколения."
+                "Учитывай возможные ошибки во вводе. Если модель не определить, то возвращай 'н.д.'"
+                "Примеры:"
+                "Ввод: Suzuki, GSF, , 1996, 4, 650, стрит → 'Suzuki GSF650 Bandit (1995–2004)'"
+                "Ввод: Kawasaki, Ninja, zx6, 1995, 4, 600, спорт → 'Kawasaki Ninja ZX-6R (1990–1997)'"
+                "Ввод: Kawasaki, Ninja, , 2006, 2, 649, спорт → 'Kawasaki Ninja 650 / ER-6f (2006–2017)"
+                "Ввод: Honda, CBR, , 1993, 4, 600, спорт → 'Honda CBR600F2 (1991–1994)'"
+                "Ввод: Yamaha, YZF, р 6, 2006, 4, 599, спорт → 'Yamaha YZF-R6 (2006–2007)"
         },
         {
             "role": 'user', 'content': f'Попробуй - {brand}, {model}, {modification}, {year}, {cylcount}, {capacity}, {mtype}'
@@ -237,16 +244,16 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
 
     # Создание чата и его атрибуты
     chat = client.chat.completions.create(
-        model="Llama-3.1-405B", # GPT-4o, Claude-Sonnet-4, Gemini-2.5-Pro, Grok-4, gpt-3.5-turbo
+        model="Llama-3.1-405B", # 100/1000 tokens, 39/message ## claude-3-haiku (10/Kt, 19/mess), Claude-Haiku-3.5 (30/1Kt, 42/mess) Llama-3.3-70B (130/mess), gpt-3.5-turbo (15/, 9/), GPT-4o-mini (5/1Kt, 5/mess)
         messages=messages,
         temperature=0,
         #max_tokens=64
     )
     
     # Вывод и подсчет количества потраченных токенов
-    print(f'ключ на итерации - {api_key}')
-    print(f'completion_ = {chat.usage.completion_tokens}, prompt_ = {chat.usage.prompt_tokens}')
-    token_usage += chat.usage.prompt_tokens
+    # print(f'ключ на итерации - {api_key}')
+    # print(f'completion_ = {chat.usage.completion_tokens}, prompt_ = {chat.usage.prompt_tokens}')
+    token_usage += chat.usage.total_tokens
 
     # Получение первого ответа
     return chat.choices[0].message.content
@@ -419,7 +426,7 @@ while stop_flag == False:
             and cylcount > 1
             and brand not in exclude_brands
             and mtype != 'кастом'
-            #### and refresh_for_print == publish_for_print
+            #### and refresh_for_print == publish_for_print ## на будущее
             # and seller not in exclude_sellers
             # and condition != 'новый'  
             ):
@@ -437,7 +444,7 @@ while stop_flag == False:
                 mvlk_llm_print = 'н.д.'
                 print(f'Для {id} oшибка - {err.code}')
         else:
-            mvlk_llm_print = ('-')
+            mvlk_llm_print = ('')
         
         # Проверка необходимости установить exclude_flag
         exclude_flag = False
@@ -475,9 +482,9 @@ while stop_flag == False:
             VALUES (%s, %s, '%s', '%s', '%s', '%s', %s, '%s', %s, '%s', %s, %s, '%s', '%s', 'Актуально', null, '%s', '%s', '%s', %s, '%s', %s, '%s')
             ON CONFLICT (id) DO UPDATE 
             SET 
-            price = excluded.price
+                model_vlk_llm = excluded.model_vlk_llm
             WHERE av_full.id = excluded.id;
-        """ % (id, price, datetime_obj, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, best_match, seller, condition, exclude_flag, user_description, seller_id, mvlk_llm)
+        """ % (id, price, datetime_obj, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, best_match, seller, condition, exclude_flag, user_description, seller_id, mvlk_llm_print)
         
         # Работа курсора для пгри
         parsecursor.execute(parsequery)
@@ -607,6 +614,17 @@ Seller - {seller}
 URL - {url}""")
         
             # Дополнение большим HTML каждого объявления
+            # Выдача дат
+            if refresh_for_print == publish_for_print:
+                dates_html_block = f'''
+<strong>Дата подачи </strong>{publish_for_print}</td>
+'''         
+            else:
+                dates_html_block = f"""
+<blockquote><strong>Дата апдейта&nbsp;</strong>{refresh_for_print}</blockquote>
+<strong>Дата подачи </strong>{publish_for_print}</td>"""
+
+            # Формирование выдачи html
             html_mail_contents += f"""
 <html>
         <body>
@@ -654,8 +672,7 @@ URL - {url}""")
 </tr>
 <tr style="height: 10px;">
 <td style="height: 10px; text-align: center; width: 287.719px;" colspan="4">
-<blockquote><strong>Дата апдейта&nbsp;</strong>{refresh_for_print}</blockquote>
-<strong>Дата подачи </strong>{publish_for_print}</td>
+{dates_html_block}
 </tr>
 <tr style="height: 62px;">
 <td style="text-align: center; height: 62px; width: 484.953px;">
