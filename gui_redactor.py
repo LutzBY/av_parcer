@@ -2,6 +2,9 @@
 #id_to_check = 111355795 114225903
 #########################
 
+# Версия
+version = '18.08.2025'
+
 import json
 from fuzzywuzzy import fuzz
 import psycopg2
@@ -72,6 +75,7 @@ def get_id_from_clipboard(root, keeper):
     #Проверка на айди
     if not id_to_check.isdigit():
         messagebox.showinfo("Результат", "В буфере обмена не ID")
+        sys.exit()
     # Создание экземпляра класса
     keeper.clear_old_values()
 
@@ -293,8 +297,9 @@ def vlk_search_process(id_to_check, brand, model, modification, year, cylcount, 
     root_title = (f"{id_to_check}\n{brand} {model} {modification}, {year} г.в. \n{capacity} см3, {cylcount} цил.\nТип - {mtype},\nVLK - {actual_vlk}")
     label = tk.Label(root, text=root_title, justify="left", background='light grey')
     label.pack(anchor="w")
-    root.minsize(420, 600)
+    # root.minsize(420, 600)
     root.attributes('-topmost', True)
+    root.geometry('%dx%d+%d+%d' % (300, 600, 975, 245))
 
     # Создаем в нем фрейм для скроллинга
     scrollable_frame = tk.Frame(root)
@@ -448,10 +453,12 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
     entry_window = tk.Toplevel(root)
     entry_window.title("Дубликаты через запятую")
     entry_window.attributes('-topmost', True)
+    entry_window.geometry('%dx%d+%d+%d' % (400, 75, 1300, 600)) # размер ш.в. и положение (отступы) ш.в.
     
     # Поле ввода
     entry = tk.Entry(entry_window, width=50)
     entry.pack(pady=5)
+    
     entry.bind("<Return>", on_enter)  # Нажатие Enter для вызова функции on_enter
 
     # Создаем кнопку для записи (вызова on_enter)
@@ -459,7 +466,7 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
         entry_window, 
         text="Записать", 
         command=on_enter)
-    submit_button.pack(side="right", padx=5)
+    submit_button.pack(side="left", padx=5)
 
     # Устанавливаем фокус на поле ввода 
     entry.focus_set()
@@ -575,6 +582,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
             messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
             return
 
+    # Запустить поиск vlk по llm
     def run_add_mvlk_llm():
         def enter_new_mvlk_llm_and_close():
             # Через гет получаем новые значения которые вводятся в поля
@@ -616,6 +624,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
         entry_window = tk.Toplevel(root)
         entry_window.title(f"Результат mvlk_llm (затрачено - {token_usage})") #token_usage
         entry_window.attributes('-topmost', True)
+        entry_window.geometry('%dx%d+%d+%d' % (400, 75, 1300, 600)) # размер ш.в. и положение (отступы) ш.в.
         
         # Поле ввода
         entry = tk.Entry(entry_window, width=50)
@@ -628,7 +637,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
             entry_window, 
             text="Записать", 
             command=enter_new_mvlk_llm_and_close) 
-        submit_button.pack(side="right", padx=5)
+        submit_button.pack(side="left", padx=5)
 
         # Устанавливаем фокус на поле ввода 
         entry.focus_set()
@@ -639,6 +648,7 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
     edit_window = tk.Toplevel(root, width=40)
     edit_window.title("Редактирование")
     edit_window.attributes('-topmost', True)
+    edit_window.geometry('%dx%d+%d+%d' % (300, 610, 975, 245))
 
     # Метки и поля для vlk_llm
     lbl_model_vlk_llm = tk.Label(edit_window, text="Актуальная VLK-LLM")
@@ -711,7 +721,6 @@ def update_and_restart(id_to_check, capacity, cylcount, year, mtype, actual_vlk,
     # Запуск цикла сообщений для окна
     edit_window.mainloop()
 
-
 #### ИСПОЛНЕНИЕ
 
 # Сохранение айди из буфера обмена
@@ -722,9 +731,10 @@ keeper = OldValuesKeeper()
 
 #Проверка на айди
 if not id_to_check.isdigit():
-    messagebox.showinfo("Результат", "В буфере обмена не ID")
+    print('В буфере обмена не ID')
     sys.exit()
-
+    # messagebox.showinfo("Результат", "В буфере обмена не ID")
+    
 # Чтение json конфига
 with open('config.json') as file:
     config = json.load(file)
