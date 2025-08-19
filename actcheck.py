@@ -1,5 +1,5 @@
 # ACTCHECK #
-version = '11.08.2025'
+version = '19.08.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -120,8 +120,8 @@ price_cumulative = 0
 ## ФУНКЦИИ
 # Квери на запись и курсор execute
 def update_and_write(updated_status, updated_status_date, id_value):
-    update_query = ("UPDATE av_full SET status = '%s', status_date = %s WHERE id = %s") % (updated_status, updated_status_date, id_value) 
-    cursor.execute(update_query)
+    update_query = ("UPDATE av_full SET status = %s, status_date = %s WHERE id = %s")
+    cursor.execute(update_query, (updated_status, updated_status_date, id_value))
     conn.commit()
 
 # Функция отправки результата на email
@@ -148,10 +148,10 @@ def send_email(subject, body, recipient):
 # легаси функция добавления организации
 def set_orgainsation (id_value):
     # Добавление организации
-    organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', 'null')
-    if organization != 'null':
-        organization_query = ("UPDATE av_full SET seller = '%s' WHERE id = %s") % (organization, id_value) 
-        cursor.execute(organization_query)
+    organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', None)
+    if organization:
+        organization_query = ("UPDATE av_full SET seller = %s WHERE id = %s")
+        cursor.execute(organization_query, (organization, id_value))
         conn.commit()
         print(f"Organization = {organization}")
 
@@ -164,11 +164,11 @@ def check_for_duplicates (id_value):
     (
         SELECT brand, model, model_misc, year, type, cylinders, capacity, mileage, seller, locations
         FROM public.av_full
-        WHERE id = %d
+        WHERE id = %s
     )
-    AND id != %d
-    ORDER BY date ASC;""" % (id_value, id_value)
-    cursor.execute(select_query)
+    AND id != %s
+    ORDER BY date ASC;"""
+    cursor.execute(select_query, (id_value, id_value))
     dupl_rows = cursor.fetchall()
     dupl_count = 0 # счетчик количества объяв-дубликатов
     is_not_yet_marked_as_duplicate = 0 # были ли в выборке уже помеченные как дубликаты объявы
@@ -196,15 +196,15 @@ def check_for_duplicates (id_value):
 
         # квери выставить флажок дубликата
         query1 = """UPDATE public.av_full
-        SET duplicate_flag = True, duplicate_id = %d
-        WHERE id in (%s);""" % (id_value, dupl_id_list)
-        cursor.execute(query1)
+        SET duplicate_flag = True, duplicate_id = %s
+        WHERE id in (%s);""" 
+        cursor.execute(query1, (id_value, dupl_id_list))
 
         # квери выставить новую дату
         query2 = """UPDATE public.av_full
-        SET date_corrected = '%s'
-        WHERE id = %d;""" % (dupl_date, id_value)
-        cursor.execute(query2)
+        SET date_corrected = %s
+        WHERE id = %s;"""
+        cursor.execute(query2, (dupl_date, id_value))
         
         # записать изменения
         conn.commit()
@@ -381,6 +381,7 @@ for row in rows:
 
         #Извлекаем даты из data
         try:
+            data = json.loads(json_string) #Пакуем в data
             #Проверяем статус
             ad_status_script = data['props']['initialState']['advert']['advert']['status'] 
             published_at_str = data['props']['initialState']['advert']['advert']['publishedAt']
@@ -474,7 +475,7 @@ for row in rows:
 
             else: #Если статус "active" то объява еще актуальная или стала актуальной
                 print(f"id - {id_value} актуален")
-                update_and_write('Актуально', 'null', id_value)
+                update_and_write('Актуально', None, id_value)
                 stayed_active_count += 1 # Крутим счетчик
                 
                 # Вызываем функцию поиска номера для активных объяв
@@ -489,15 +490,15 @@ for row in rows:
                     print(f'Запись номера для id:{id_value} не проводится') 
         
         # Если страница открылась но она с домиком 404
-        except (KeyError, json.JSONDecodeError, TypeError):
+        except (KeyError, json.JSONDecodeError, TypeError, AttributeError):
             # Обн. базу, уст. статус и стат. дату для соотв id
             print(f"ссылка сдохла для id {id_value}")
-            update_and_write('Недоступная ссылка', 'null', id_value)
+            update_and_write('Недоступная ссылка', None, id_value)
             dead_link_count += 1
 
     else: # Если респонс не 200, т.е. страница не прочиталась
         # Обн. базу, уст. статус и стат. дату для соотв id
-        update_and_write('Недоступная ссылка', 'null', id_value)
+        update_and_write('Недоступная ссылка', None, id_value)
         print(f"ссылка сдохла для id {id_value}")
         dead_link_count += 1
     

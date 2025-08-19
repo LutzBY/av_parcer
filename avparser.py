@@ -1,5 +1,5 @@
 # AVPARSER #
-version = '14.08.2025'
+version = '19.08.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -92,10 +92,16 @@ print(f"Последняя дата объявления - {latest_ad_date.strft
 datecursor.close()
 
 # Функция дополнения модели инф-ой из базы знаний по постре
-def add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_match): 
-    model_concat = model
+def add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_match):
     displacement = float(capacity)
-    model_concat += " " + modification
+
+    # Преобразование model и model_misc
+    model_concat = model
+    if modification:
+        model_concat += " " + modification
+    else:
+        model_concat = model
+
     vlkcursor = conn.cursor()
     query = """
         SELECT model, mtype, id
@@ -117,7 +123,7 @@ def add_mvlk(brand, model, modification, year, cylcount, capacity, mtype, best_m
 
     match_ratio = []
     best_match_list = []
-    best_match = ""
+    best_match = None
     best_ratio = 0
     for row in rows:
         model_found = row[0]
@@ -364,13 +370,13 @@ while stop_flag == False:
             pic = 'https://commons.wikimedia.org/wiki/File:No_Image_Available.jpg' 
         condition = item['metadata']['condition']['label']
         flag_on_order = item['metadata']['onOrder']
-        user_description = item.get('description', '')
-        seller_id = item.get('organizationId', 'null')
+        user_description = item.get('description', None)
+        seller_id = item.get('organizationId', None)
 
         # Искать нужные свойства по имени тега внутри пропертис
         brand = next((prop['value'] for prop in properties if prop['name'] == 'brand'), None)
         model = next((prop['value'] for prop in properties if prop['name'] == 'model'), None)
-        modification = next((prop['value'] for prop in properties if prop['name'] == 'modification'), "")
+        modification = next((prop['value'] for prop in properties if prop['name'] == 'modification'), None)
         year = next((prop['value'] for prop in properties if prop['name'] == 'year'), "0")
         mtype = next((prop['value'] for prop in properties if prop['name'] == 'purpose_type'), None)
         cylcount = next((prop['value'] for prop in properties if prop['name'] == 'cylinder_number'), "0")
@@ -410,8 +416,8 @@ while stop_flag == False:
         publish_for_print = datetime_obj.strftime('%d.%m.%y %H:%M')
         refresh_for_print = rdatetime_obj.strftime('%d.%m.%y %H:%M')
         seller = seller.replace("'", ".")
-        modification = modification.replace("'", ".")
-        user_description = user_description.replace("'", ".")
+        if modification: modification = modification.replace("'", ".")
+        if user_description: user_description = user_description.replace("'", ".")
                 
         # Вызов функции дополнения vlk
         best_match = None
@@ -444,7 +450,7 @@ while stop_flag == False:
                 mvlk_llm_print = 'н.д.'
                 print(f'Для {id} oшибка - {err.code}')
         else:
-            mvlk_llm_print = ('')
+            mvlk_llm_print = None
         
         # Проверка необходимости установить exclude_flag
         exclude_flag = False
@@ -479,15 +485,22 @@ while stop_flag == False:
         # Скрипт для пгри
         parsequery = """
             INSERT INTO av_full(id, price, date, brand, model, model_misc, year, type, cylinders, drive, capacity, mileage, url, locations, status, status_date, model_vlk, seller, condition, exclude_flag, user_description, seller_id, model_vlk_llm)
-            VALUES (%s, %s, '%s', '%s', '%s', '%s', %s, '%s', %s, '%s', %s, %s, '%s', '%s', 'Актуально', null, '%s', '%s', '%s', %s, '%s', %s, '%s')
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'Актуально', null, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (id) DO UPDATE 
             SET 
                 model_vlk_llm = excluded.model_vlk_llm
             WHERE av_full.id = excluded.id;
-        """ % (id, price, datetime_obj, brand, model, modification, year, mtype, cylcount, drivetype, capacity, mileage, url, location, best_match, seller, condition, exclude_flag, user_description, seller_id, mvlk_llm_print)
+        """
         
         # Работа курсора для пгри
-        parsecursor.execute(parsequery)
+        parsecursor.execute(
+            parsequery, 
+        (id, price, datetime_obj, brand, model, modification, 
+        year, mtype, cylcount, drivetype,
+        capacity, mileage, url, location,
+        best_match, seller, condition,
+        exclude_flag,user_description,
+        seller_id, mvlk_llm_print))
         
         # Вынять влк и эксклюд флаш из базы
         vlkquery = " SELECT model_vlk, exclude_flag FROM av_full WHERE id = %s " % (id)
@@ -639,14 +652,14 @@ URL - {url}""")
 <p style="text-align: center;">{year} г.в.&nbsp;</p>
 </td>
 <td style="width: 173.438px; height: 10px; text-align: center;" colspan="3">
-<p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification}</strong></a></p>
+<p style="text-align: center;"><a href="{url}"> <strong>{brand} {model} {modification or ''}</strong></a></p>
 </td>
 </tr>
 <tr style="height: 35px;">
 <td style="width: 484.953px; height: 78px;" rowspan="3"><img src="{img_src}" alt="" /></td>
 <td style="width: 108.281px; height: 35px;">
 <p style="text-align: left;"><strong>Актуальное влк</strong></p>
-<p style="text-align: left;">{mvlk_actual}</p>
+<p style="text-align: left;">{mvlk_actual or ''}</p>
 </td>
 <td style="width: 173.438px; height: 35px;" colspan="3">
 <p>{mtype}</p>
@@ -660,7 +673,7 @@ URL - {url}""")
 <tr style="height: 33px;">
 <td style="width: 108.281px; height: 33px;">
 <p style="text-align: left;"><strong>Лучшее влк</strong></p>
-<p style="text-align: left;">{best_match}</p>
+<p style="text-align: left;">{best_match or ''}</p>
 </td>
 <td style="width: 173.438px; height: 33px;" colspan="3">
 <p style="text-align: center;"><strong>Продавец</strong></p>
@@ -700,7 +713,7 @@ URL - {url}""")
 <p style="text-align: left;">{id}</p>
 </td>
 <td style="width: 137px;" colspan="2">
-<p style="text-align: center;"><a href="{url}"><strong>{brand} {model} {modification}</strong></a></p>
+<p style="text-align: center;"><a href="{url}"><strong>{brand} {model} {modification or ''}</strong></a></p>
 </td>
 <td style="width: 128px;">
 <p style="text-align: center;"><strong>{year} г.в.&nbsp;</strong></p>
