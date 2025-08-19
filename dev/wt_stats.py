@@ -6,7 +6,7 @@ import pandas as pd
 import sys
 
 # Куда
-file_path = r"D:\data.xlsx" # r"C:\Users\lutzb\Desktop\wt_stats\data.xlsx"
+file_path = r"C:\Users\lutzb\Desktop\wt_stats\data.xlsx"
 
 # Функция парсинга
 def parse_battle_stats():
