@@ -148,10 +148,10 @@ def send_email(subject, body, recipient):
 # легаси функция добавления организации
 def set_orgainsation (id_value):
     # Добавление организации
-    organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', 'null')
-    if organization != 'null':
+    organization = data['props']['initialState']['advert']['advert'].get('organizationTitle', None)
+    if organization:
         organization_query = ("UPDATE av_full SET seller = %s WHERE id = %s")
-        cursor.execute(organization_query, (organization, id_value) )
+        cursor.execute(organization_query, (organization, id_value))
         conn.commit()
         print(f"Organization = {organization}")
 
@@ -381,6 +381,7 @@ for row in rows:
 
         #Извлекаем даты из data
         try:
+            data = json.loads(json_string) #Пакуем в data
             #Проверяем статус
             ad_status_script = data['props']['initialState']['advert']['advert']['status'] 
             published_at_str = data['props']['initialState']['advert']['advert']['publishedAt']
@@ -474,7 +475,7 @@ for row in rows:
 
             else: #Если статус "active" то объява еще актуальная или стала актуальной
                 print(f"id - {id_value} актуален")
-                update_and_write('Актуально', 'null', id_value)
+                update_and_write('Актуально', None, id_value)
                 stayed_active_count += 1 # Крутим счетчик
                 
                 # Вызываем функцию поиска номера для активных объяв
@@ -489,15 +490,15 @@ for row in rows:
                     print(f'Запись номера для id:{id_value} не проводится') 
         
         # Если страница открылась но она с домиком 404
-        except (KeyError, json.JSONDecodeError, TypeError):
+        except (KeyError, json.JSONDecodeError, TypeError, AttributeError):
             # Обн. базу, уст. статус и стат. дату для соотв id
             print(f"ссылка сдохла для id {id_value}")
-            update_and_write('Недоступная ссылка', 'null', id_value)
+            update_and_write('Недоступная ссылка', None, id_value)
             dead_link_count += 1
 
     else: # Если респонс не 200, т.е. страница не прочиталась
         # Обн. базу, уст. статус и стат. дату для соотв id
-        update_and_write('Недоступная ссылка', 'null', id_value)
+        update_and_write('Недоступная ссылка', None, id_value)
         print(f"ссылка сдохла для id {id_value}")
         dead_link_count += 1
     
