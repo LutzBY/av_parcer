@@ -112,10 +112,10 @@ class WTApp:
     def __init__(self, root):
         self.root = root
         self.root.title("WT Parser")
-        root.geometry('%dx%d+%d+%d' % (400, 325, 1500, 650)) # размер - ш, в, положение - ш, в (3520 + 1080 )
+        root.geometry('%dx%d+%d+%d' % (400, 325, 4065, 1025)) # размер - ш, в, положение - ш, в (3520 + 1080 )
         self.root.resizable(True, True)
         self.root.attributes('-topmost', True) # поверх
-        self.root.attributes('-alpha', 0.90) # прозрачность
+        self.root.attributes('-alpha', 0.75) # прозрачность
         
         # Метка: последняя миссия
         self.last_mission_label = tk.Label(
