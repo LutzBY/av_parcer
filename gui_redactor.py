@@ -96,7 +96,7 @@ def main_app_window(id_to_check):
         {brand} {model} {modification}
         {year} г.в. {capacity} см3, {cylcount} цил.
         {mtype}
-    E.Flag - {exclude_flag}, D.Flag - {duplicate_flag}""")
+    E.Flag - {'✅' if exclude_flag else '❌'}, D.Flag - {'✅' if duplicate_flag else '❌'}""")
     label = tk.Label(root, text=info, justify="left", background='light grey')
     label.pack(anchor="w", padx=10, pady=10)
     root.minsize(420, 200)
