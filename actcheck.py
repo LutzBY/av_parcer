@@ -191,13 +191,10 @@ def check_for_duplicates (id_value):
         
         print(f"Найдено {dupl_count} дубликатов для id:{id_value} с самой ранней датой - {dupl_date}")
 
-        # отформатировать список для вставки в квери
-        dupl_id_list = ', '.join(str(int(d)) for d in dupl_id_list)
-
         # квери выставить флажок дубликата
         query1 = """UPDATE public.av_full
         SET duplicate_flag = True, duplicate_id = %s
-        WHERE id in (%s);""" 
+        WHERE id ANY (%s);""" 
         cursor.execute(query1, (id_value, dupl_id_list))
 
         # квери выставить новую дату
