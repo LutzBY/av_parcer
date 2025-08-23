@@ -1,5 +1,5 @@
 # ACTCHECK #
-version = '21.08.2025'
+version = '23.08.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -194,7 +194,7 @@ def check_for_duplicates (id_value):
         # квери выставить флажок дубликата
         query1 = """UPDATE public.av_full
         SET duplicate_flag = True, duplicate_id = %s
-        WHERE id ANY = (%s);""" 
+        WHERE id = ANY (%s);""" 
         cursor.execute(query1, (id_value, dupl_id_list))
 
         # квери выставить новую дату
