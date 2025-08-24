@@ -7,7 +7,7 @@ token_usage = 0
 llm_iter_counter = 0
 
 # Чтение json конфига
-with open('config.json') as file:
+with open('config.json', encoding='UTF-8') as file:
     config = json.load(file)
 
 mail_login = config['sender login']

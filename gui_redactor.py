@@ -3,7 +3,7 @@
 #########################
 
 # Версия
-version = '18.08.2025'
+version = '24.08.2025'
 
 import json
 from fuzzywuzzy import fuzz
@@ -12,7 +12,9 @@ import pyperclip
 import tkinter as tk
 from tkinter import messagebox
 import sys
+# импорт нужного из utils
 from av_parser_utils import add_mvlk_llm
+from av_parser_utils import pgre_login, pgre_password, pgre_host, pgre_port, pgre_db
 
 # Сохранение исходных значений
 class OldValuesKeeper:
@@ -735,16 +737,6 @@ if not id_to_check.isdigit():
     sys.exit()
     # messagebox.showinfo("Результат", "В буфере обмена не ID")
     
-# Чтение json конфига
-with open('config.json') as file:
-    config = json.load(file)
-
-pgre_login = config['postgre login']
-pgre_password = config['postgre password']
-pgre_host = config['postgre host']
-pgre_port = config['postgre port']
-pgre_db = config['postgre database']
-
 #Подключение к postgres
 conn = psycopg2.connect(
     host = pgre_host,
