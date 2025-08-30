@@ -391,7 +391,7 @@ def set_exclude_flag_and_reset_mvlk(id_to_check):
 # Функция кнопки установить влк "кастом"
 def set_exclude_mvlk_to_cutom(id_to_check, root):
     vlk_cursor = conn.cursor()
-    set_flag_and_reset_query = ("UPDATE av_full SET model_vlk = 'кастом' WHERE id = %s") % (id_to_check) 
+    set_flag_and_reset_query = ("UPDATE av_full SET model_vlk = 'кастом', model_vlk_llm = 'кастом' WHERE id = %s") % (id_to_check) 
     vlk_cursor.execute(set_flag_and_reset_query)
     conn.commit()
     # root.destroy()
