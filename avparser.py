@@ -1,5 +1,5 @@
 # AVPARSER #
-version = '01.09.2025'
+version = '10.09.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -436,19 +436,26 @@ while stop_flag == False:
             # and seller not in exclude_sellers
             # and condition != 'новый'  
             ):
-            try:
-                # вызвать
-                mvlk_llm = add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype)
-                llm_iter_counter += 1
-                
-                # запись в базу выполняется в пункте # Скрипт для пгри
-        
-                # добавить в принт и в html
-                mvlk_llm_print = mvlk_llm
+            # Дергаем есть ли такая строка в базе, если нет то вызываем llm
+            parsecursor.execute("SELECT model_vlk_llm FROM av_full WHERE id = %s", (id,))
+            result = parsecursor.fetchone()
 
-            except (APIStatusError) as err:
-                mvlk_llm_print = 'н.д.'
-                print(f'Для {id} oшибка - {err.code}')
+            if result and result[0]: 
+                mvlk_llm_print = result[0]
+            else:
+                try:
+                    # вызвать
+                    mvlk_llm = add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype)
+                    llm_iter_counter += 1
+                    
+                    # запись в базу выполняется в пункте # Скрипт для пгри
+            
+                    # добавить в принт и в html
+                    mvlk_llm_print = mvlk_llm
+
+                except (APIStatusError) as err:
+                    mvlk_llm_print = 'н.д.'
+                    print(f'Для {id} oшибка - {err.code}')
         else:
             mvlk_llm_print = None
         
