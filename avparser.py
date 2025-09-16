@@ -226,6 +226,7 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
     api_key= api_key,
     base_url="https://api.poe.com/v1",
     )
+    print(f'ОТЛАДОЧНОЕ СООБЩЕНИЕ: Функция add_mvlk_llm запустилась, подставлен ключ {api_key[0:5]}')
 
     # Передаваемое сообщение
     messages = [
@@ -257,12 +258,10 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
     )
     
     # Вывод и подсчет количества потраченных токенов
-    # print(f'ключ на итерации - {api_key}')
-    # print(f'completion_ = {chat.usage.completion_tokens}, prompt_ = {chat.usage.prompt_tokens}')
     token_usage += chat.usage.total_tokens
-
+    
     # Получение первого ответа
-    return chat.choices[0].message.content, api_key[0:5]
+    return chat.choices[0].message.content
 
 # Создание HTML отчета
 html_mail_contents = f"""
@@ -441,14 +440,15 @@ while stop_flag == False:
             parsecursor.execute("SELECT model_vlk_llm FROM av_full WHERE id = %s", (id,))
             result = parsecursor.fetchone()
 
-            if result and result[0]: 
+            if result and result[0]:
                 mvlk_llm_print = result[0]
+                print(f'ОТЛАДОЧНОЕ СООБЩЕНИЕ: Получен model_vlk из базы')
             else:
                 try:
                     # вызвать
                     llm_iter_counter += 1
-                    mvlk_llm, test1 = add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype)
-                    print(test1)                    
+                    mvlk_llm = add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype)
+                    print(f'ОТЛАДОЧНОЕ СООБЩЕНИЕ: Функция add_mvlk_llm отработала')           
                     # запись в базу выполняется в пункте # Скрипт для пгри
             
                     # добавить в принт и в html
@@ -456,8 +456,9 @@ while stop_flag == False:
 
                 except (APIStatusError) as err:
                     mvlk_llm_print = 'Ошибка API'
-                    print(f'Для {id} oшибка - {err.code}')
+                    print(f'Для {id} oшибка при попытке подключится к llm api - {err.code}')
         else:
+            print(f'ОТЛАДОЧНОЕ СООБЩЕНИЕ: Условия по объему/цилиндрам/... не пройдены')
             mvlk_llm_print = None
         
         # Проверка необходимости установить exclude_flag
