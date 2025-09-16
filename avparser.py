@@ -1,5 +1,5 @@
 # AVPARSER #
-version = '10.09.2025'
+version = '16.09.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -262,7 +262,7 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
     token_usage += chat.usage.total_tokens
 
     # Получение первого ответа
-    return chat.choices[0].message.content
+    return chat.choices[0].message.content, api_key[0:5]
 
 # Создание HTML отчета
 html_mail_contents = f"""
@@ -427,6 +427,7 @@ while stop_flag == False:
             best_match = 'кастом'
 
         # Вызов функции add_mvlk_llm по условиям, запись mvlk_llm
+        mvlk_llm_print = None
         if (
             int(capacity) >= 299
             and cylcount > 1
@@ -445,16 +446,16 @@ while stop_flag == False:
             else:
                 try:
                     # вызвать
-                    mvlk_llm = add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype)
                     llm_iter_counter += 1
-                    
+                    mvlk_llm, test1 = add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype)
+                    print(test1)                    
                     # запись в базу выполняется в пункте # Скрипт для пгри
             
                     # добавить в принт и в html
                     mvlk_llm_print = mvlk_llm
 
                 except (APIStatusError) as err:
-                    mvlk_llm_print = 'н.д.'
+                    mvlk_llm_print = 'Ошибка API'
                     print(f'Для {id} oшибка - {err.code}')
         else:
             mvlk_llm_print = None
