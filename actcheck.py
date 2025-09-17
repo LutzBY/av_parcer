@@ -54,7 +54,7 @@ headers = {
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'same-site',
     'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36',
-    'x-api-key': {av_key},
+    'x-api-key': av_key,
     'x-device-type': 'web.desktop'
 }
 
@@ -116,6 +116,7 @@ new_companies_written = 0
 price_history_counter = 0
 to_check_counter = 0
 price_cumulative = 0
+not_used_flag = True # включение / выключение неиспользуемых функций (True = выключено)
 
 ## ФУНКЦИИ
 # Квери на запись и курсор execute
@@ -474,17 +475,20 @@ for row in rows:
                 print(f"id - {id_value} актуален")
                 update_and_write('Актуально', None, id_value)
                 stayed_active_count += 1 # Крутим счетчик
-                
-                # Вызываем функцию поиска номера для активных объяв
-                if (
-                    int(capacity) >= 299 # это чтобы исключить индурики
-                    and cylcount > 1 # это тоже чтобы исключить индурики
-                    and brand not in exclude_brands # это совкоциклы и гавно
-                    and seller_ph_nr is None  
-                ):
-                    phone_writed_counter += phone_get_request(id_value)
-                else:
-                    print(f'Запись номера для id:{id_value} не проводится') 
+                print('abc)')
+
+                if not_used_flag is False:
+                    # Вызываем функцию поиска номера для активных объяв
+                    if (
+                        int(capacity) >= 299 # это чтобы исключить индурики
+                        and cylcount > 1 # это тоже чтобы исключить индурики
+                        and brand not in exclude_brands # это совкоциклы и гавно
+                        and seller_ph_nr is None  
+                    ):
+                        
+                        phone_writed_counter += phone_get_request(id_value)
+                    else:
+                        print(f'Запись номера для id:{id_value} не проводится')
         
         # Если страница открылась но она с домиком 404
         except (KeyError, json.JSONDecodeError, TypeError, AttributeError):
