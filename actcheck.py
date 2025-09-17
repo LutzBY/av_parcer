@@ -17,6 +17,27 @@ from email.mime.text import MIMEText
 from email.utils import COMMASPACE
 import smtplib
 
+# Чтение json конфига
+with open('config.json') as file:
+    config = json.load(file)
+
+mail_login = config['sender login']
+mail_password = config['sender password']
+pgre_login = config['postgre login']
+pgre_password = config['postgre password']
+pgre_host = config['postgre host']
+pgre_port = config['postgre port']
+pgre_db = config['postgre database']
+recipients = config['mail recipients']
+av_key = config['av_x-api-key']
+
+# Чтение json исключений
+with open('exceptions.json', encoding="utf8") as file:
+    exceptions_json = json.load(file)
+
+exclude_sellers = exceptions_json['exclude_sellers']
+exclude_brands = exceptions_json['exclude_brands']
+
 headers = {
     'accept': '*/*',
     'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,be-BY;q=0.6,be;q=0.5',
@@ -33,34 +54,14 @@ headers = {
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'same-site',
     'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36',
-    'x-api-key': 's8ac827208ff4c6b71db46c',
-    'x-device-type': 'web.desktop',
+    'x-api-key': {av_key},
+    'x-device-type': 'web.desktop'
 }
     # если теперь что-то будет не так, то попробовать requests.Session()
     # 'x-api-key': 's8ac827208ff4c6b71db46c',
     #подставить ключи если будет надо
     #"X-Api-Key": "-",
     #"X-User-Group": "-",
-
-# Чтение json конфига
-with open('config.json') as file:
-    config = json.load(file)
-
-mail_login = config['sender login']
-mail_password = config['sender password']
-pgre_login = config['postgre login']
-pgre_password = config['postgre password']
-pgre_host = config['postgre host']
-pgre_port = config['postgre port']
-pgre_db = config['postgre database']
-recipients = config['mail recipients']
-
-# Чтение json исключений
-with open('exceptions.json', encoding="utf8") as file:
-    exceptions_json = json.load(file)
-
-exclude_sellers = exceptions_json['exclude_sellers']
-exclude_brands = exceptions_json['exclude_brands']
 
 #Подключение к postgres
 conn = psycopg2.connect(
