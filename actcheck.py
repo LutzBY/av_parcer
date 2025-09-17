@@ -1,5 +1,5 @@
 # ACTCHECK #
-version = '23.08.2025'
+version = '17.08.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -18,22 +18,26 @@ from email.utils import COMMASPACE
 import smtplib
 
 headers = {
-    'authority': 'moto.av.by',
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-    'accept-language': 'ru,en;q=0.9',
+    'accept': '*/*',
+    'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,be-BY;q=0.6,be;q=0.5',
     'cache-control': 'no-cache',
+    'content-type': 'application/json',
+    'origin': 'https://moto.av.by',
     'pragma': 'no-cache',
-    'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "YaBrowser";v="24.1", "Yowser";v="2.5"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'sec-fetch-dest': 'document',
-    'sec-fetch-mode': 'navigate',
-    'sec-fetch-site': 'same-origin',
-    'sec-fetch-user': '?1',
-    'upgrade-insecure-requests': '1',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
+    'priority': 'u=1, i',
+    'referer': 'https://moto.av.by/',
+    'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+    'sec-ch-ua-mobile': '?1',
+    'sec-ch-ua-platform': '"Android"',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-site',
+    'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36',
+    'x-api-key': 's8ac827208ff4c6b71db46c',
+    'x-device-type': 'web.desktop',
 }
     # если теперь что-то будет не так, то попробовать requests.Session()
+    # 'x-api-key': 's8ac827208ff4c6b71db46c',
     #подставить ключи если будет надо
     #"X-Api-Key": "-",
     #"X-User-Group": "-",
