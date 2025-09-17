@@ -57,11 +57,6 @@ headers = {
     'x-api-key': {av_key},
     'x-device-type': 'web.desktop'
 }
-    # если теперь что-то будет не так, то попробовать requests.Session()
-    # 'x-api-key': 's8ac827208ff4c6b71db46c',
-    #подставить ключи если будет надо
-    #"X-Api-Key": "-",
-    #"X-User-Group": "-",
 
 #Подключение к postgres
 conn = psycopg2.connect(
