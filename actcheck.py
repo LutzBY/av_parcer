@@ -1,5 +1,5 @@
 # ACTCHECK #
-version = '17.08.2025'
+version = '24.09.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -441,7 +441,7 @@ for row in rows:
             if ad_status_script != 'active': 
                 # updated_status = data['props']['initialState']['advert']['advert']['publicStatus']['label']
                 updated_status = data['props']['initialState']['advert']['advert']['removeReason']
-                if updated_status == 'cancelled_sale':
+                if updated_status in ['cancelled_sale', 'removed_by_admin']:
                     updated_status = 'Удалено'
                 elif updated_status in ['sold_avby', 'sold', 'sold_other_place']:
                     updated_status = 'Продано'
