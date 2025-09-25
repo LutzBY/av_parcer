@@ -13,7 +13,7 @@ import tkinter as tk
 from tkinter import messagebox
 import sys
 # импорт нужного из utils
-from av_parser_utils import add_mvlk_llm
+from av_parser_utils import add_mvlk_llm, phone_get_request
 from av_parser_utils import pgre_login, pgre_password, pgre_host, pgre_port, pgre_db
 
 # Сохранение исходных значений
@@ -86,7 +86,7 @@ def get_id_from_clipboard(root, keeper):
 # Создание главного окна ткинтер
 def main_app_window(id_to_check):
     # Загружаем данные из базы (без  выполнения поиска VLK)
-    brand, model, modification, year, cylcount, capacity, mtype, actual_vlk, price, status, exclude_flag, duplicate_flag, model_vlk_llm = load_data_from_db(id_to_check, keeper)
+    brand, model, modification, year, cylcount, capacity, mtype, actual_vlk, price, status, exclude_flag, duplicate_flag, model_vlk_llm, seller_ph_nr = load_data_from_db(id_to_check, keeper)
     
     # Создаем главное диалоговое окно
     root = tk.Tk()
@@ -98,7 +98,7 @@ def main_app_window(id_to_check):
         {brand} {model} {modification}
         {year} г.в. {capacity} см3, {cylcount} цил.
         {mtype}
-    E.Flag - {'✅' if exclude_flag else '❌'}, D.Flag - {'✅' if duplicate_flag else '❌'}""")
+    E.Flag - {'✅' if exclude_flag else '❌'}, D.Flag - {'✅' if duplicate_flag else '❌'}, Ph.Num - {'✅' if seller_ph_nr else '❌'} """)
     label = tk.Label(root, text=info, justify="left", background='light grey')
     label.pack(anchor="w", padx=10, pady=10)
     root.minsize(420, 200)
@@ -187,13 +187,22 @@ def main_app_window(id_to_check):
     )
     btn_restart.pack(side="left", padx=10, pady=5)
 
+    # Фрейм 3 - Кнопка запросить и записать номер телефона
+    btn_run_phone_request = tk.Button(
+        button_low_frame3,
+        text="Запросить н.телефона",
+        bg="violet",
+        command=lambda: phone_get_request(id_to_check, conn)
+    )
+    btn_run_phone_request.pack(side="bottom", padx=10, pady=5)
+
     root.mainloop()
 
 # Функция получения данных из базы
 def load_data_from_db(id_to_check, keeper):
     cursor = conn.cursor()
     query = """
-        SELECT brand, model, model_misc, year, cylinders, capacity, type, model_vlk, price, status, exclude_flag, duplicate_flag, model_vlk_llm
+        SELECT brand, model, model_misc, year, cylinders, capacity, type, model_vlk, price, status, exclude_flag, duplicate_flag, model_vlk_llm, seller_ph_nr
         FROM av_full
         WHERE id IN (%s);
     """ % id_to_check
