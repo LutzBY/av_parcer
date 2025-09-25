@@ -3,7 +3,7 @@
 #########################
 
 # Версия
-version = '24.08.2025'
+version = '25.09.2025'
 
 import json
 from fuzzywuzzy import fuzz
