@@ -1,5 +1,5 @@
 # AVPARSER #
-version = '16.09.2025'
+version = '25.10.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -619,7 +619,7 @@ while stop_flag == False:
 
             if duplicates_grouped:
                 for dupl_id, ids in duplicates_grouped.items():
-                    duplicate_html_block += f"<br>Для id {dupl_id}:<br>"
+                    duplicate_html_block += f"<br>Для id {dupl_id}, <br>"
                     duplicate_html_block += ", ".join(ids)
 
         # Принт объявы и дополнение HTML contents (для маленьких сокращенный)
