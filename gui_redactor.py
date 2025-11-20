@@ -275,23 +275,27 @@ def vlk_search_process(id_to_check, brand, model, modification, year, cylcount, 
                 enumerat +=1
         model_ratio_list = list(zip(best_match_list, match_ratio))
 
-        # Подсчет сколько встречается найденное влк
-        count_vlk_query = """
-        select count(model_vlk)
-        from av_full
-        where model_vlk = '%s'
-        """ % model_found
-        vlkcursor.execute(count_vlk_query)
-        count_vlk = vlkcursor.fetchone()[0]
+        # Подсчет сколько встречается найденное влк и средней цены для каждой строки
+        price_query = """
+        select count(model_vlk), avg(price)
+        FROM av_full
+        where model_vlk = %s
+        """
+        vlkcursor.execute(price_query, (model_found, ))
+        vlk_results = vlkcursor.fetchone()
+        count_vlk = vlk_results[0]
+        avg_price_for_vlk = vlk_results[1]
+        avg_price_for_vlk = int(round(avg_price_for_vlk, 0))
+        avg_price_for_vlk_formatted = f"{avg_price_for_vlk:_}".replace("_", " ")
 
         # Запись найденного результата
-        results.append({"№": enumerat,"name": model_found, "type": mtype_found, "ratio": model_comp, "vlk_id": vlk_id, "vlk_sums": count_vlk},)
+        results.append({"№": enumerat,"name": model_found, "type": mtype_found, "ratio": model_comp, "vlk_id": vlk_id, "vlk_sums": count_vlk, "avg_price_for_vlk": avg_price_for_vlk_formatted})
 
         print(f"""
     {enumerat} --------
     {model_found}
     {mtype_found}
-    ratio = {model_comp}, vlk_id = {vlk_id}, в базе - {count_vlk} шт.""")
+    ratio = {model_comp}, vlk_id = {vlk_id}, в базе - {count_vlk} шт. по {avg_price_for_vlk_formatted} USD""")
         best_model, best_ratio = max(model_ratio_list, key=lambda x: x[1])
         best_match = best_model
 
@@ -340,8 +344,9 @@ def vlk_search_process(id_to_check, brand, model, modification, year, cylcount, 
     # Заполнение окна каждым результатом
 
     for idx, result in enumerate(results, 1):
+        
         # Отображаем текстовую информацию о каждом элементе
-        text = f"{idx} ------\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}, в базе - {result['vlk_sums']} шт.\n"
+        text = f"{idx} ------\n{result['name']}\n{result['type']}\nratio = {result['ratio']}, vlk_id = {result['vlk_id']}\nв базе - {result['vlk_sums']} шт, ср.цена - {result['avg_price_for_vlk']} USD"
         label = tk.Label(inner_frame, text=text, justify="left")
         label.pack(anchor="w")
 
