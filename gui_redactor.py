@@ -285,9 +285,12 @@ def vlk_search_process(id_to_check, brand, model, modification, year, cylcount, 
         vlk_results = vlkcursor.fetchone()
         count_vlk = vlk_results[0]
         avg_price_for_vlk = vlk_results[1]
-        avg_price_for_vlk = int(round(avg_price_for_vlk, 0))
-        avg_price_for_vlk_formatted = f"{avg_price_for_vlk:_}".replace("_", " ")
-
+        if avg_price_for_vlk:
+            avg_price_for_vlk = int(round(avg_price_for_vlk, 0))
+            avg_price_for_vlk_formatted = f"{avg_price_for_vlk:_}".replace("_", " ")
+        else:
+            avg_price_for_vlk_formatted = '-'
+        
         # Запись найденного результата
         results.append({"№": enumerat,"name": model_found, "type": mtype_found, "ratio": model_comp, "vlk_id": vlk_id, "vlk_sums": count_vlk, "avg_price_for_vlk": avg_price_for_vlk_formatted})
 
