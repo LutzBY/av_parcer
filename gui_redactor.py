@@ -1,9 +1,7 @@
 ##########################
-#id_to_check = 111355795 114225903
-#########################
 
 # Версия
-version = '25.09.2025'
+version = '01.12.2025'
 
 import json
 from fuzzywuzzy import fuzz
@@ -77,7 +75,8 @@ def get_id_from_clipboard(root, keeper):
     #Проверка на айди
     if not id_to_check.isdigit():
         messagebox.showinfo("Результат", "В буфере обмена не ID")
-        sys.exit()
+        id_to_check = 111355795
+        # sys.exit()
     # Создание экземпляра класса
     keeper.clear_old_values()
 
@@ -751,7 +750,8 @@ keeper = OldValuesKeeper()
 #Проверка на айди
 if not id_to_check.isdigit():
     print('В буфере обмена не ID')
-    sys.exit()
+    id_to_check = 111355795
+    # sys.exit()
     # messagebox.showinfo("Результат", "В буфере обмена не ID")
     
 #Подключение к postgres
