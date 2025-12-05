@@ -475,7 +475,6 @@ for row in rows:
                 print(f"id - {id_value} актуален")
                 update_and_write('Актуально', None, id_value)
                 stayed_active_count += 1 # Крутим счетчик
-                print('abc)')
 
                 if not_used_flag is False:
                     # Вызываем функцию поиска номера для активных объяв
