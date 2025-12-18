@@ -1,5 +1,5 @@
 # AVPARSER #
-version = '27.11.2025'
+version = '18.12.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -358,7 +358,7 @@ while stop_flag == False:
         advert_id = item['id']
         price = item['price']['usd']['amount']
         published_at = item['publishedAt']
-        refreshed_at = item['refreshedAt']
+        refreshed_at = item.get('renewedAt', published_at) # 2025.12.18 Изменилась структура? Замена refreshedAt
         properties = item['properties']
         public_url = item['publicUrl']
         location = item['locationName']

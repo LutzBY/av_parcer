@@ -1,5 +1,5 @@
 # ACTCHECK #
-version = '24.09.2025'
+version = '18.12.2025'
 
 import requests
 from urllib.parse import urlencode
@@ -456,7 +456,7 @@ for row in rows:
                     try:
                         removed_at_str = data['props']['initialState']['advert']['advert']['removedAt']
                     except KeyError:
-                        removed_at_str = data['props']['initialState']['advert']['advert']['refreshedAt']
+                        removed_at_str = data['props']['initialState']['advert']['advert']['renewedAt']
                     removed_at = datetime.strptime(removed_at_str, "%Y-%m-%dT%H:%M:%S%z")
                     updated_status_date = removed_at.strftime("'%Y-%m-%d %H:%M:%S'") 
     
