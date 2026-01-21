@@ -251,7 +251,7 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
 
     # Создание чата и его атрибуты
     chat = client.chat.completions.create(
-        model='Llama-3.3-70B', # #'Llama-3.1-405B' возвращает ошибку 500 100/1000 tokens, 39/message ## claude-3-haiku (10/Kt, 19/mess), Claude-Haiku-3.5 (30/1Kt, 42/mess) Llama-3.3-70B (130/mess), gpt-3.5-turbo (15/, 9/), GPT-4o-mini (5/1Kt, 5/mess)
+        model='Llama-4-Scout-T', #'Llama-3.3-70B', # #'Llama-3.1-405B' возвращает ошибку 500 100/1000 tokens, 39/message ## claude-3-haiku (10/Kt, 19/mess), Claude-Haiku-3.5 (30/1Kt, 42/mess) Llama-3.3-70B (130/mess), gpt-3.5-turbo (15/, 9/), GPT-4o-mini (5/1Kt, 5/mess)
         messages=messages,
         temperature=0,
         #max_tokens=64

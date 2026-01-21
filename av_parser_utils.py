@@ -34,13 +34,14 @@ headers = {
     'priority': 'u=1, i',
     'referer': 'https://moto.av.by/',
     'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-    'sec-ch-ua-mobile': '?1',
-    'sec-ch-ua-platform': '"Android"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
     'sec-fetch-dest': 'empty',
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'same-site',
     'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36',
     'x-api-key': av_key,
+    'x-user-group': '4e1bdcdb-a5c9-414f-bac8-a7e99e5a77db',
     'x-device-type': 'web.desktop'
 }
 
@@ -81,7 +82,7 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
 
     # Создание чата и его атрибуты
     chat = client.chat.completions.create(
-        model= 'Llama-3.3-70B', #'Llama-3.1-405B' возвращает ошибку 500
+        model= 'Llama-4-Scout-T',#'Llama-3.3-70B', #'Llama-3.1-405B' возвращает ошибку 500
         messages=messages,
         temperature=0,
         #max_tokens=64
