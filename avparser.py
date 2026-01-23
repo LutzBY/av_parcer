@@ -18,23 +18,21 @@ import time
 from collections import defaultdict
 import openai
 from openai import APIStatusError
+from curl_cffi.requests import Session
 
 # Хэдеры
 headers = {
-    'authority': 'moto.av.by',
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-    'accept-language': 'ru,en;q=0.9',
-    'cache-control': 'no-cache',
-    'pragma': 'no-cache',
-    'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "YaBrowser";v="24.1", "Yowser";v="2.5"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'sec-fetch-dest': 'document',
-    'sec-fetch-mode': 'navigate',
-    'sec-fetch-site': 'same-origin',
-    'sec-fetch-user': '?1',
-    'upgrade-insecure-requests': '1',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 YaBrowser/24.1.0.0 Safari/537.36',
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Sec-Fetch-Site": "same-site",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-User": "?1",
+    "Sec-Fetch-Dest": "document",
+    "Upgrade-Insecure-Requests": "1",
+    "Referer": "https://av.by/",
+    "Origin": "https://moto.av.by",
 }
 
 # Счетчики
@@ -301,7 +299,20 @@ while stop_flag == False:
 
     for response_attempt in range(max_response_retries):
         try:
-            response = requests.get(url_cycle, headers=headers)
+            # Попытка обхода safeline
+            session = Session()
+
+            # главная страница сбор куки
+            session.get("https://moto.av.by/", headers=headers, impersonate="safari17_0")
+            time.sleep(2)
+
+            # запрос к url_cycle
+            response = session.get(
+                url_cycle,
+                headers=headers,
+                impersonate="safari17_0"
+            )
+            
             response.raise_for_status() # Выбросит исключение, если статус не 200
             src = response.text
             soup = BeautifulSoup(src, 'lxml')
@@ -313,6 +324,12 @@ while stop_flag == False:
 
         except (ChunkedEncodingError, RequestException, json.JSONDecodeError, AttributeError, ValueError) as err:
             print(f"Ошибка {err} при чтении страницы {url_cycle}. Попытка {response_attempt + 1} из {max_response_retries} не удалась. Повтор через 10 секунд.")
+            #### тестовая зона
+            print("Status:", response.status_code)
+            print("Content-Type:", response.headers.get('content-type'))
+            print("First 500 chars:")
+            print(response.text[:500])
+            #### тестовая зона
             time.sleep(10)
             error_counter += 1
         if response_attempt == max_response_retries - 1:
