@@ -82,7 +82,7 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
 
     # Создание чата и его атрибуты
     chat = client.chat.completions.create(
-        model= 'Llama-4-Scout-T',#'Llama-3.3-70B', #'Llama-3.1-405B' возвращает ошибку 500
+        model= 'Llama-3.3-70B', #'Llama-4-Scout-T', #'Llama-3.1-405B' возвращает ошибку 500
         messages=messages,
         temperature=0,
         #max_tokens=64
