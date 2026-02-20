@@ -1,5 +1,5 @@
 # AVPARSER #
-version = '08.02.2026'
+version = '20.02.2026'
 
 import requests
 from urllib.parse import urlencode
@@ -235,6 +235,7 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
                 "Если модели имеют разные названия для рынков или известны под разными именами — объедини через слеш: 'ZX-6R / ZX600G (1998–1999)', GSX650F / Bandit 650. "
                 "НЕ используй год из данных как ответ — найди период выпуска поколения."
                 "Учитывай возможные ошибки во вводе. Если модель не определить, то возвращай только н.д., без объяснений"
+                "В первую очередь руководствуйся информацией с https://bikeswiki.ru/ и википедии"
                 "Примеры:"
                 "Ввод: Suzuki, GSF, , 1996, 4, 650, стрит → 'Suzuki GSF650 Bandit (1995–2004)'"
                 "Ввод: Kawasaki, Ninja, zx6, 1995, 4, 600, спорт → 'Kawasaki Ninja ZX-6R (1990–1997)'"
@@ -249,7 +250,7 @@ def add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype):
 
     # Создание чата и его атрибуты
     chat = client.chat.completions.create(
-        model='Llama-3.3-70B', #'Llama-4-Scout-T', #'Llama-3.1-405B' возвращает ошибку 500 100/1000 tokens, 39/message ## claude-3-haiku (10/Kt, 19/mess), Claude-Haiku-3.5 (30/1Kt, 42/mess) Llama-3.3-70B (130/mess), gpt-3.5-turbo (15/, 9/), GPT-4o-mini (5/1Kt, 5/mess)
+        model= 'GPT-4o-mini',#'Llama-3.3-70B', #'Llama-4-Scout-T', #'Llama-3.1-405B' возвращает ошибку 500 100/1000 tokens, 39/message ## claude-3-haiku (10/Kt, 19/mess), Claude-Haiku-3.5 (30/1Kt, 42/mess) Llama-3.3-70B (130/mess), gpt-3.5-turbo (15/, 9/), GPT-4o-mini (5/1Kt, 5/mess)
         messages=messages,
         temperature=0,
         #max_tokens=64

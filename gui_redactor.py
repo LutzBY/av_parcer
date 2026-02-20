@@ -1,7 +1,7 @@
 ##########################
 
 # Версия
-version = '01.12.2025'
+version = '20.02.2026'
 
 import json
 from fuzzywuzzy import fuzz
@@ -64,6 +64,58 @@ class OldValuesKeeper:
         self.old_type = None
         self.old_model_vlk = None
 
+# Функция получения статистики по дубликатам
+def return_duplicate_stats(id_to_check, root, dupl_cursor):
+    """По передаче ID возвращает словарь duplicate_stats с информацией о дубликатах для ID"""
+    # кверя
+    known_duplicates_query = """
+    WITH CTE AS (SELECT %s AS search_id)
+    Select id, date, price
+    from av_full
+    where id = (select search_id from CTE)
+    or duplicate_id = (select search_id from CTE)
+    order by date asc
+    """ % id_to_check
+
+    dupl_cursor.execute(known_duplicates_query)
+
+    results = dupl_cursor.fetchall()
+    
+    # обработка results
+    if results:
+        first = results[0]      # самая ранняя запись (минимальная дата)
+        last = results[-1]      # самая поздняя запись (максимальная дата)
+
+        earliest_date = first[1]
+        latest_date = last[1]
+        date_range = latest_date - earliest_date  # timedelta
+
+        first_price = first[2]
+        last_price = last[2]
+        price_diff = last_price - first_price
+
+        max_price = max(row[2] for row in results)  # максимальная цена в выборке
+        
+        # Окно вывода статистики
+        dupl_stats_window = tk.Toplevel(root)
+        dupl_stats_window.title(f"Найдено {len(results)} дубликатов")
+        dupl_stats_window.attributes('-topmost', True)
+        dupl_stats_window.geometry('%dx%d+%d+%d' % (400, 75, 1300, 600)) # размер ш.в. и положение (отступы) ш.в.
+        # Поле текста
+        formatted_text_string = f"""
+        Цена изменилась на {price_diff} USD.
+        Максимальная цена была {max_price} USD.
+        Самая ранняя дата - {f'{earliest_date.day}.{earliest_date.month}.{earliest_date.year}'} (в продаже {date_range.days} дней)'
+        """
+        dupl_stats_text = tk.Label(dupl_stats_window, text=formatted_text_string)
+        dupl_stats_text.pack(pady=5)
+
+    else:
+        # Обработка пустого результата
+        earliest_date = latest_date = date_range = price_diff = max_price = None
+
+
+    
 # Функция для перезапуска по новому айди
 def get_id_from_clipboard(root, keeper):
     # Сохранение айди из буфера обмена
@@ -461,8 +513,8 @@ def mark_duplicates_and_set_oldest_date_in_(id_to_check, root):
             # root.destroy()
             # sys.exit()
 
-            # Выводим сообщение (закомичено, мешает)
-           # messagebox.showinfo(f'Искомый айди - {id_to_check} ', f'Записаны {dupl_id_list} c датой {dupl_earliest_date}')
+            # Вызов окна показа статистики дубликатов
+            return_duplicate_stats(id_to_check, root, dupl_cursor)
 
         except Exception as e:
             messagebox.showerror("Ошибка", f"Произошла ошибка: {e}")
