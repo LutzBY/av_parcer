@@ -98,14 +98,14 @@ def return_duplicate_stats(id_to_check, root, dupl_cursor):
         
         # Окно вывода статистики
         dupl_stats_window = tk.Toplevel(root)
-        dupl_stats_window.title(f"Найдено {len(results)} дубликатов")
+        dupl_stats_window.title(f"Дубликатов найдено {len(results)} шт.")
         dupl_stats_window.attributes('-topmost', True)
         dupl_stats_window.geometry('%dx%d+%d+%d' % (400, 75, 1300, 600)) # размер ш.в. и положение (отступы) ш.в.
         # Поле текста
         formatted_text_string = f"""
         Цена изменилась на {price_diff} USD.
         Максимальная цена была {max_price} USD.
-        Самая ранняя дата - {f'{earliest_date.day}.{earliest_date.month}.{earliest_date.year}'} (в продаже {date_range.days} дней)'
+        Самая ранняя дата - {f'{earliest_date.day}.{earliest_date.month}.{earliest_date.year}'} (в продаже {date_range.days} дней)
         """
         dupl_stats_text = tk.Label(dupl_stats_window, text=formatted_text_string)
         dupl_stats_text.pack(pady=5)
