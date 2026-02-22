@@ -1,5 +1,5 @@
 # AVPARSER #
-version = '20.02.2026'
+version = '22.02.2026'
 
 import requests
 from urllib.parse import urlencode
@@ -460,17 +460,20 @@ while stop_flag == False:
 
             if result and result[0]:
                 mvlk_llm_print = result[0]
-                print(f'ОТЛАДОЧНОЕ СООБЩЕНИЕ: Получен model_vlk из базы')
             else:
                 try:
                     # вызвать
                     llm_iter_counter += 1
-                    mvlk_llm = add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype)
-                    print(f'ОТЛАДОЧНОЕ СООБЩЕНИЕ: Функция add_mvlk_llm отработала')           
+                    # mvlk_llm = add_mvlk_llm (brand, model, modification, year, cylcount, capacity, mtype)       
                     # запись в базу выполняется в пункте # Скрипт для пгри
-            
+
+                    #### решение для заголовка из-за отключения бесплатной ллм апи
+                    parsecursor.execute("SELECT min(year), max(YEAR) FROM vlookup where model = %s", (best_match,))
+                    result = parsecursor.fetchall()
+                    mvlk_llm_print = f'{brand} {best_match} ({result[0] - result[1]})'
+
                     # добавить в принт и в html
-                    mvlk_llm_print = mvlk_llm
+                    # mvlk_llm_print = mvlk_llm
 
                 except (APIStatusError) as err:
                     mvlk_llm_print = 'Ошибка API'
