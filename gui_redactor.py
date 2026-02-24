@@ -434,8 +434,13 @@ def copy_to_clipboard(text):
 def copy_to_clipboard_and_write(text, id_to_check):
     vlk_to_write = text
     vlk_cursor = conn.cursor()
-    organization_query = ("UPDATE av_full SET model_vlk = '%s' WHERE id = %s") % (vlk_to_write, id_to_check) 
-    vlk_cursor.execute(organization_query)
+
+    # получить-записать model_vlk_llm который плейсхолдер
+    vlk_cursor.execute("SELECT brand, model, min(year), max(YEAR) FROM vlookup where model = %s GROUP BY brand, model", (vlk_to_write,))
+    brand, model, min_year, max_year = vlk_cursor.fetchone()
+    mvlk_llm_print = f'{brand} {model} ({min_year} - {max_year})'
+
+    vlk_cursor.execute("UPDATE av_full SET model_vlk = %s, model_vlk_llm = %s WHERE id = %s", (vlk_to_write, mvlk_llm_print, id_to_check,))
     conn.commit()
     root.destroy()
     # sys.exit()

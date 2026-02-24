@@ -469,8 +469,11 @@ while stop_flag == False:
 
                     #### решение для заголовка из-за отключения бесплатной ллм апи
                     parsecursor.execute("SELECT min(year), max(YEAR) FROM vlookup where model = %s", (best_match,))
-                    result = parsecursor.fetchall()
-                    mvlk_llm_print = f'{brand} {best_match} ({result[0] - result[1]})'
+                    min_year, max_year = parsecursor.fetchone()
+                    if best_match and min_year and max_year:
+                        mvlk_llm_print = f'{brand} {best_match} ({min_year} - {max_year})'
+                    else:
+                        mvlk_llm_print = None
 
                     # добавить в принт и в html
                     # mvlk_llm_print = mvlk_llm
